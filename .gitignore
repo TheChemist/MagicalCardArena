@@ -57,3 +57,11 @@ $RECYCLE.BIN/
 
 # Windows shortcuts
 *.lnk
+/target/
+/avatarImages/
+/cardImages/
+
+.classpath
+*.project
+.settings/org.eclipse.core.resources.prefs
+*.prefs
