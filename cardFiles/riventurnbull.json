@@ -1,0 +1,71 @@
+{
+	"displayName": "Riven Turnbull",
+	"rarity": "UNCOMMON",
+	"power": "5",
+	"toughness": "7",
+	"supertypes": 
+	[
+		{
+			"supertype": "LEGENDARY"
+		}
+	],
+
+	"coretypes": 
+	[
+		{
+			"coretype": "CREATURE"
+		}
+	],
+
+	"subtypes": 
+	[
+		{
+			"subtype": "HUMAN"
+		},
+
+		{
+			"subtype": "ADVISOR"
+		}
+	],
+
+	"cost": 
+	[
+		[
+			{
+				"color": "NONE",
+				"value": "5"
+			},
+
+			{
+				"color": "BLUE",
+				"value": "1"
+			},
+
+			{
+				"color": "BLACK",
+				"value": "1"
+			}
+		]
+	],
+
+	"abilities": 
+	[
+		{
+			"abilitytype": "ACTIVATED_MANA_ABILITY",
+			"additionalcost": "TAP",
+			"effects": 
+			[
+				{
+					"effecttype": "PRODUCE_MANA",
+					"produce": 
+					[
+						{
+							"color": "BLACK",
+							"value": "1"
+						}
+					]
+				}
+			]
+		}
+	]
+}

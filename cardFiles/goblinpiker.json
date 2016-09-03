@@ -1,0 +1,38 @@
+{
+	"displayName": "Goblin Piker",
+	"rarity": "COMMON",
+	"power": "2",
+	"toughness": "1",
+	"coretypes": 
+	[
+		{
+			"coretype": "CREATURE"
+		}
+	],
+
+	"subtypes": 
+	[
+		{
+			"subtype": "GOBLIN"
+		},
+
+		{
+			"subtype": "WARRIOR"
+		}
+	],
+
+	"cost": 
+	[
+		[
+			{
+				"color": "NONE",
+				"value": "1"
+			},
+
+			{
+				"color": "RED",
+				"value": "1"
+			}
+		]
+	]
+}

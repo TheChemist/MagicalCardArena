@@ -1,0 +1,29 @@
+{
+	"displayName": "Savannah Lions",
+	"rarity": "RARE",
+	"power": "2",
+	"toughness": "1",
+	"coretypes": 
+	[
+		{
+			"coretype": "CREATURE"
+		}
+	],
+
+	"subtypes": 
+	[
+		{
+			"subtype": "CAT"
+		}
+	],
+
+	"cost": 
+	[
+		[
+			{
+				"color": "WHITE",
+				"value": "1"
+			}
+		]
+	]
+}

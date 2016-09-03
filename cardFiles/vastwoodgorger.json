@@ -1,0 +1,34 @@
+{
+	"displayName": "Vastwood Gorger",
+	"rarity": "COMMON",
+	"power": "5",
+	"toughness": "6",
+	"coretypes": 
+	[
+		{
+			"coretype": "CREATURE"
+		}
+	],
+
+	"subtypes": 
+	[
+		{
+			"subtype": "WURM"
+		}
+	],
+
+	"cost": 
+	[
+		[
+			{
+				"color": "NONE",
+				"value": "5"
+			},
+
+			{
+				"color": "GREEN",
+				"value": "1"
+			}
+		]
+	]
+}

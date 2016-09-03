@@ -1,0 +1,31 @@
+{
+	"displayName": "Mox Pearl",
+	"rarity": "RARE",
+	"coretypes": 
+	[
+		{
+			"coretype": "ARTIFACT"
+		}
+	],
+
+	"abilities": 
+	[
+		{
+			"abilitytype": "ACTIVATED_MANA_ABILITY",
+			"additionalcost": "TAP",
+			"effects": 
+			[
+				{
+					"effecttype": "PRODUCE_MANA",
+					"produce": 
+					[
+						{
+							"color": "WHITE",
+							"value": "1"
+						}
+					]
+				}
+			]
+		}
+	]
+}

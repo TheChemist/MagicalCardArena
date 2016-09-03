@@ -1,0 +1,34 @@
+{
+	"displayName": "Golden Bear",
+	"rarity": "COMMON",
+	"power": "4",
+	"toughness": "3",
+	"coretypes": 
+	[
+		{
+			"coretype": "CREATURE"
+		}
+	],
+
+	"subtypes": 
+	[
+		{
+			"subtype": "BEAR"
+		}
+	],
+
+	"cost": 
+	[
+		[
+			{
+				"color": "NONE",
+				"value": "3"
+			},
+
+			{
+				"color": "GREEN",
+				"value": "1"
+			}
+		]
+	]
+}

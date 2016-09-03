@@ -1,0 +1,38 @@
+{
+	"displayName": "Straw Soldiers",
+	"rarity": "COMMON",
+	"power": "1",
+	"toughness": "3",
+	"coretypes": 
+	[
+		{
+			"coretype": "CREATURE"
+		}
+	],
+
+	"subtypes": 
+	[
+		{
+			"subtype": "SCARECROW"
+		},
+
+		{
+			"subtype": "SOLDIER"
+		}
+	],
+
+	"cost": 
+	[
+		[
+			{
+				"color": "NONE",
+				"value": "1"
+			},
+
+			{
+				"color": "BLUE",
+				"value": "1"
+			}
+		]
+	]
+}

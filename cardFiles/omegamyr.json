@@ -1,0 +1,33 @@
+{
+	"displayName": "Omega Myr",
+	"rarity": "COMMON",
+	"power": "1",
+	"toughness": "2",
+	"coretypes": 
+	[
+		{
+			"coretype": "ARTIFACT"
+		},
+
+		{
+			"coretype": "CREATURE"
+		}
+	],
+
+	"subtypes": 
+	[
+		{
+			"subtype": "ZOMBIE"
+		}
+	],
+
+	"cost": 
+	[
+		[
+			{
+				"color": "NONE",
+				"value": "2"
+			}
+		]
+	]
+}

@@ -1,0 +1,59 @@
+{
+	"displayName": "Llanowar Dead",
+	"rarity": "COMMON",
+	"power": "2",
+	"toughness": "2",
+	"coretypes": 
+	[
+		{
+			"coretype": "CREATURE"
+		}
+	],
+
+	"subtypes": 
+	[
+		{
+			"subtype": "ZOMBIE"
+		},
+
+		{
+			"subtype": "ELF"
+		}
+	],
+
+	"cost": 
+	[
+		[
+			{
+				"color": "BLACK",
+				"value": "1"
+			},
+
+			{
+				"color": "GREEN",
+				"value": "1"
+			}
+		]
+	],
+
+	"abilities": 
+	[
+		{
+			"abilitytype": "ACTIVATED_MANA_ABILITY",
+			"additionalcost": "TAP",
+			"effects": 
+			[
+				{
+					"effecttype": "PRODUCE_MANA",
+					"produce": 
+					[
+						{
+							"color": "BLACK",
+							"value": "1"
+						}
+					]
+				}
+			]
+		}
+	]
+}

@@ -1,0 +1,68 @@
+{
+	"displayName": "Apprentice Wizard",
+	"rarity": "COMMON",
+	"power": "0",
+	"toughness": "1",
+	"coretypes": 
+	[
+		{
+			"coretype": "CREATURE"
+		}
+	],
+
+	"subtypes": 
+	[
+		{
+			"subtype": "HUMAN"
+		},
+
+		{
+			"subtype": "WIZARD"
+		}
+	],
+
+	"cost": 
+	[
+		[
+			{
+				"color": "NONE",
+				"value": "1"
+			},
+			
+			{
+				"color": "BLUE",
+				"value": "2"
+			},
+		]
+	],
+
+	"abilities": 
+	[
+		{
+			"abilitytype": "ACTIVATED_MANA_ABILITY",
+			"cost": 
+			[
+				[
+					{
+						"color": "BLUE",
+						"value": "1"
+					}
+				]
+			],
+			"additionalCost": "TAP";
+			"effects": 
+			[
+				{
+					"effecttype": "PRODUCE_MANA",
+					"produce": 
+					[
+						{
+							"color": "NONE",
+							"value": "3"
+						}
+					]
+				}
+			]
+		}
+	]
+}

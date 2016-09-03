@@ -1,0 +1,33 @@
+{
+	"displayName": "Bronze Sable",
+	"rarity": "COMMON",
+	"power": "2",
+	"toughness": "1",
+	"coretypes": 
+	[
+		{
+			"coretype": "ARTIFACT"
+		},
+
+		{
+			"coretype": "CREATURE"
+		}
+	],
+
+	"subtypes": 
+	[
+		{
+			"subtype": "SABLE"
+		}
+	],
+
+	"cost": 
+	[
+		[
+			{
+				"color": "NONE",
+				"value": "2"
+			}
+		]
+	]
+}

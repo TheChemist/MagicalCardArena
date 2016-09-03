@@ -1,0 +1,59 @@
+{
+	"displayName": "Sisters of the Flame",
+	"rarity": "COMMON",
+	"power": "2",
+	"toughness": "2",
+	"coretypes": 
+	[
+		{
+			"coretype": "CREATURE"
+		}
+	],
+
+	"subtypes": 
+	[
+		{
+			"subtype": "HUMAN"
+		},
+
+		{
+			"subtype": "SHAMAN"
+		}
+	],
+
+	"cost": 
+	[
+		[
+			{
+				"color": "NONE",
+				"value": "1"
+			},
+
+			{
+				"color": "RED",
+				"value": "2"
+			}
+		]
+	],
+
+	"abilities": 
+	[
+		{
+			"abilitytype": "ACTIVATED_MANA_ABILITY",
+			"additionalcost": "TAP",
+			"effects": 
+			[
+				{
+					"effecttype": "PRODUCE_MANA",
+					"produce": 
+					[
+						{
+							"color": "RED",
+							"value": "1"
+						}
+					]
+				}
+			]
+		}
+	]
+}

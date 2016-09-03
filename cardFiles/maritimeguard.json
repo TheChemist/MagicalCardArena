@@ -1,0 +1,38 @@
+{
+	"displayName": "Maritime Guard",
+	"rarity": "COMMON",
+	"power": "1",
+	"toughness": "3",
+	"coretypes": 
+	[
+		{
+			"coretype": "CREATURE"
+		}
+	],
+
+	"subtypes": 
+	[
+		{
+			"subtype": "MERFOLK"
+		},
+
+		{
+			"subtype": "SOLDIER"
+		}
+	],
+
+	"cost": 
+	[
+		[
+			{
+				"color": "NONE",
+				"value": "1"
+			},
+
+			{
+				"color": "BLUE",
+				"value": "1"
+			}
+		]
+	]
+}

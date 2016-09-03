@@ -1,0 +1,34 @@
+{
+	"displayName": "Raging Bull",
+	"rarity": "COMMON",
+	"power": "2",
+	"toughness": "2",
+	"coretypes": 
+	[
+		{
+			"coretype": "CREATURE"
+		}
+	],
+
+	"subtypes": 
+	[
+		{
+			"subtype": "OX"
+		}
+	],
+
+	"cost": 
+	[
+		[
+			{
+				"color": "NONE",
+				"value": "2"
+			},
+
+			{
+				"color": "RED",
+				"value": "1"
+			}
+		]
+	]
+}

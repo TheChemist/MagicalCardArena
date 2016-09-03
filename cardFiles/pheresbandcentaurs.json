@@ -1,0 +1,38 @@
+{
+	"displayName": "Pheres-Band Centaurs",
+	"rarity": "COMMON",
+	"power": "3",
+	"toughness": "7",
+	"coretypes": 
+	[
+		{
+			"coretype": "CREATURE"
+		}
+	],
+
+	"subtypes": 
+	[
+		{
+			"subtype": "CENTAUR"
+		},
+
+		{
+			"subtype": "WARRIOR"
+		}
+	],
+
+	"cost": 
+	[
+		[
+			{
+				"color": "NONE",
+				"value": "4"
+			},
+
+			{
+				"color": "GREEN",
+				"value": "1"
+			}
+		]
+	]
+}

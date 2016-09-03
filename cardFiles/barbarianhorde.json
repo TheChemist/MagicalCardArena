@@ -1,0 +1,34 @@
+{
+	"displayName": "Barbarian Horde",
+	"rarity": "COMMON",
+	"power": "3",
+	"toughness": "3",
+	"coretypes": 
+	[
+		{
+			"coretype": "CREATURE"
+		}
+	],
+
+	"subtypes": 
+	[
+		{
+			"subtype": "SOLDIER"
+		}
+	],
+
+	"cost": 
+	[
+		[
+			{
+				"color": "NONE",
+				"value": "3"
+			},
+
+			{
+				"color": "RED",
+				"value": "1"
+			}
+		]
+	]
+}

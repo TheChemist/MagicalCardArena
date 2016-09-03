@@ -1,0 +1,33 @@
+{
+	"displayName": "Triton Shorethief",
+	"rarity": "COMMON",
+	"power": "1",
+	"toughness": "2",
+	"coretypes": 
+	[
+		{
+			"coretype": "CREATURE"
+		}
+	],
+
+	"subtypes": 
+	[
+		{
+			"subtype": "MERFOLK"
+		},
+
+		{
+			"subtype": "ROGUE"
+		}
+	],
+
+	"cost": 
+	[
+		[
+			{
+				"color": "BLUE",
+				"value": "1"
+			}
+		]
+	]
+}

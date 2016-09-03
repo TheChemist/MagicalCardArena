@@ -1,0 +1,41 @@
+{
+	"displayName": "Thran Dynamo",
+	"rarity": "UNCOMMON",
+	"coretypes": 
+	[
+		{
+			"coretype": "ARTIFACT"
+		}
+	],
+
+	"cost": 
+	[
+		[
+			{
+				"color": "NONE",
+				"value": "4"
+			}
+		]
+	],
+
+	"abilities": 
+	[
+		{
+			"abilitytype": "ACTIVATED_MANA_ABILITY",
+			"additionalcost": "TAP",
+			"effects": 
+			[
+				{
+					"effecttype": "PRODUCE_MANA",
+					"produce": 
+					[
+						{
+							"color": "NONE",
+							"value": "3"
+						}
+					]
+				}
+			]
+		}
+	]
+}

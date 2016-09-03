@@ -1,0 +1,34 @@
+{
+	"displayName": "Goblin Cavaliers",
+	"rarity": "COMMON",
+	"power": "3",
+	"toughness": "2",
+	"coretypes": 
+	[
+		{
+			"coretype": "CREATURE"
+		}
+	],
+
+	"subtypes": 
+	[
+		{
+			"subtype": "GOBLIN"
+		}
+	],
+
+	"cost": 
+	[
+		[
+			{
+				"color": "NONE",
+				"value": "2"
+			},
+
+			{
+				"color": "RED",
+				"value": "1"
+			}
+		]
+	]
+}

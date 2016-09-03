@@ -1,0 +1,34 @@
+{
+	"displayName": "Felhide Minotaur",
+	"rarity": "COMMON",
+	"power": "2",
+	"toughness": "3",
+	"coretypes": 
+	[
+		{
+			"coretype": "CREATURE"
+		}
+	],
+
+	"subtypes": 
+	[
+		{
+			"subtype": "MINOTAUR"
+		}
+	],
+
+	"cost": 
+	[
+		[
+			{
+				"color": "NONE",
+				"value": "2"
+			},
+
+			{
+				"color": "BLACK",
+				"value": "3"
+			}
+		]
+	]
+}

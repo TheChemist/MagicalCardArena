@@ -1,0 +1,23 @@
+{
+	"displayName": "Phyrexian Walker",
+	"rarity": "COMMON",
+	"power": "0",
+	"toughness": "3",
+	"coretypes": 
+	[
+		{
+			"coretype": "ARTIFACT"
+		},
+
+		{
+			"coretype": "CREATURE"
+		}
+	],
+
+	"subtypes": 
+	[
+		{
+			"subtype": "CONSTRUCT"
+		}
+	]
+}

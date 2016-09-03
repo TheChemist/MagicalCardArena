@@ -1,0 +1,36 @@
+{
+	"name": "Vanilla Red",
+	"description": "Ein rotes Deck bestehend aus Vanilla-Kreaturen",
+	"cards": 
+	[
+		{
+			"name": "mountain",
+			"count": "20"
+		},
+
+		{
+			"name": "balduvianbarbarians",
+			"count": "4"
+		},
+
+		{
+			"name": "canyonminotaur",
+			"count": "4"
+		},
+
+		{
+			"name": "earthelemental",
+			"count": "4"
+		},
+
+		{
+			"name": "goblinpiker",
+			"count": "4"
+		},
+
+		{
+			"name": "scoriaelemental",
+			"count": "4"
+		}
+	]
+}

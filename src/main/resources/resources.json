@@ -1,0 +1,76 @@
+{
+	"icons":
+	[
+		{
+			"name": "b.png"
+		},
+
+		{
+			"name": "u.png"
+		},
+
+		{
+			"name": "g.png"
+		},
+
+		{
+			"name": "1.png"
+		},
+
+		{
+			"name": "r.png"
+		},
+
+		{
+			"name": "w.png"
+		},
+
+		{
+			"name": "actions.png"
+		},
+
+		{
+			"name": "back.png"
+		},
+
+		{
+			"name": "create.png"
+		},
+
+		{
+			"name": "deck.png"
+		},
+
+		{
+			"name": "exit.png"
+		},
+
+		{
+			"name": "grave.png"
+		},
+
+		{
+			"name": "hand.png"
+		},
+
+		{
+			"name": "heart.png"
+		},
+
+		{
+			"name": "left.png"
+		},
+
+		{
+			"name": "logo.png"
+		},
+
+		{
+			"name": "new.png"
+		},
+
+		{
+			"name": "right.png"
+		}
+	]
+}

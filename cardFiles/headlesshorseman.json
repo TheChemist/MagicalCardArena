@@ -1,0 +1,38 @@
+{
+	"displayName": "Headless Horseman",
+	"rarity": "COMMON",
+	"power": "2",
+	"toughness": "2",
+	"coretypes": 
+	[
+		{
+			"coretype": "CREATURE"
+		}
+	],
+
+	"subtypes": 
+	[
+		{
+			"subtype": "ZOMBIE"
+		},
+
+		{
+			"subtype": "KNIGHT"
+		}
+	],
+
+	"cost": 
+	[
+		[
+			{
+				"color": "NONE",
+				"value": "2"
+			},
+
+			{
+				"color": "BLACK",
+				"value": "1"
+			}
+		]
+	]
+}

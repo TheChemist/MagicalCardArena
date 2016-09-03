@@ -1,0 +1,23 @@
+{
+	"displayName": "Memnite",
+	"rarity": "UNCOMMON",
+	"power": "1",
+	"toughness": "1",
+	"coretypes": 
+	[
+		{
+			"coretype": "ARTIFACT"
+		},
+
+		{
+			"coretype": "CREATURE"
+		}
+	],
+
+	"subtypes": 
+	[
+		{
+			"subtype": "CONSTRUCT"
+		}
+	]
+}

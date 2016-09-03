@@ -1,0 +1,29 @@
+{
+	"displayName": "Sanctuary Cat",
+	"rarity": "COMMON",
+	"power": "1",
+	"toughness": "2",
+	"coretypes": 
+	[
+		{
+			"coretype": "CREATURE"
+		}
+	],
+
+	"subtypes": 
+	[
+		{
+			"subtype": "CAT"
+		}
+	],
+
+	"cost": 
+	[
+		[
+			{
+				"color": "WHITE",
+				"value": "1"
+			}
+		]
+	]
+}

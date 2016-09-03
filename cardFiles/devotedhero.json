@@ -1,0 +1,29 @@
+{
+	"displayName": "Devoted Hero",
+	"rarity": "COMMON",
+	"power": "1",
+	"toughness": "2",
+	"coretypes": 
+	[
+		{
+			"coretype": "CREATURE"
+		}
+	],
+
+	"subtypes": 
+	[
+		{
+			"subtype": "SOLDIER"
+		}
+	],
+
+	"cost": 
+	[
+		[
+			{
+				"color": "WHITE",
+				"value": "1"
+			}
+		]
+	]
+}

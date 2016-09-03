@@ -1,0 +1,39 @@
+{
+	"displayName": "Streetbraker Wurm",
+	"rarity": "COMMON",
+	"power": "6",
+	"toughness": "4",
+	"coretypes": 
+	[
+		{
+			"coretype": "CREATURE"
+		}
+	],
+
+	"subtypes": 
+	[
+		{
+			"subtype": "WURM"
+		}
+	],
+
+	"cost": 
+	[
+		[
+			{
+				"color": "NONE",
+				"value": "3"
+			},
+
+			{
+				"color": "RED",
+				"value": "1"
+			},
+
+			{
+				"color": "GREEN",
+				"value": "1"
+			}
+		]
+	]
+}

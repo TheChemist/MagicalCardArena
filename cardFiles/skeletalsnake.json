@@ -1,0 +1,38 @@
+{
+	"displayName": "Skeletal Snake",
+	"rarity": "COMMON",
+	"power": "2",
+	"toughness": "1",
+	"coretypes": 
+	[
+		{
+			"coretype": "CREATURE"
+		}
+	],
+
+	"subtypes": 
+	[
+		{
+			"subtype": "SNAKE"
+		},
+
+		{
+			"subtype": "SKELETON"
+		}
+	],
+
+	"cost": 
+	[
+		[
+			{
+				"color": "NONE",
+				"value": "1"
+			},
+
+			{
+				"color": "BLACK",
+				"value": "1"
+			}
+		]
+	]
+}

@@ -1,0 +1,67 @@
+{
+	"displayName": "Old Ghastbark",
+	"rarity": "COMMON",
+	"power": "3",
+	"toughness": "6",
+	"coretypes": 
+	[
+		{
+			"coretype": "CREATURE"
+		}
+	],
+
+	"subtypes": 
+	[
+		{
+			"subtype": "TREEFOLK"
+		},
+
+		{
+			"subtype": "WARRIOR"
+		}
+	],
+
+	"cost": 
+	[
+		[
+			{
+				"color": "NONE",
+				"value": "3"
+			},
+
+			{
+				"color": "GREEN",
+				"value": "2"
+			}
+		],
+
+		[
+			{
+				"color": "NONE",
+				"value": "3"
+			},
+
+			{
+				"color": "GREEN",
+				"value": "1"
+			},
+
+			{
+				"color": "WHITE",
+				"value": "1"
+			}
+		],
+
+		[
+			{
+				"color": "NONE",
+				"value": "3"
+			},
+
+			{
+				"color": "WHITE",
+				"value": "2"
+			}
+		]
+	]
+}

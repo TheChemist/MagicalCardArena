@@ -1,0 +1,38 @@
+{
+	"displayName": "Loxodon Wayfarer",
+	"rarity": "COMMON",
+	"power": "1",
+	"toughness": "5",
+	"coretypes": 
+	[
+		{
+			"coretype": "CREATURE"
+		}
+	],
+
+	"subtypes": 
+	[
+		{
+			"subtype": "ELEPHANT"
+		},
+
+		{
+			"subtype": "MONK"
+		}
+	],
+
+	"cost": 
+	[
+		[
+			{
+				"color": "NONE",
+				"value": "2"
+			},
+
+			{
+				"color": "WHITE",
+				"value": "1"
+			}
+		]
+	]
+}

@@ -1,0 +1,43 @@
+{
+	"displayName": "Armored Wolf-Rider",
+	"rarity": "COMMON",
+	"power": "4",
+	"toughness": "6",
+	"coretypes": 
+	[
+		{
+			"coretype": "CREATURE"
+		}
+	],
+
+	"subtypes": 
+	[
+		{
+			"subtype": "ELF"
+		},
+
+		{
+			"subtype": "KNIGHT"
+		}
+	],
+
+	"cost": 
+	[
+		[
+			{
+				"color": "NONE",
+				"value": "3"
+			},
+
+			{
+				"color": "GREEN",
+				"value": "1"
+			},
+
+			{
+				"color": "WHITE",
+				"value": "1"
+			}
+		]
+	]
+}

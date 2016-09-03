@@ -1,0 +1,50 @@
+{
+	"displayName": "Tobias Andrion",
+	"rarity": "UNCOMMON",
+	"power": "4",
+	"toughness": "4",
+	"supertypes": 
+	[
+		{
+			"supertype": "LEGENDARY"
+		}
+	],
+
+	"coretypes": 
+	[
+		{
+			"coretype": "CREATURE"
+		}
+	],
+
+	"subtypes": 
+	[
+		{
+			"subtype": "HUMAN"
+		},
+
+		{
+			"subtype": "ADVISOR"
+		}
+	],
+
+	"cost": 
+	[
+		[
+			{
+				"color": "NONE",
+				"value": "3"
+			},
+
+			{
+				"color": "WHITE",
+				"value": "1"
+			},
+
+			{
+				"color": "BLUE",
+				"value": "1"
+			}
+		]
+	]
+}

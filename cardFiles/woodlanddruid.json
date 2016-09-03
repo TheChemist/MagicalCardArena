@@ -1,0 +1,33 @@
+{
+	"displayName": "Woodland Druid",
+	"rarity": "COMMON",
+	"power": "1",
+	"toughness": "2",
+	"coretypes": 
+	[
+		{
+			"coretype": "CREATURE"
+		}
+	],
+
+	"subtypes": 
+	[
+		{
+			"subtype": "HUMAN"
+		},
+
+		{
+			"subtype": "DRUID"
+		}
+	],
+
+	"cost": 
+	[
+		[
+			{
+				"color": "GREEN",
+				"value": "1"
+			}
+		]
+	]
+}

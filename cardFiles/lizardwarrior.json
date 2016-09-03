@@ -1,0 +1,38 @@
+{
+	"displayName": "Lizard Warrior",
+	"rarity": "COMMON",
+	"power": "4",
+	"toughness": "2",
+	"coretypes": 
+	[
+		{
+			"coretype": "CREATURE"
+		}
+	],
+
+	"subtypes": 
+	[
+		{
+			"subtype": "LIZARD"
+		},
+
+		{
+			"subtype": "WARRIOR"
+		}
+	],
+
+	"cost": 
+	[
+		[
+			{
+				"color": "NONE",
+				"value": "3"
+			},
+
+			{
+				"color": "RED",
+				"value": "1"
+			}
+		]
+	]
+}

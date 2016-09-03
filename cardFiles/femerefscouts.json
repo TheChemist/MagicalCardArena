@@ -1,0 +1,38 @@
+{
+	"displayName": "Femeref Scouts",
+	"rarity": "COMMON",
+	"power": "1",
+	"toughness": "4",
+	"coretypes": 
+	[
+		{
+			"coretype": "CREATURE"
+		}
+	],
+
+	"subtypes": 
+	[
+		{
+			"subtype": "HUMAN"
+		},
+
+		{
+			"subtype": "SCOUT"
+		}
+	],
+
+	"cost": 
+	[
+		[
+			{
+				"color": "NONE",
+				"value": "2"
+			},
+
+			{
+				"color": "WHITE",
+				"value": "1"
+			}
+		]
+	]
+}

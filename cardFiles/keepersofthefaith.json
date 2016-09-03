@@ -1,0 +1,38 @@
+{
+	"displayName": "Keepers of the Faith",
+	"rarity": "COMMON",
+	"power": "2",
+	"toughness": "1",
+	"coretypes": 
+	[
+		{
+			"coretype": "CREATURE"
+		}
+	],
+
+	"subtypes": 
+	[
+		{
+			"subtype": "HUMAN"
+		},
+
+		{
+			"subtype": "CLERIC"
+		}
+	],
+
+	"cost": 
+	[
+		[
+			{
+				"color": "NONE",
+				"value": "1"
+			},
+
+			{
+				"color": "WHITE",
+				"value": "2"
+			}
+		]
+	]
+}

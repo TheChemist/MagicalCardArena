@@ -1,0 +1,34 @@
+{
+	"displayName": "Jwari Scuttler",
+	"rarity": "COMMON",
+	"power": "2",
+	"toughness": "3",
+	"coretypes": 
+	[
+		{
+			"coretype": "CREATURE"
+		}
+	],
+
+	"subtypes": 
+	[
+		{
+			"subtype": "CRAB"
+		}
+	],
+
+	"cost": 
+	[
+		[
+			{
+				"color": "NONE",
+				"value": "2"
+			},
+
+			{
+				"color": "BLUE",
+				"value": "1"
+			}
+		]
+	]
+}

@@ -1,0 +1,38 @@
+{
+	"displayName": "Foot Soldiers",
+	"rarity": "COMMON",
+	"power": "2",
+	"toughness": "4",
+	"coretypes": 
+	[
+		{
+			"coretype": "CREATURE"
+		}
+	],
+
+	"subtypes": 
+	[
+		{
+			"subtype": "HUMAN"
+		},
+
+		{
+			"subtype": "SOLDIER"
+		}
+	],
+
+	"cost": 
+	[
+		[
+			{
+				"color": "NONE",
+				"value": "3"
+			},
+
+			{
+				"color": "WHITE",
+				"value": "1"
+			}
+		]
+	]
+}

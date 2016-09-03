@@ -1,0 +1,34 @@
+{
+	"displayName": "Warpath Ghoul",
+	"rarity": "COMMON",
+	"power": "3",
+	"toughness": "2",
+	"coretypes": 
+	[
+		{
+			"coretype": "CREATURE"
+		}
+	],
+
+	"subtypes": 
+	[
+		{
+			"subtype": "ZOMBIE"
+		}
+	],
+
+	"cost": 
+	[
+		[
+			{
+				"color": "NONE",
+				"value": "2"
+			},
+
+			{
+				"color": "BLACK",
+				"value": "1"
+			}
+		]
+	]
+}

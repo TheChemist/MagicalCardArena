@@ -1,0 +1,34 @@
+{
+	"displayName": "Moss Monster",
+	"rarity": "COMMON",
+	"power": "3",
+	"toughness": "6",
+	"coretypes": 
+	[
+		{
+			"coretype": "CREATURE"
+		}
+	],
+
+	"subtypes": 
+	[
+		{
+			"subtype": "ELEMENTAL"
+		}
+	],
+
+	"cost": 
+	[
+		[
+			{
+				"color": "NONE",
+				"value": "3"
+			},
+
+			{
+				"color": "GREEN",
+				"value": "2"
+			}
+		]
+	]
+}

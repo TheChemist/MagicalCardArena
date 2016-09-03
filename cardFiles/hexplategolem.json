@@ -1,0 +1,33 @@
+{
+	"displayName": "Hexplate Golem",
+	"rarity": "COMMON",
+	"power": "5",
+	"toughness": "7",
+	"coretypes": 
+	[
+		{
+			"coretype": "ARTIFACT"
+		},
+
+		{
+			"coretype": "CREATURE"
+		}
+	],
+
+	"subtypes": 
+	[
+		{
+			"subtype": "GOLEM"
+		}
+	],
+
+	"cost": 
+	[
+		[
+			{
+				"color": "NONE",
+				"value": "7"
+			}
+		]
+	]
+}

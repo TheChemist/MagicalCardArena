@@ -1,0 +1,71 @@
+{
+	"displayName": "Sunastian Falconer",
+	"rarity": "UNCOMMON",
+	"power": "4",
+	"toughness": "4",
+	"supertypes": 
+	[
+		{
+			"supertype": "LEGENDARY"
+		}
+	],
+
+	"coretypes": 
+	[
+		{
+			"coretype": "CREATURE"
+		}
+	],
+
+	"subtypes": 
+	[
+		{
+			"subtype": "HUMAN"
+		},
+
+		{
+			"subtype": "SHAMAN"
+		}
+	],
+
+	"cost": 
+	[
+		[
+			{
+				"color": "NONE",
+				"value": "3"
+			},
+
+			{
+				"color": "GREEN",
+				"value": "1"
+			},
+
+			{
+				"color": "RED",
+				"value": "1"
+			}
+		]
+	],
+
+	"abilities": 
+	[
+		{
+			"abilitytype": "ACTIVATED_MANA_ABILITY",
+			"additionalcost": "TAP",
+			"effects": 
+			[
+				{
+					"effecttype": "PRODUCE_MANA",
+					"produce": 
+					[
+						{
+							"color": "NONE",
+							"value": "2"
+						}
+					]
+				}
+			]
+		}
+	]
+}

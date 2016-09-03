@@ -1,0 +1,37 @@
+{
+	"displayName": "Sliver Construct",
+	"rarity": "COMMON",
+	"power": "2",
+	"toughness": "2",
+	"coretypes": 
+	[
+		{
+			"coretype": "ARTIFACT"
+		},
+
+		{
+			"coretype": "CREATURE"
+		}
+	],
+
+	"subtypes": 
+	[
+		{
+			"subtype": "SLIVER"
+		},
+
+		{
+			"subtype": "CONSTRUCT"
+		}
+	],
+
+	"cost": 
+	[
+		[
+			{
+				"color": "NONE",
+				"value": "3"
+			}
+		]
+	]
+}

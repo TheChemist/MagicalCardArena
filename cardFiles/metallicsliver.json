@@ -1,0 +1,29 @@
+{
+	"displayName": "Metallic Sliver",
+	"rarity": "COMMON",
+	"power": "1",
+	"toughness": "1",
+	"coretypes": 
+	[
+		{
+			"coretype": "CREATURE"
+		}
+	],
+
+	"subtypes": 
+	[
+		{
+			"subtype": "SLIVER"
+		}
+	],
+
+	"cost": 
+	[
+		[
+			{
+				"color": "NONE",
+				"value": "1"
+			}
+		]
+	]
+}

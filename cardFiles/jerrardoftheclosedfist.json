@@ -1,0 +1,50 @@
+{
+	"displayName": "Jerrard of the Closed Fist",
+	"rarity": "COMMON",
+	"power": "6",
+	"toughness": "5",
+	"supertypes": 
+	[
+		{
+			"supertype": "LEGENDARY"
+		}
+	],
+
+	"coretypes": 
+	[
+		{
+			"coretype": "CREATURE"
+		}
+	],
+
+	"subtypes": 
+	[
+		{
+			"subtype": "HUMAN"
+		},
+
+		{
+			"subtype": "NIGHT"
+		}
+	],
+
+	"cost": 
+	[
+		[
+			{
+				"color": "NONE",
+				"value": "3"
+			},
+
+			{
+				"color": "RED",
+				"value": "1"
+			},
+
+			{
+				"color": "GREEN",
+				"value": "2"
+			}
+		]
+	]
+}

@@ -1,0 +1,34 @@
+{
+	"displayName": "Enormous Baloth",
+	"rarity": "UNCOMMON",
+	"power": "7",
+	"toughness": "7",
+	"coretypes": 
+	[
+		{
+			"coretype": "CREATURE"
+		}
+	],
+
+	"subtypes": 
+	[
+		{
+			"subtype": "BEAST"
+		}
+	],
+
+	"cost": 
+	[
+		[
+			{
+				"color": "NONE",
+				"value": "6"
+			},
+
+			{
+				"color": "GREEN",
+				"value": "1"
+			}
+		]
+	]
+}

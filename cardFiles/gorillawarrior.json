@@ -1,0 +1,38 @@
+{
+	"displayName": "Gorilla Warrior",
+	"rarity": "COMMON",
+	"power": "3",
+	"toughness": "2",
+	"coretypes": 
+	[
+		{
+			"coretype": "CREATURE"
+		}
+	],
+
+	"subtypes": 
+	[
+		{
+			"subtype": "APE"
+		},
+
+		{
+			"subtype": "WARRIOR"
+		}
+	],
+
+	"cost": 
+	[
+		[
+			{
+				"color": "NONE",
+				"value": "2"
+			},
+
+			{
+				"color": "GREEN",
+				"value": "1"
+			}
+		]
+	]
+}

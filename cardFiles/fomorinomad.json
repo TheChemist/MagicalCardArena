@@ -1,0 +1,38 @@
+{
+	"displayName": "Fomori Nomad",
+	"rarity": "COMMON",
+	"power": "4",
+	"toughness": "4",
+	"coretypes": 
+	[
+		{
+			"coretype": "CREATURE"
+		}
+	],
+
+	"subtypes": 
+	[
+		{
+			"subtype": "NOMAD"
+		},
+
+		{
+			"subtype": "GIANT"
+		}
+	],
+
+	"cost": 
+	[
+		[
+			{
+				"color": "NONE",
+				"value": "4"
+			},
+
+			{
+				"color": "RED",
+				"value": "1"
+			}
+		]
+	]
+}

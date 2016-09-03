@@ -1,0 +1,38 @@
+{
+	"displayName": "Bane Alley Blackguard",
+	"rarity": "COMMON",
+	"power": "1",
+	"toughness": "3",
+	"coretypes": 
+	[
+		{
+			"coretype": "CREATURE"
+		}
+	],
+
+	"subtypes": 
+	[
+		{
+			"subtype": "HUMAN"
+		},
+
+		{
+			"subtype": "ROGUE"
+		}
+	],
+
+	"cost": 
+	[
+		[
+			{
+				"color": "NONE",
+				"value": "1"
+			},
+
+			{
+				"color": "BLACK",
+				"value": "1"
+			}
+		]
+	]
+}

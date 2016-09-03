@@ -1,0 +1,38 @@
+{
+	"displayName": "Talas Merchant",
+	"rarity": "COMMON",
+	"power": "1",
+	"toughness": "3",
+	"coretypes": 
+	[
+		{
+			"coretype": "CREATURE"
+		}
+	],
+
+	"subtypes": 
+	[
+		{
+			"subtype": "HUMAN"
+		},
+
+		{
+			"subtype": "PIRATE"
+		}
+	],
+
+	"cost": 
+	[
+		[
+			{
+				"color": "NONE",
+				"value": "1"
+			},
+
+			{
+				"color": "BLUE",
+				"value": "1"
+			}
+		]
+	]
+}

@@ -1,0 +1,38 @@
+{
+	"displayName": "Vorstclaw",
+	"rarity": "UNCOMMON",
+	"power": "7",
+	"toughness": "7",
+	"coretypes": 
+	[
+		{
+			"coretype": "CREATURE"
+		}
+	],
+
+	"subtypes": 
+	[
+		{
+			"subtype": "ELEMENTAL"
+		},
+
+		{
+			"subtype": "HORROR"
+		}
+	],
+
+	"cost": 
+	[
+		[
+			{
+				"color": "NONE",
+				"value": "4"
+			},
+
+			{
+				"color": "GREEN",
+				"value": "2"
+			}
+		]
+	]
+}

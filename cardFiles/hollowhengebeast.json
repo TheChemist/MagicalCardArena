@@ -1,0 +1,34 @@
+{
+	"displayName": "Hollowhenge Beast",
+	"rarity": "COMMON",
+	"power": "5",
+	"toughness": "5",
+	"coretypes": 
+	[
+		{
+			"coretype": "CREATURE"
+		}
+	],
+
+	"subtypes": 
+	[
+		{
+			"subtype": "BEAST"
+		}
+	],
+
+	"cost": 
+	[
+		[
+			{
+				"color": "NONE",
+				"value": "3"
+			},
+
+			{
+				"color": "GREEN",
+				"value": "2"
+			}
+		]
+	]
+}

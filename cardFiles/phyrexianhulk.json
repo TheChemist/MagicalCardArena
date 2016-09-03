@@ -1,0 +1,33 @@
+{
+	"displayName": "Phyrexian Hulk",
+	"rarity": "UNCOMMON",
+	"power": "5",
+	"toughness": "4",
+	"coretypes": 
+	[
+		{
+			"coretype": "ARTIFACT"
+		},
+
+		{
+			"coretype": "CREATURE"
+		}
+	],
+
+	"subtypes": 
+	[
+		{
+			"subtype": "GOLEM"
+		}
+	],
+
+	"cost": 
+	[
+		[
+			{
+				"color": "NONE",
+				"value": "6"
+			}
+		]
+	]
+}

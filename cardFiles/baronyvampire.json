@@ -1,0 +1,34 @@
+{
+	"displayName": "Barony Vampire",
+	"rarity": "COMMON",
+	"power": "3",
+	"toughness": "2",
+	"coretypes": 
+	[
+		{
+			"coretype": "CREATURE"
+		}
+	],
+
+	"subtypes": 
+	[
+		{
+			"subtype": "VAMPIRE"
+		}
+	],
+
+	"cost": 
+	[
+		[
+			{
+				"color": "NONE",
+				"value": "2"
+			},
+
+			{
+				"color": "BLACK",
+				"value": "1"
+			}
+		]
+	]
+}

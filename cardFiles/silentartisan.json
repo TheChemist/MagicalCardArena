@@ -1,0 +1,34 @@
+{
+	"displayName": "Silent Artisan",
+	"rarity": "COMMON",
+	"power": "3",
+	"toughness": "5",
+	"coretypes": 
+	[
+		{
+			"coretype": "CREATURE"
+		}
+	],
+
+	"subtypes": 
+	[
+		{
+			"subtype": "GIANT"
+		}
+	],
+
+	"cost": 
+	[
+		[
+			{
+				"color": "NONE",
+				"value": "3"
+			},
+
+			{
+				"color": "WHITE",
+				"value": "2"
+			}
+		]
+	]
+}

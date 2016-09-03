@@ -1,0 +1,54 @@
+{
+	"displayName": "Izzet Signet",
+	"rarity": "COMMON",
+	"coretypes": 
+	[
+		{
+			"coretype": "ARTIFACT"
+		}
+	],
+
+	"cost": 
+	[
+		[
+			{
+				"color": "NONE",
+				"value": "2"
+			}
+		]
+	],
+
+	"abilities": 
+	[
+		{
+			"abilitytype": "ACTIVATED_MANA_ABILITY",
+			"activationcost": 
+			[
+				{
+					"color": "NONE",
+					"value": "1"
+				}
+			],
+
+			"additionalcost": "TAP",
+			"effects": 
+			[
+				{
+					"effecttype": "PRODUCE_MANA",
+					"produce": 
+					[
+						{
+							"color": "BLUE",
+							"value": "1"
+						},
+
+						{
+							"color": "RED",
+							"value": "1"
+						}
+					]
+				}
+			]
+		}
+	]
+}

@@ -1,0 +1,33 @@
+{
+	"displayName": "Tusked Colossodon",
+	"rarity": "COMMON",
+	"power": "6",
+	"toughness": "5",
+	"coretypes": 
+	[
+		{
+			"coretype": "CREATURE"
+		}
+	],
+
+	"subtypes": 
+	[
+		{
+			"subtype": "BEAST"
+		}
+	],
+
+	"cost": 
+	[
+		[
+			{
+				"color": "NONE",
+				"value": "4"
+			}
+			{
+				"color": "GREEN",
+				"value": "2"
+			}
+		]
+	]
+}

@@ -1,0 +1,85 @@
+{
+	"displayName": "Sea Scryer",
+	"rarity": "COMMON",
+	"power": "1",
+	"toughness": "1",
+	"coretypes": 
+	[
+		{
+			"coretype": "CREATURE"
+		}
+	],
+
+	"subtypes": 
+	[
+		{
+			"subtype": "MERFOLK"
+		},
+
+		{
+			"subtype": "WIZARD"
+		}
+	],
+
+	"cost": 
+	[
+		[
+			{
+				"color": "NONE",
+				"value": "1"
+			},
+
+			{
+				"color": "BLUE",
+				"value": "1"
+			}
+		]
+	],
+
+	"abilities": 
+	[
+		{
+			"abilitytype": "ACTIVATED_MANA_ABILITY",
+			"additionalcost": "TAP",
+			"effects": 
+			[
+				{
+					"effecttype": "PRODUCE_MANA",
+					"produce": 
+					[
+						{
+							"color": "NONE",
+							"value": "1"
+						}
+					]
+				}
+			]
+		},
+
+		{
+			"abilitytype": "ACTIVATED_MANA_ABILITY",
+			"activationcost": 
+			[
+				{
+					"color": "NONE",
+					"value": "1"
+				}
+			],
+
+			"additionalcost": "TAP",
+			"effects": 
+			[
+				{
+					"effecttype": "PRODUCE_MANA",
+					"produce": 
+					[
+						{
+							"color": "BLUE",
+							"value": "1"
+						}
+					]
+				}
+			]
+		}
+	]
+}

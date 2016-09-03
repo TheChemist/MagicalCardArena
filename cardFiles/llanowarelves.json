@@ -1,0 +1,54 @@
+{
+	"displayName": "Llanowar Elves",
+	"rarity": "COMMON",
+	"power": "1",
+	"toughness": "1",
+	"coretypes": 
+	[
+		{
+			"coretype": "CREATURE"
+		}
+	],
+
+	"subtypes": 
+	[
+		{
+			"subtype": "ELF"
+		},
+
+		{
+			"subtype": "DRUID"
+		}
+	],
+
+	"cost": 
+	[
+		[
+			{
+				"color": "GREEN",
+				"value": "1"
+			}
+		]
+	],
+
+	"abilities": 
+	[
+		{
+			"abilitytype": "ACTIVATED_MANA_ABILITY",
+			"additionalcost": "TAP",
+			"effects": 
+			[
+				{
+					"effecttype": "PRODUCE_MANA",
+					"produce": 
+					[
+						{
+							"color": "GREEN",
+							"value": "1"
+						}
+					]
+				}
+			]
+		}
+	]
+}

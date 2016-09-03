@@ -1,0 +1,50 @@
+{
+	"displayName": "Torsten Von Ursus",
+	"rarity": "UNCOMMON",
+	"power": "5",
+	"toughness": "5",
+	"supertypes": 
+	[
+		{
+			"supertype": "LEGENDARY"
+		}
+	],
+
+	"coretypes": 
+	[
+		{
+			"coretype": "CREATURE"
+		}
+	],
+
+	"subtypes": 
+	[
+		{
+			"subtype": "HUMAN"
+		},
+
+		{
+			"subtype": "SOLDIER"
+		}
+	],
+
+	"cost": 
+	[
+		[
+			{
+				"color": "NONE",
+				"value": "3"
+			},
+
+			{
+				"color": "WHITE",
+				"value": "1"
+			},
+
+			{
+				"color": "GREEN",
+				"value": "2"
+			}
+		]
+	]
+}

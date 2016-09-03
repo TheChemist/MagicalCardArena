@@ -1,0 +1,29 @@
+{
+	"displayName": "Yoked Ox",
+	"rarity": "COMMON",
+	"power": "0",
+	"toughness": "4",
+	"coretypes": 
+	[
+		{
+			"coretype": "CREATURE"
+		}
+	],
+
+	"subtypes": 
+	[
+		{
+			"subtype": "OX"
+		}
+	],
+
+	"cost": 
+	[
+		[
+			{
+				"color": "WHITE",
+				"value": "3"
+			}
+		]
+	]
+}

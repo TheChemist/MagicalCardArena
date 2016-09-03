@@ -1,0 +1,37 @@
+{
+	"displayName": "Rotting Mastodon",
+	"rarity": "COMMON",
+	"power": "2",
+	"toughness": "8",
+	"coretypes": 
+	[
+		{
+			"coretype": "CREATURE"
+		}
+	],
+
+	"subtypes": 
+	[
+		{
+			"subtype": "ZOMBIE"
+		},
+		
+		{
+			"subtype": "ELEPHANT"
+		}
+	],
+
+	"cost": 
+	[
+		[
+			{
+				"color": "NONE",
+				"value": "4"
+			}
+			{
+				"color": "BLACK",
+				"value": "1"
+			}
+		]
+	]
+}

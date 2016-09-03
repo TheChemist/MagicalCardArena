@@ -1,0 +1,38 @@
+{
+	"displayName": "Loxodon Convert",
+	"rarity": "COMMON",
+	"power": "4",
+	"toughness": "2",
+	"coretypes": 
+	[
+		{
+			"coretype": "CREATURE"
+		}
+	],
+
+	"subtypes": 
+	[
+		{
+			"subtype": "ELEPHANT"
+		},
+
+		{
+			"subtype": "SOLDIER"
+		}
+	],
+
+	"cost": 
+	[
+		[
+			{
+				"color": "NONE",
+				"value": "3"
+			},
+
+			{
+				"color": "WHITE",
+				"value": "1"
+			}
+		]
+	]
+}

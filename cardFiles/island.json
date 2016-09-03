@@ -1,0 +1,45 @@
+{
+	"displayName": "Island",
+	"rarity": "BASIC",
+	"supertypes": 
+	[
+		{
+			"supertype": "BASIC"
+		}
+	],
+
+	"coretypes": 
+	[
+		{
+			"coretype": "LAND"
+		}
+	],
+
+	"subtypes": 
+	[
+		{
+			"subtype": "ISLAND"
+		}
+	],
+
+	"abilities": 
+	[
+		{
+			"abilitytype": "ACTIVATED_MANA_ABILITY",
+			"additionalcost": "TAP",
+			"effects": 
+			[
+				{
+					"effecttype": "PRODUCE_MANA",
+					"produce": 
+					[
+						{
+							"color": "BLUE",
+							"value": "1"
+						}
+					]
+				}
+			]
+		}
+	]
+}

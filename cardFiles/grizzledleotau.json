@@ -1,0 +1,34 @@
+{
+	"displayName": "Grizzled Leotau",
+	"rarity": "COMMON",
+	"power": "1",
+	"toughness": "5",
+	"coretypes": 
+	[
+		{
+			"coretype": "CREATURE"
+		}
+	],
+
+	"subtypes": 
+	[
+		{
+			"subtype": "CAT"
+		}
+	],
+
+	"cost": 
+	[
+		[
+			{
+				"color": "GREEN",
+				"value": "1"
+			},
+
+			{
+				"color": "WHITE",
+				"value": "1"
+			}
+		]
+	]
+}

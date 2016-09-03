@@ -1,0 +1,38 @@
+{
+	"displayName": "Blade of the Sixth Pride",
+	"rarity": "COMMON",
+	"power": "3",
+	"toughness": "1",
+	"coretypes": 
+	[
+		{
+			"coretype": "CREATURE"
+		}
+	],
+
+	"subtypes": 
+	[
+		{
+			"subtype": "CAT"
+		},
+
+		{
+			"subtype": "REBEL"
+		}
+	],
+
+	"cost": 
+	[
+		[
+			{
+				"color": "NONE",
+				"value": "1"
+			},
+
+			{
+				"color": "WHITE",
+				"value": "1"
+			}
+		]
+	]
+}

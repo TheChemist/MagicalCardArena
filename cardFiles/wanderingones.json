@@ -1,0 +1,29 @@
+{
+	"displayName": "Wandering Ones",
+	"rarity": "COMMON",
+	"power": "1",
+	"toughness": "1",
+	"coretypes": 
+	[
+		{
+			"coretype": "CREATURE"
+		}
+	],
+
+	"subtypes": 
+	[
+		{
+			"subtype": "SPIRIT"
+		}
+	],
+
+	"cost": 
+	[
+		[
+			{
+				"color": "BLUE",
+				"value": "3"
+			}
+		]
+	]
+}

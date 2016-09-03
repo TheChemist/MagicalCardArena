@@ -1,0 +1,34 @@
+{
+	"displayName": "Ogre Resister",
+	"rarity": "COMMON",
+	"power": "4",
+	"toughness": "3",
+	"coretypes": 
+	[
+		{
+			"coretype": "CREATURE"
+		}
+	],
+
+	"subtypes": 
+	[
+		{
+			"subtype": "OGRE"
+		}
+	],
+
+	"cost": 
+	[
+		[
+			{
+				"color": "NONE",
+				"value": "2"
+			},
+
+			{
+				"color": "RED",
+				"value": "2"
+			}
+		]
+	]
+}

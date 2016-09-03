@@ -1,0 +1,45 @@
+{
+	"displayName": "Mountain",
+	"rarity": "BASIC",
+	"supertypes": 
+	[
+		{
+			"supertype": "BASIC"
+		}
+	],
+
+	"coretypes": 
+	[
+		{
+			"coretype": "LAND"
+		}
+	],
+
+	"subtypes": 
+	[
+		{
+			"subtype": "MOUNTAIN"
+		}
+	],
+
+	"abilities": 
+	[
+		{
+			"abilitytype": "ACTIVATED_MANA_ABILITY",
+			"additionalcost": "TAP",
+			"effects": 
+			[
+				{
+					"effecttype": "PRODUCE_MANA",
+					"produce": 
+					[
+						{
+							"color": "RED",
+							"value": "1"
+						}
+					]
+				}
+			]
+		}
+	]
+}

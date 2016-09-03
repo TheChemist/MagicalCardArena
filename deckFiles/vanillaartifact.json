@@ -1,0 +1,56 @@
+{
+	"name": "Vanilla Artifact",
+	"description": "Ein farbloses Deck bestehend aus Vanilla-Kreaturen",
+	"cards": 
+	[
+		{
+			"name": "swamp",
+			"count": "4"
+		},
+
+		{
+			"name": "forest",
+			"count": "4"
+		},
+
+		{
+			"name": "mountain",
+			"count": "4"
+		},
+
+		{
+			"name": "plains",
+			"count": "4"
+		},
+
+		{
+			"name": "island",
+			"count": "4"
+		},
+
+		{
+			"name": "memnite",
+			"count": "4"
+		},
+
+		{
+			"name": "alphamyr",
+			"count": "4"
+		},
+
+		{
+			"name": "omegamyr",
+			"count": "4"
+		},
+
+		{
+			"name": "stonegolem",
+			"count": "4"
+		},
+
+		{
+			"name": "glassgolem",
+			"count": "4"
+		}
+	]
+}

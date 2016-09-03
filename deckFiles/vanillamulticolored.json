@@ -1,0 +1,56 @@
+{
+	"name": "Vanilla Multicolored",
+	"description": "Ein vielfarbiges Deck bestehend aus Vanilla-Kreaturen",
+	"cards": 
+	[
+		{
+			"name": "swamp",
+			"count": "4"
+		},
+
+		{
+			"name": "forest",
+			"count": "4"
+		},
+
+		{
+			"name": "mountain",
+			"count": "4"
+		},
+
+		{
+			"name": "plains",
+			"count": "4"
+		},
+
+		{
+			"name": "island",
+			"count": "4"
+		},
+
+		{
+			"name": "watchwolf",
+			"count": "4"
+		},
+
+		{
+			"name": "wollytharctar",
+			"count": "4"
+		},
+
+		{
+			"name": "fusionelemental",
+			"count": "4"
+		},
+
+		{
+			"name": "rhoxbrute",
+			"count": "4"
+		},
+
+		{
+			"name": "grizzledleotau",
+			"count": "4"
+		}
+	]
+}

@@ -1,0 +1,33 @@
+{
+	"displayName": "Elvish Warrior",
+	"rarity": "UNCOMMON",
+	"power": "2",
+	"toughness": "3",
+	"coretypes": 
+	[
+		{
+			"coretype": "CREATURE"
+		}
+	],
+
+	"subtypes": 
+	[
+		{
+			"subtype": "ELF"
+		},
+
+		{
+			"subtype": "WARRIOR"
+		}
+	],
+
+	"cost": 
+	[
+		[
+			{
+				"color": "GREEN",
+				"value": "2"
+			}
+		]
+	]
+}

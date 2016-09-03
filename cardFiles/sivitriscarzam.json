@@ -1,0 +1,46 @@
+{
+	"displayName": "Sivitri Scarzam",
+	"rarity": "UNCOMMON",
+	"power": "6",
+	"toughness": "4",
+	"supertypes": 
+	[
+		{
+			"supertype": "LEGENDARY"
+		}
+	],
+
+	"coretypes": 
+	[
+		{
+			"coretype": "CREATURE"
+		}
+	],
+
+	"subtypes": 
+	[
+		{
+			"subtype": "HUMAN"
+		}
+	],
+
+	"cost": 
+	[
+		[
+			{
+				"color": "NONE",
+				"value": "5"
+			},
+
+			{
+				"color": "BLUE",
+				"value": "1"
+			},
+
+			{
+				"color": "BLACK",
+				"value": "1"
+			}
+		]
+	]
+}

@@ -1,0 +1,34 @@
+{
+	"displayName": "Python",
+	"rarity": "COMMON",
+	"power": "3",
+	"toughness": "2",
+	"coretypes": 
+	[
+		{
+			"coretype": "CREATURE"
+		}
+	],
+
+	"subtypes": 
+	[
+		{
+			"subtype": "SNAKE"
+		}
+	],
+
+	"cost": 
+	[
+		[
+			{
+				"color": "NONE",
+				"value": "1"
+			},
+
+			{
+				"color": "BLACK",
+				"value": "2"
+			}
+		]
+	]
+}

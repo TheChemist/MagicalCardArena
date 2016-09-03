@@ -1,0 +1,47 @@
+{
+	"displayName": "Barktooth Warbeard",
+	"rarity": "COMMON",
+	"power": "6",
+	"toughness": "5",
+	"coretypes": 
+	[
+		{
+			"coretype": "LEGENDARY"
+		},
+
+		{
+			"coretype": "CREATURE"
+		}
+	],
+
+	"subtypes": 
+	[
+		{
+			"subtype": "HUMAN"
+		},
+
+		{
+			"subtype": "WARRIOR"
+		}
+	],
+
+	"cost": 
+	[
+		[
+			{
+				"color": "NONE",
+				"value": "4"
+			},
+
+			{
+				"color": "BLACK",
+				"value": "4"
+			},
+
+			{
+				"color": "RED",
+				"value": "2"
+			}
+		]
+	]
+}

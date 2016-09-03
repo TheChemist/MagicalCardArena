@@ -1,0 +1,35 @@
+{
+	"displayName": "Great Furnace",
+	"rarity": "COMMON",
+	"coretypes": 
+	[
+		{
+			"coretype": "ARTIFACT"
+		},
+
+		{
+			"coretype": "LAND"
+		}
+	],
+
+	"abilities": 
+	[
+		{
+			"abilitytype": "ACTIVATED_MANA_ABILITY",
+			"additionalcost": "TAP",
+			"effects": 
+			[
+				{
+					"effecttype": "PRODUCE_MANA",
+					"produce": 
+					[
+						{
+							"color": "RED",
+							"value": "1"
+						}
+					]
+				}
+			]
+		}
+	]
+}

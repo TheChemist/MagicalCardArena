@@ -1,0 +1,34 @@
+{
+	"displayName": "Catacomb Slub",
+	"rarity": "COMMON",
+	"power": "2",
+	"toughness": "6",
+	"coretypes": 
+	[
+		{
+			"coretype": "CREATURE"
+		}
+	],
+
+	"subtypes": 
+	[
+		{
+			"subtype": "SLUG"
+		}
+	],
+
+	"cost": 
+	[
+		[
+			{
+				"color": "NONE",
+				"value": "4"
+			},
+
+			{
+				"color": "BLACK",
+				"value": "1"
+			}
+		]
+	]
+}

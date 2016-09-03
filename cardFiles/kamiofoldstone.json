@@ -1,0 +1,34 @@
+{
+	"displayName": "Kami of Old Stone",
+	"rarity": "UNCOMMON",
+	"power": "1",
+	"toughness": "7",
+	"coretypes": 
+	[
+		{
+			"coretype": "CREATURE"
+		}
+	],
+
+	"subtypes": 
+	[
+		{
+			"subtype": "SPIRIT"
+		}
+	],
+
+	"cost": 
+	[
+		[
+			{
+				"color": "NONE",
+				"value": "3"
+			},
+
+			{
+				"color": "WHITE",
+				"value": "1"
+			}
+		]
+	]
+}

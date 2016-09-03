@@ -1,0 +1,33 @@
+{
+	"displayName": "Razorfield Tresher",
+	"rarity": "COMMON",
+	"power": "6",
+	"toughness": "4",
+	"coretypes": 
+	[
+		{
+			"coretype": "ARTIFACT"
+		},
+
+		{
+			"coretype": "CREATURE"
+		}
+	],
+
+	"subtypes": 
+	[
+		{
+			"subtype": "CONSTRUCT"
+		}
+	],
+
+	"cost": 
+	[
+		[
+			{
+				"color": "NONE",
+				"value": "7"
+			}
+		]
+	]
+}

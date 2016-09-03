@@ -1,0 +1,36 @@
+{
+	"name": "Vanilla Green",
+	"description": "Ein gr�nes Deck bestehend aus Vanilla-Kreaturen",
+	"cards": 
+	[
+		{
+			"name": "forest",
+			"count": "20"
+		},
+
+		{
+			"name": "alphatyrranax",
+			"count": "4"
+		},
+
+		{
+			"name": "elvishwarrior",
+			"count": "4"
+		},
+
+		{
+			"name": "grizzlybears",
+			"count": "4"
+		},
+
+		{
+			"name": "norwoodranger",
+			"count": "4"
+		},
+
+		{
+			"name": "runeclawbear",
+			"count": "4"
+		}
+	]
+}

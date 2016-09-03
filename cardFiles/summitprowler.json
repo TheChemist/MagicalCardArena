@@ -1,0 +1,33 @@
+{
+	"displayName": "Summit Prowler",
+	"rarity": "COMMON",
+	"power": "4",
+	"toughness": "3",
+	"coretypes": 
+	[
+		{
+			"coretype": "CREATURE"
+		}
+	],
+
+	"subtypes": 
+	[
+		{
+			"subtype": "YETI"
+		}
+	],
+
+	"cost": 
+	[
+		[
+			{
+				"color": "NONE",
+				"value": "2"
+			}
+			{
+				"color": "RED",
+				"value": "2"
+			}
+		]
+	]
+}

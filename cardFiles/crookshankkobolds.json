@@ -1,0 +1,26 @@
+{
+	"displayName": "Crookshank Kobolds",
+	"rarity": "COMMON",
+	"power": "0",
+	"toughness": "1",
+	"colors": 
+	[
+		{
+			"color": "RED"
+		}
+	],
+
+	"coretypes": 
+	[
+		{
+			"coretype": "CREATURE"
+		}
+	],
+
+	"subtypes": 
+	[
+		{
+			"subtype": "KOBOLD"
+		}
+	]
+}

@@ -1,0 +1,33 @@
+{
+	"displayName": "Gore Swine",
+	"rarity": "COMMON",
+	"power": "4",
+	"toughness": "1",
+	"coretypes": 
+	[
+		{
+			"coretype": "CREATURE"
+		}
+	],
+
+	"subtypes": 
+	[
+		{
+			"subtype": "BOAR"
+		}
+	],
+
+	"cost": 
+	[
+		[
+			{
+				"color": "NONE",
+				"value": "2"
+			}
+			{
+				"color": "RED",
+				"value": "1"
+			}
+		]
+	]
+}

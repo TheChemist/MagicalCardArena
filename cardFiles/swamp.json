@@ -1,0 +1,45 @@
+{
+	"displayName": "Swamp",
+	"rarity": "BASIC",
+	"supertypes": 
+	[
+		{
+			"supertype": "BASIC"
+		}
+	],
+
+	"coretypes": 
+	[
+		{
+			"coretype": "LAND"
+		}
+	],
+
+	"subtypes": 
+	[
+		{
+			"subtype": "SWAMP"
+		}
+	],
+
+	"abilities": 
+	[
+		{
+			"abilitytype": "ACTIVATED_MANA_ABILITY",
+			"additionalcost": "TAP",
+			"effects": 
+			[
+				{
+					"effecttype": "PRODUCE_MANA",
+					"produce": 
+					[
+						{
+							"color": "BLACK",
+							"value": "1"
+						}
+					]
+				}
+			]
+		}
+	]
+}

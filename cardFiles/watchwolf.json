@@ -1,0 +1,34 @@
+{
+	"displayName": "Watchwolf",
+	"rarity": "UNCOMMON",
+	"power": "3",
+	"toughness": "3",
+	"coretypes": 
+	[
+		{
+			"coretype": "CREATURE"
+		}
+	],
+
+	"subtypes": 
+	[
+		{
+			"subtype": "WOLF"
+		}
+	],
+
+	"cost": 
+	[
+		[
+			{
+				"color": "GREEN",
+				"value": "1"
+			},
+
+			{
+				"color": "WHITE",
+				"value": "1"
+			}
+		]
+	]
+}

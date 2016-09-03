@@ -1,0 +1,33 @@
+{
+	"displayName": "Norwood Ranger",
+	"rarity": "COMMON",
+	"power": "1",
+	"toughness": "2",
+	"coretypes": 
+	[
+		{
+			"coretype": "CREATURE"
+		}
+	],
+
+	"subtypes": 
+	[
+		{
+			"subtype": "ELF"
+		},
+
+		{
+			"subtype": "SCOUT"
+		}
+	],
+
+	"cost": 
+	[
+		[
+			{
+				"color": "GREEN",
+				"value": "1"
+			}
+		]
+	]
+}

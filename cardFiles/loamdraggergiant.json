@@ -1,0 +1,84 @@
+{
+	"displayName": "Loamdragger Giant",
+	"rarity": "COMMON",
+	"power": "7",
+	"toughness": "6",
+	"coretypes": 
+	[
+		{
+			"coretype": "CREATURE"
+		}
+	],
+
+	"subtypes": 
+	[
+		{
+			"subtype": "GIANT"
+		},
+
+		{
+			"subtype": "WARRIOR"
+		}
+	],
+
+	"cost": 
+	[
+		[
+			{
+				"color": "NONE",
+				"value": "4"
+			},
+
+			{
+				"color": "RED",
+				"value": "3"
+			}
+		],
+
+		[
+			{
+				"color": "NONE",
+				"value": "4"
+			},
+
+			{
+				"color": "RED",
+				"value": "2"
+			},
+
+			{
+				"color": "GREEN",
+				"value": "1"
+			}
+		],
+
+		[
+			{
+				"color": "NONE",
+				"value": "4"
+			},
+
+			{
+				"color": "RED",
+				"value": "1"
+			},
+
+			{
+				"color": "GREEN",
+				"value": "2"
+			}
+		],
+
+		[
+			{
+				"color": "NONE",
+				"value": "4"
+			},
+
+			{
+				"color": "GREEN",
+				"value": "3"
+			}
+		]
+	]
+}

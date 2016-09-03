@@ -1,0 +1,36 @@
+{
+	"name": "Vanilla White",
+	"desxription": "Ein wei�es Deck bestehend aus Vanilla-Kreaturen",
+	"cards": 
+	[
+		{
+			"name": "plains",
+			"count": "20"
+		},
+
+		{
+			"name": "armoredwarhorse",
+			"count": "4"
+		},
+
+		{
+			"name": "eagercadet",
+			"count": "4"
+		},
+
+		{
+			"name": "indomitableancients",
+			"count": "4"
+		},
+
+		{
+			"name": "isamaruhoundofkonda",
+			"count": "4"
+		},
+
+		{
+			"name": "sancturycat",
+			"count": "4"
+		}
+	]
+}

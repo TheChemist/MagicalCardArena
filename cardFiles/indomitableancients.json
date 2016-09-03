@@ -1,0 +1,38 @@
+{
+	"displayName": "Indomitable Ancients",
+	"rarity": "RARE",
+	"power": "2",
+	"toughness": "10",
+	"coretypes": 
+	[
+		{
+			"coretype": "CREATURE"
+		}
+	],
+
+	"subtypes": 
+	[
+		{
+			"subtype": "TREEFOLK"
+		},
+
+		{
+			"subtype": "WARRIOR"
+		}
+	],
+
+	"cost": 
+	[
+		[
+			{
+				"color": "NONE",
+				"value": "2"
+			},
+
+			{
+				"color": "WHITE",
+				"value": "2"
+			}
+		]
+	]
+}

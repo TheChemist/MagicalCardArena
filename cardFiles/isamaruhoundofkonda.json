@@ -1,0 +1,36 @@
+{
+	"displayName": "Isamaru, Hound of Konda",
+	"rarity": "RARE",
+	"power": "2",
+	"toughness": "2",
+	"supertypes": 
+	[
+		{
+			"supertype": "LEGENDARY"
+		}
+	],
+
+	"coretypes": 
+	[
+		{
+			"coretype": "CREATURE"
+		}
+	],
+
+	"subtypes": 
+	[
+		{
+			"subtype": "HOUND"
+		}
+	],
+
+	"cost": 
+	[
+		[
+			{
+				"color": "WHITE",
+				"value": "1"
+			}
+		]
+	]
+}

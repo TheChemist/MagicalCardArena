@@ -1,0 +1,67 @@
+{
+	"displayName": "Bog Initiate",
+	"rarity": "COMMON",
+	"power": "1",
+	"toughness": "1",
+	"coretypes": 
+	[
+		{
+			"coretype": "CREATURE"
+		}
+	],
+
+	"subtypes": 
+	[
+		{
+			"subtype": "HUMAN"
+		},
+
+		{
+			"subtype": "WIZARD"
+		}
+	],
+
+	"cost": 
+	[
+		[
+			{
+				"color": "NONE",
+				"value": "1"
+			},
+			
+			{
+				"color": "BLACK",
+				"value": "1"
+			}
+		]
+	],
+
+	"abilities": 
+	[
+		{
+			"abilitytype": "ACTIVATED_MANA_ABILITY",
+			"cost": 
+			[
+				[
+					{
+						"color": "NONE",
+						"value": "1"
+					}
+				]
+			],
+			"effects": 
+			[
+				{
+					"effecttype": "PRODUCE_MANA",
+					"produce": 
+					[
+						{
+							"color": "BLACK",
+							"value": "1"
+						}
+					]
+				}
+			]
+		}
+	]
+}

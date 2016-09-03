@@ -1,0 +1,33 @@
+{
+	"displayName": "Witch's Familiar",
+	"rarity": "COMMON",
+	"power": "2",
+	"toughness": "3",
+	"coretypes": 
+	[
+		{
+			"coretype": "CREATURE"
+		}
+	],
+
+	"subtypes": 
+	[
+		{
+			"subtype": "FROG"
+		}
+	],
+
+	"cost": 
+	[
+		[
+			{
+				"color": "NONE",
+				"value": "2"
+			}
+			{
+				"color": "BLACK",
+				"value": "1"
+			}
+		]
+	]
+}

@@ -1,0 +1,39 @@
+{
+	"displayName": "Woolly Thoctar",
+	"rarity": "UNCOMMON",
+	"power": "5",
+	"toughness": "4",
+	"coretypes": 
+	[
+		{
+			"coretype": "CREATURE"
+		}
+	],
+
+	"subtypes": 
+	[
+		{
+			"subtype": "BEAST"
+		}
+	],
+
+	"cost": 
+	[
+		[
+			{
+				"color": "RED",
+				"value": "1"
+			},
+
+			{
+				"color": "GREEN",
+				"value": "1"
+			},
+
+			{
+				"color": "WHITE",
+				"value": "1"
+			}
+		]
+	]
+}

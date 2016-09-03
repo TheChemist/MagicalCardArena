@@ -1,0 +1,30 @@
+{
+	"name": "dwarventrader",
+	"displayName": "Dwarven Trader",
+	"rarity": "COMMON",
+	"power": "1",
+	"toughness": "1",
+	"coretypes": 
+	[
+		{
+			"coretype": "CREATURE"
+		}
+	],
+
+	"subtypes": 
+	[
+		{
+			"subtype": "DWARF"
+		}
+	],
+
+	"cost": 
+	[
+		[
+			{
+				"color": "RED",
+				"value": "1"
+			}
+		]
+	]
+}

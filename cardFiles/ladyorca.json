@@ -1,0 +1,46 @@
+{
+	"displayName": "Lady Orca",
+	"rarity": "COMMON",
+	"power": "7",
+	"toughness": "4",
+	"supertypes": 
+	[
+		{
+			"supertype": "LEGENDARY"
+		}
+	],
+
+	"coretypes": 
+	[
+		{
+			"coretype": "CREATURE"
+		}
+	],
+
+	"subtypes": 
+	[
+		{
+			"subtype": "DEMON"
+		}
+	],
+
+	"cost": 
+	[
+		[
+			{
+				"color": "NONE",
+				"value": "5"
+			},
+
+			{
+				"color": "BLACK",
+				"value": "1"
+			},
+
+			{
+				"color": "RED",
+				"value": "1"
+			}
+		]
+	]
+}

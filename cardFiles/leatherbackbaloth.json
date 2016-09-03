@@ -1,0 +1,29 @@
+{
+	"displayName": "Leatherback Baloth",
+	"rarity": "UNCOMMON",
+	"power": "4",
+	"toughness": "5",
+	"coretypes": 
+	[
+		{
+			"coretype": "CREATURE"
+		}
+	],
+
+	"subtypes": 
+	[
+		{
+			"subtype": "BEAST"
+		}
+	],
+
+	"cost": 
+	[
+		[
+			{
+				"color": "GREEN",
+				"value": "3"
+			}
+		]
+	]
+}

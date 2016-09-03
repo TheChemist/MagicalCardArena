@@ -1,0 +1,34 @@
+{
+	"displayName": "Flameborn Viron",
+	"rarity": "COMMON",
+	"power": "6",
+	"toughness": "4",
+	"coretypes": 
+	[
+		{
+			"coretype": "CREATURE"
+		}
+	],
+
+	"subtypes": 
+	[
+		{
+			"subtype": "INSECT"
+		}
+	],
+
+	"cost": 
+	[
+		[
+			{
+				"color": "NONE",
+				"value": "4"
+			},
+
+			{
+				"color": "RED",
+				"value": "2"
+			}
+		]
+	]
+}

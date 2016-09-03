@@ -1,0 +1,41 @@
+{
+	"displayName": "Sol Ring",
+	"rarity": "UNCOMMON",
+	"coretypes": 
+	[
+		{
+			"coretype": "ARTIFACT"
+		}
+	],
+
+	"cost": 
+	[
+		[
+			{
+				"color": "NONE",
+				"value": "1"
+			}
+		]
+	],
+
+	"abilities": 
+	[
+		{
+			"abilitytype": "ACTIVATED_MANA_ABILITY",
+			"additionalcost": "TAP",
+			"effects": 
+			[
+				{
+					"effecttype": "PRODUCE_MANA",
+					"produce": 
+					[
+						{
+							"color": "NONE",
+							"value": "2"
+						}
+					]
+				}
+			]
+		}
+	]
+}

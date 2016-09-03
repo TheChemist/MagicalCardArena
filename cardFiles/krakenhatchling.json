@@ -1,0 +1,29 @@
+{
+	"displayName": "Kraken Hatchling",
+	"rarity": "COMMON",
+	"power": "0",
+	"toughness": "4",
+	"coretypes": 
+	[
+		{
+			"coretype": "CREATURE"
+		}
+	],
+
+	"subtypes": 
+	[
+		{
+			"subtype": "KRAKEN"
+		}
+	],
+
+	"cost": 
+	[
+		[
+			{
+				"color": "BLUE",
+				"value": "3"
+			}
+		]
+	]
+}

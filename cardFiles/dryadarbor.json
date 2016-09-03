@@ -1,0 +1,55 @@
+{
+	"displayName": "Dryad Arbor",
+	"rarity": "MYTHIC_RARE",
+	"power": "1",
+	"toughness": "1",
+	"colors": 
+	[
+		{
+			"color": "GREEN"
+		}
+	],
+
+	"coretypes": 
+	[
+		{
+			"coretype": "LAND"
+		},
+
+		{
+			"coretype": "CREATURE"
+		}
+	],
+
+	"subtypes": 
+	[
+		{
+			"subtype": "FOREST"
+		},
+
+		{
+			"subtype": "DRYAD"
+		}
+	],
+
+	"abilities": 
+	[
+		{
+			"abilitytype": "ACTIVATED_MANA_ABILITY",
+			"additionalcost": "TAP",
+			"effects": 
+			[
+				{
+					"effecttype": "PRODUCE_MANA",
+					"produce": 
+					[
+						{
+							"color": "GREEN",
+							"value": "1"
+						}
+					]
+				}
+			]
+		}
+	]
+}

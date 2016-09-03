@@ -1,0 +1,29 @@
+{
+	"displayName": "Muck Rats",
+	"rarity": "COMMON",
+	"power": "1",
+	"toughness": "1",
+	"coretypes": 
+	[
+		{
+			"coretype": "CREATURE"
+		}
+	],
+
+	"subtypes": 
+	[
+		{
+			"subtype": "RAT"
+		}
+	],
+
+	"cost": 
+	[
+		[
+			{
+				"color": "BLACK",
+				"value": "1"
+			}
+		]
+	]
+}

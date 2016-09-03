@@ -1,0 +1,54 @@
+{
+	"displayName": "Gruul Signet",
+	"rarity": "COMMON",
+	"coretypes": 
+	[
+		{
+			"coretype": "ARTIFACT"
+		}
+	],
+
+	"cost": 
+	[
+		[
+			{
+				"color": "NONE",
+				"value": "2"
+			}
+		]
+	],
+
+	"abilities": 
+	[
+		{
+			"abilitytype": "ACTIVATED_MANA_ABILITY",
+			"activationcost": 
+			[
+				{
+					"color": "NONE",
+					"value": "1"
+				}
+			],
+
+			"additionalcost": "TAP",
+			"effects": 
+			[
+				{
+					"effecttype": "PRODUCE_MANA",
+					"produce": 
+					[
+						{
+							"color": "RED",
+							"value": "1"
+						},
+
+						{
+							"color": "GREEN",
+							"value": "1"
+						}
+					]
+				}
+			]
+		}
+	]
+}

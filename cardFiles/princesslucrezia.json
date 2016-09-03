@@ -1,0 +1,71 @@
+{
+	"displayName": "Princess Lucrezia",
+	"rarity": "UNCOMMON",
+	"power": "5",
+	"toughness": "4",
+	"supertypes": 
+	[
+		{
+			"supertype": "LEGENDARY"
+		}
+	],
+
+	"coretypes": 
+	[
+		{
+			"coretype": "CREATURE"
+		}
+	],
+
+	"subtypes": 
+	[
+		{
+			"subtype": "HUMAN"
+		},
+
+		{
+			"subtype": "WIZARD"
+		}
+	],
+
+	"cost": 
+	[
+		[
+			{
+				"color": "NONE",
+				"value": "3"
+			},
+
+			{
+				"color": "BLUE",
+				"value": "2"
+			},
+
+			{
+				"color": "BLACK",
+				"value": "1"
+			}
+		]
+	],
+
+	"abilities": 
+	[
+		{
+			"abilitytype": "ACTIVATED_MANA_ABILITY",
+			"additionalcost": "TAP",
+			"effects": 
+			[
+				{
+					"effecttype": "PRODUCE_MANA",
+					"produce": 
+					[
+						{
+							"color": "BLUE",
+							"value": "1"
+						}
+					]
+				}
+			]
+		}
+	]
+}

@@ -1,0 +1,29 @@
+{
+	"displayName": "Mons's Goblin Raiders",
+	"rarity": "COMMON",
+	"power": "1",
+	"toughness": "1",
+	"coretypes": 
+	[
+		{
+			"coretype": "CREATURE"
+		}
+	],
+
+	"subtypes": 
+	[
+		{
+			"subtype": "GOBLIN"
+		}
+	],
+
+	"cost": 
+	[
+		[
+			{
+				"color": "RED",
+				"value": "1"
+			}
+		]
+	]
+}

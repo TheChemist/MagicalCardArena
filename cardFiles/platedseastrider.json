@@ -1,0 +1,29 @@
+{
+	"displayName": "Plated Seastrider",
+	"rarity": "COMMON",
+	"power": "3",
+	"toughness": "3",
+	"coretypes": 
+	[
+		{
+			"coretype": "CREATURE"
+		}
+	],
+
+	"subtypes": 
+	[
+		{
+			"subtype": "BEAST"
+		}
+	],
+
+	"cost": 
+	[
+		[
+			{
+				"color": "BLUE",
+				"value": "2"
+			}
+		]
+	]
+}

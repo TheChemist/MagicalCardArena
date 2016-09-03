@@ -1,0 +1,33 @@
+{
+	"displayName": "Wetland Sambar",
+	"rarity": "COMMON",
+	"power": "2",
+	"toughness": "1",
+	"coretypes": 
+	[
+		{
+			"coretype": "CREATURE"
+		}
+	],
+
+	"subtypes": 
+	[
+		{
+			"subtype": "ELK"
+		}
+	],
+
+	"cost": 
+	[
+		[
+			{
+				"color": "NONE",
+				"value": "1"
+			}
+			{
+				"color": "BLUE",
+				"value": "1"
+			}
+		]
+	]
+}

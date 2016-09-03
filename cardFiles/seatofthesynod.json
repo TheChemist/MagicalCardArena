@@ -1,0 +1,29 @@
+{
+	"displayName": "Seat of the Synod",
+	"rarity": "COMMON",
+	"coretypes": 
+	[
+		{
+			"coretype": "ARTIFACT"
+		},
+
+		{
+			"coretype": "LAND"
+		}
+	],
+
+	"abilities": 
+	[
+		{
+			"abilitytype": "ACTIVATED_MANA_ABILITY",
+			"additionalcost": "TAP",
+			"produce": 
+			[
+				{
+					"color": "BLUE",
+					"value": "1"
+				}
+			]
+		}
+	]
+}

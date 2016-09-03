@@ -1,0 +1,36 @@
+{
+	"name": "Vanilla Black",
+	"description": "Ein schwares Deck bestehend aus Vanilla-Kreaturen",
+	"cards": 
+	[
+		{
+			"name": "swamp",
+			"count": "20"
+		},
+
+		{
+			"name": "baronyvampire",
+			"count": "4"
+		},
+
+		{
+			"name": "catacombslug",
+			"count": "4"
+		},
+
+		{
+			"name": "headlesshorseman",
+			"count": "4"
+		},
+
+		{
+			"name": "massofghouls",
+			"count": "4"
+		},
+
+		{
+			"name": "walkingcorpse",
+			"count": "4"
+		}
+	]
+}

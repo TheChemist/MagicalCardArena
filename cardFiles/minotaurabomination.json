@@ -1,0 +1,38 @@
+{
+	"displayName": "Minotaur Abomination",
+	"rarity": "COMMON",
+	"power": "4",
+	"toughness": "6",
+	"coretypes": 
+	[
+		{
+			"coretype": "CREATURE"
+		}
+	],
+
+	"subtypes": 
+	[
+		{
+			"subtype": "ZOMBIE"
+		},
+
+		{
+			"subtype": "MINOTAUR"
+		}
+	],
+
+	"cost": 
+	[
+		[
+			{
+				"color": "NONE",
+				"value": "4"
+			},
+
+			{
+				"color": "BLACK",
+				"value": "2"
+			}
+		]
+	]
+}

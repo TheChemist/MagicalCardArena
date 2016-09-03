@@ -1,0 +1,33 @@
+{
+	"displayName": "Obsianus Golem",
+	"rarity": "UNCOMMON",
+	"power": "4",
+	"toughness": "6",
+	"coretypes": 
+	[
+		{
+			"coretype": "ARTIFACT"
+		},
+
+		{
+			"coretype": "CREATURE"
+		}
+	],
+
+	"subtypes": 
+	[
+		{
+			"subtype": "GOLEM"
+		}
+	],
+
+	"cost": 
+	[
+		[
+			{
+				"color": "NONE",
+				"value": "6"
+			}
+		]
+	]
+}

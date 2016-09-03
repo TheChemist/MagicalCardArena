@@ -1,0 +1,36 @@
+{
+	"name": "Vanilla Blue",
+	"description": "Ein blaues Deck bestehend aus Vanilla-Kreaturen",
+	"cards": 
+	[
+		{
+			"name": "island",
+			"count": "20"
+		},
+
+		{
+			"name": "coralmerfolk",
+			"count": "4"
+		},
+
+		{
+			"name": "amphincutthroat",
+			"count": "4"
+		},
+
+		{
+			"name": "coraleel",
+			"count": "4"
+		},
+
+		{
+			"name": "armoredcancrix",
+			"count": "4"
+		},
+
+		{
+			"name": "fugitivewizard",
+			"count": "4"
+		}
+	]
+}

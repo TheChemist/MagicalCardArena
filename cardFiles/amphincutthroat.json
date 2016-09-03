@@ -1,0 +1,38 @@
+{
+	"displayName": "Amphin Cutthroat",
+	"rarity": "COMMON",
+	"power": "2",
+	"toughness": "4",
+	"coretypes": 
+	[
+		{
+			"coretype": "CREATURE"
+		}
+	],
+
+	"subtypes": 
+	[
+		{
+			"subtype": "SALAMANDER"
+		},
+
+		{
+			"subtype": "ROGUE"
+		}
+	],
+
+	"cost": 
+	[
+		[
+			{
+				"color": "NONE",
+				"value": "3"
+			},
+
+			{
+				"color": "BLUE",
+				"value": "1"
+			}
+		]
+	]
+}

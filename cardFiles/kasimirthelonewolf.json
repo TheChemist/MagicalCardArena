@@ -1,0 +1,50 @@
+{
+	"displayName": "Kasimir the Lone Wolf",
+	"rarity": "UNCOMMON",
+	"power": "5",
+	"toughness": "3",
+	"supertypes": 
+	[
+		{
+			"supertype": "LEGENDARY"
+		}
+	],
+
+	"coretypes": 
+	[
+		{
+			"coretype": "CREATURE"
+		}
+	],
+
+	"subtypes": 
+	[
+		{
+			"subtype": "HUMAN"
+		},
+
+		{
+			"subtype": "WARRIOR"
+		}
+	],
+
+	"cost": 
+	[
+		[
+			{
+				"color": "NONE",
+				"value": "4"
+			},
+
+			{
+				"color": "BLUE",
+				"value": "1"
+			},
+
+			{
+				"color": "SCOUT",
+				"value": "1"
+			}
+		]
+	]
+}

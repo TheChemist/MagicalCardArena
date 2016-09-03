@@ -1,0 +1,29 @@
+{
+	"displayName": "Merfolk of the Pearl Trident",
+	"rarity": "COMMON",
+	"power": "1",
+	"toughness": "1",
+	"coretypes": 
+	[
+		{
+			"coretype": "CREATURE"
+		}
+	],
+
+	"subtypes": 
+	[
+		{
+			"subtype": "MERFOLK"
+		}
+	],
+
+	"cost": 
+	[
+		[
+			{
+				"color": "BLUE",
+				"value": "1"
+			}
+		]
+	]
+}

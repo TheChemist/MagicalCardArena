@@ -1,0 +1,43 @@
+{
+	"displayName": "Darkwater Catacombs",
+	"rarity": "RARE",
+	"coretypes": 
+	[
+		{
+			"coretype": "LAND"
+		}
+	],
+	
+	"abilities": 
+	[
+		{
+			"abilitytype": "ACTIVATED_MANA_ABILITY",
+			"cost": 
+			[
+				{
+					"color": "NONE",
+					"value": "1";
+				}
+			],
+			"additionalcost": "TAP",
+			"effects": 
+			[
+				{
+					"effecttype": "PRODUCE_MANA",
+					"produce": 
+					[
+						{
+							"color": "BLUE",
+							"value": "1"
+						},
+						
+						{
+							"color": "BLACK",
+							"value": "1"
+						}
+					]
+				}
+			]
+		}
+	]
+}

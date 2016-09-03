@@ -1,0 +1,38 @@
+{
+	"displayName": "Incurable Ogre",
+	"rarity": "COMMON",
+	"power": "5",
+	"toughness": "1",
+	"coretypes": 
+	[
+		{
+			"coretype": "CREATURE"
+		}
+	],
+
+	"subtypes": 
+	[
+		{
+			"subtype": "OGRE"
+		},
+
+		{
+			"subtype": "MUTANT"
+		}
+	],
+
+	"cost": 
+	[
+		[
+			{
+				"color": "NONE",
+				"value": "3"
+			},
+
+			{
+				"color": "RED",
+				"value": "1"
+			}
+		]
+	]
+}

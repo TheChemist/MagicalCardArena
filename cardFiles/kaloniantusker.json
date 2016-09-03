@@ -1,0 +1,29 @@
+{
+	"displayName": "Kalonian Tusker",
+	"rarity": "UNCOMMON",
+	"power": "3",
+	"toughness": "3",
+	"coretypes": 
+	[
+		{
+			"coretype": "CREATURE"
+		}
+	],
+
+	"subtypes": 
+	[
+		{
+			"subtype": "BEAST"
+		}
+	],
+
+	"cost": 
+	[
+		[
+			{
+				"color": "GREEN",
+				"value": "2"
+			}
+		]
+	]
+}

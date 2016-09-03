@@ -1,0 +1,33 @@
+{
+	"displayName": "Rotted Hulk",
+	"rarity": "COMMON",
+	"power": "2",
+	"toughness": "5",
+	"coretypes": 
+	[
+		{
+			"coretype": "CREATURE"
+		}
+	],
+
+	"subtypes": 
+	[
+		{
+			"subtype": "ELEMENTAL"
+		}
+	],
+
+	"cost": 
+	[
+		[
+			{
+				"color": "NONE",
+				"value": "3"
+			}
+			{
+				"color": "BLACK",
+				"value": "2"
+			}
+		]
+	]
+}
