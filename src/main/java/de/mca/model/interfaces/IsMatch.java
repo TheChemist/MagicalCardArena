@@ -4,8 +4,12 @@ import java.util.List;
 
 import de.mca.model.MagicCard;
 import de.mca.model.MagicPermanent;
+import de.mca.model.Phase;
+import de.mca.model.Step;
 import de.mca.model.ZoneDefault;
 import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.IntegerProperty;
+import javafx.beans.property.ObjectProperty;
 
 /**
  * Deklariert alle Methoden, die für die Steuerung des Ablaufs eines Matches
@@ -128,4 +132,14 @@ public interface IsMatch {
 	public void turnEnd(boolean hasNextPhase, boolean hasNextStepp);
 
 	public void update();
+
+	public IntegerProperty propertyTurnNumber();
+
+	public ObjectProperty<Phase> propertyCurrentPhase();
+
+	public ObjectProperty<IsPlayer> propertyPlayerActive();
+
+	public ObjectProperty<IsPlayer> propertyPlayerPrioritized();
+
+	public ObjectProperty<Step> propertyCurrentStep();
 }

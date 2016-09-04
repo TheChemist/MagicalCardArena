@@ -166,6 +166,16 @@ public class MatchPresenter extends AnimationTimer implements Initializable, IsS
 	private ResizableCanvas canvasExile;
 	private ResizableCanvas canvasHumanGraveyard;
 	private ResizableCanvas canvasHumanHand;
+	@FXML
+	private Label labelTurnNumber;
+	@FXML
+	private Label labelCurrentPhase;
+	@FXML
+	private Label labelCurrentStep;
+	@FXML
+	private Label labelPlayerActive;
+	@FXML
+	private Label labelPlayerPrioritized;
 	@Inject
 	private FactoryMatch factoryMatch;
 	@Inject
@@ -217,8 +227,6 @@ public class MatchPresenter extends AnimationTimer implements Initializable, IsS
 	private Label labelIconHumanHandSize;
 	@FXML
 	private Label labelIconHumanLife;
-	@FXML
-	private Label labelStatus;
 	@Inject
 	private MagicParser magicParser;
 	private IsMatch matchActive;
@@ -258,7 +266,6 @@ public class MatchPresenter extends AnimationTimer implements Initializable, IsS
 	private List<Sprite> spriteListExile;
 	private List<Sprite> spriteListHumanGraveyard;
 	private List<Sprite> spriteListHumanHand;
-	private Consumer<String> statusReporter;
 	@FXML
 	private Tab tabBattlefield;
 	@FXML
@@ -303,8 +310,6 @@ public class MatchPresenter extends AnimationTimer implements Initializable, IsS
 		rendererExile.run();
 		rendererHumanGraveyard.run();
 		rendererHumanHand.run();
-
-		statusReporter.accept(getMatchActive().toString());
 
 		secondsElapsedSinceLastFpsUpdate += secondsElapsed;
 		framesSinceLastFpsUpdate++;
@@ -404,7 +409,6 @@ public class MatchPresenter extends AnimationTimer implements Initializable, IsS
 		rendererHumanGraveyard = () -> canvasHumanGraveyard.draw();
 		rendererHumanHand = () -> canvasHumanHand.draw();
 		fpsReporter = fps -> fpsLabel.setText(String.format("FPS: %d", fps));
-		statusReporter = status -> labelStatus.setText(status);
 
 		// Binden der Status-Label der Spieler an entsprechende Werte
 		labelComputerAvatar.setGraphic(new AdaptableImageView(avatarComputer, labelComputerAvatar.heightProperty(),
@@ -459,6 +463,13 @@ public class MatchPresenter extends AnimationTimer implements Initializable, IsS
 
 		tabHumanHand.textProperty().bind(Bindings.concat("(").concat(playerHuman.propertyHandSize().asString())
 				.concat(") ").concat(playerHuman.getDisplayName()));
+
+		// Bottom Pane
+		labelTurnNumber.textProperty().bind(matchActive.propertyTurnNumber().asString());
+		labelCurrentPhase.textProperty().bind(matchActive.propertyCurrentPhase().asString());
+		labelCurrentStep.textProperty().bind(matchActive.propertyCurrentStep().asString());
+		labelPlayerActive.textProperty().bind(matchActive.propertyPlayerActive().asString());
+		labelPlayerPrioritized.textProperty().bind(matchActive.propertyPlayerPrioritized().asString());
 
 		// Starten
 		setMatchActive(matchActive);

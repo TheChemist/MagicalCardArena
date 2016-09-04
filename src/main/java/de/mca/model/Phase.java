@@ -56,6 +56,7 @@ public class Phase {
 	/**
 	 * Speichert die Spielschritte der Phase.
 	 */
+	// TODO: Muss kein Property sein.
 	private final ListProperty<Step> propertyListSteps;
 
 	@Inject
@@ -86,7 +87,7 @@ public class Phase {
 	}
 
 	Step getCurrentStep() {
-		return propertyCurrentStep.get();
+		return propertyCurrentStep().get();
 	}
 
 	boolean getFlagPhaseRunning() {
@@ -163,5 +164,9 @@ public class Phase {
 				return;
 			}
 		}
+	}
+
+	ObjectProperty<Step> propertyCurrentStep() {
+		return propertyCurrentStep;
 	}
 }

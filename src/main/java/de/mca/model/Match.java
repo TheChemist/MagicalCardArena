@@ -25,7 +25,9 @@ import de.mca.model.interfaces.IsMatch;
 import de.mca.model.interfaces.IsPlayer;
 import de.mca.model.interfaces.IsStackable;
 import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.ListProperty;
+import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SetProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleListProperty;
@@ -677,10 +679,6 @@ public final class Match implements IsMatch {
 		return getCurrentTurn().getPlayerOpponent(playerActive);
 	}
 
-	private IsPlayer getPlayerPrioritized() {
-		return getCurrentTurn().getPlayerPrioritized();
-	}
-
 	private int getTurnNumber() {
 		return getCurrentTurn().getTurnNumber();
 	}
@@ -761,5 +759,30 @@ public final class Match implements IsMatch {
 
 	boolean getFlagNeedPlayerInput() {
 		return propertyFlagNeedPlayerInput().get();
+	}
+
+	@Override
+	public IntegerProperty propertyTurnNumber() {
+		return getCurrentTurn().propertyTurnNumber();
+	}
+
+	@Override
+	public ObjectProperty<Phase> propertyCurrentPhase() {
+		return getCurrentTurn().propertyCurrentPhase();
+	}
+
+	@Override
+	public ObjectProperty<IsPlayer> propertyPlayerActive() {
+		return getCurrentTurn().propertyPlayerActive();
+	}
+
+	@Override
+	public ObjectProperty<IsPlayer> propertyPlayerPrioritized() {
+		return getCurrentTurn().propertyPlayerPrioritized();
+	}
+
+	@Override
+	public ObjectProperty<Step> propertyCurrentStep() {
+		return getCurrentPhase().propertyCurrentStep();
 	}
 }

@@ -60,6 +60,7 @@ public class Turn {
 	/**
 	 * Spiechert die verschiedenen Spielphasen.
 	 */
+	// TODO: Muss kein Property sein
 	private final ListProperty<Phase> propertyListPhases;
 	/**
 	 * Speichert den aktiven Spieler.
@@ -83,8 +84,8 @@ public class Turn {
 		propertyFlagTurnRunning = new SimpleBooleanProperty(false);
 		propertyFlagTurnSkipped = new SimpleBooleanProperty(false);
 		propertyListPhases = new SimpleListProperty<>(FXCollections.observableArrayList(new ArrayList<>()));
-		propertyPlayerActive = new SimpleObjectProperty<>();
-		propertyPlayerPrioritized = new SimpleObjectProperty<>();
+		propertyPlayerActive = new SimpleObjectProperty<>(playerComputer);
+		propertyPlayerPrioritized = new SimpleObjectProperty<>(playerComputer);
 		propertyTurnNumber = new SimpleIntegerProperty(0);
 
 		final Step untap = stepFactory.create(StepType.UNTAP_STEP, EnumSet.of(TurnBasedActionType.UNTAP));
@@ -164,7 +165,7 @@ public class Turn {
 		}
 	}
 
-	private ObjectProperty<Phase> propertyCurrentPhase() {
+	ObjectProperty<Phase> propertyCurrentPhase() {
 		return propertyCurrentPhase;
 	}
 
@@ -180,15 +181,15 @@ public class Turn {
 		return propertyListPhases;
 	}
 
-	private ObjectProperty<IsPlayer> propertyPlayerActive() {
+	ObjectProperty<IsPlayer> propertyPlayerActive() {
 		return propertyPlayerActive;
 	}
 
-	private ObjectProperty<IsPlayer> propertyPlayerPrioritized() {
+	ObjectProperty<IsPlayer> propertyPlayerPrioritized() {
 		return propertyPlayerPrioritized;
 	}
 
-	private IntegerProperty propertyTurnNumber() {
+	IntegerProperty propertyTurnNumber() {
 		return propertyTurnNumber;
 	}
 

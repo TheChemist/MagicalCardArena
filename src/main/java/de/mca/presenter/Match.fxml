@@ -11,9 +11,11 @@
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.FlowPane?>
 <?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.RowConstraints?>
 <?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.text.Font?>
 
 <BorderPane maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="600.0" minWidth="800.0" xmlns="http://javafx.com/javafx/8.0.60" xmlns:fx="http://javafx.com/fxml/1" fx:controller="de.mca.presenter.MatchPresenter">
 	<center>
@@ -270,7 +272,35 @@
    <bottom>
       <AnchorPane maxHeight="-Infinity" maxWidth="1.7976931348623157E308" minHeight="-Infinity" minWidth="-Infinity" prefHeight="25.0" BorderPane.alignment="CENTER">
          <children>
-            <Label fx:id="labelStatus" AnchorPane.leftAnchor="5.0" />
+            <FlowPane alignment="CENTER" hgap="10.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+               <children>
+                  <Label alignment="CENTER" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" text="Turn Number:" />
+                  <Label fx:id="labelTurnNumber" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308">
+                     <font>
+                        <Font name="System Bold" size="12.0" />
+                     </font></Label>
+                  <Label alignment="CENTER" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" text="Current Phase:" />
+                  <Label fx:id="labelCurrentPhase" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308">
+                     <font>
+                        <Font name="System Bold" size="12.0" />
+                     </font></Label>
+                  <Label alignment="CENTER" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" text="Current Step:" />
+                  <Label fx:id="labelCurrentStep" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308">
+                     <font>
+                        <Font name="System Bold" size="12.0" />
+                     </font></Label>
+                  <Label alignment="CENTER" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" text="Active Player:" />
+                  <Label fx:id="labelPlayerActive" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308">
+                     <font>
+                        <Font name="System Bold" size="12.0" />
+                     </font></Label>
+                  <Label text="Prioritized Player:" />
+                  <Label fx:id="labelPlayerPrioritized">
+                     <font>
+                        <Font name="System Bold" size="12.0" />
+                     </font></Label>
+               </children>
+            </FlowPane>
          </children>
       </AnchorPane>
    </bottom>
