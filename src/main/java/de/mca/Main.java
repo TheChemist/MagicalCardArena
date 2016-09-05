@@ -9,6 +9,7 @@ import com.google.inject.Guice;
 import de.mca.io.FileManager;
 import de.mca.io.ResourceManager;
 import de.mca.presenter.IsStackableScreen;
+import de.mca.presenter.MainView;
 import de.mca.presenter.MatchView;
 import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;

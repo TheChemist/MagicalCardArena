@@ -1,9 +1,9 @@
-package de.mca;
+package de.mca.presenter;
 
 import java.net.URL;
 import java.util.ResourceBundle;
 
-import de.mca.presenter.IsStackableScreen;
+import de.mca.Main;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;

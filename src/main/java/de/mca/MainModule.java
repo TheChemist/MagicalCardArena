@@ -17,13 +17,11 @@ import de.mca.factories.FactoryTurn;
 import de.mca.factories.FactoryZone;
 import de.mca.model.CharacteristicAbility;
 import de.mca.model.MagicPermanent;
-import de.mca.model.Match;
 import de.mca.model.Player;
 import de.mca.model.ZoneDefault;
 import de.mca.model.enums.PlayerType;
 import de.mca.model.enums.ZoneType;
 import de.mca.model.interfaces.IsAbility;
-import de.mca.model.interfaces.IsMatch;
 import de.mca.model.interfaces.IsPlayer;
 import de.mca.model.interfaces.IsZone;
 
@@ -40,6 +38,7 @@ public class MainModule extends AbstractModule {
 	protected void configure() {
 		bind(MagicParser.class).asEagerSingleton();
 
+		install(new FactoryModuleBuilder().build(FactoryMatch.class));
 		install(new FactoryModuleBuilder().build(FactoryTurn.class));
 		install(new FactoryModuleBuilder().build(FactoryPhase.class));
 		install(new FactoryModuleBuilder().build(FactoryStep.class));
@@ -47,7 +46,6 @@ public class MainModule extends AbstractModule {
 		install(new FactoryModuleBuilder().build(FactoryMagicSpell.class));
 		install(new FactoryModuleBuilder().build(FactoryEffect.class));
 
-		install(new FactoryModuleBuilder().implement(IsMatch.class, Match.class).build(FactoryMatch.class));
 		install(new FactoryModuleBuilder().implement(IsZone.class, ZoneDefault.class).build(FactoryZone.class));
 		install(new FactoryModuleBuilder().implement(IsPlayer.class, Player.class).build(FactoryPlayer.class));
 		install(new FactoryModuleBuilder().implement(IsAbility.class, CharacteristicAbility.class)

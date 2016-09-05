@@ -2,6 +2,7 @@ package de.mca.model;
 
 import java.util.ArrayList;
 import java.util.EnumSet;
+import java.util.List;
 import java.util.ListIterator;
 
 import com.google.common.collect.ImmutableList;
@@ -18,7 +19,6 @@ import de.mca.model.enums.TurnBasedActionType;
 import de.mca.model.interfaces.IsPlayer;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.IntegerProperty;
-import javafx.beans.property.ListProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleIntegerProperty;
@@ -37,6 +37,10 @@ public class Turn {
 	 * Speichert den Iterator, der sie Phasen durchläuft.
 	 */
 	private final ListIterator<Phase> iteratorPhases;
+	/**
+	 * Spiechert die verschiedenen Spielphasen.
+	 */
+	private final List<Phase> listPhases;
 	/**
 	 * Speichert den computergesteuerten Spieler.
 	 */
@@ -58,11 +62,6 @@ public class Turn {
 	 */
 	private final BooleanProperty propertyFlagTurnSkipped;
 	/**
-	 * Spiechert die verschiedenen Spielphasen.
-	 */
-	// TODO: Muss kein Property sein
-	private final ListProperty<Phase> propertyListPhases;
-	/**
 	 * Speichert den aktiven Spieler.
 	 */
 	private final ObjectProperty<IsPlayer> propertyPlayerActive;
@@ -81,9 +80,9 @@ public class Turn {
 		this.playerComputer = playerComputer;
 		this.playerHuman = playerHuman;
 
+		listPhases = new SimpleListProperty<>(FXCollections.observableArrayList(new ArrayList<>()));
 		propertyFlagTurnRunning = new SimpleBooleanProperty(false);
 		propertyFlagTurnSkipped = new SimpleBooleanProperty(false);
-		propertyListPhases = new SimpleListProperty<>(FXCollections.observableArrayList(new ArrayList<>()));
 		propertyPlayerActive = new SimpleObjectProperty<>(playerComputer);
 		propertyPlayerPrioritized = new SimpleObjectProperty<>(playerComputer);
 		propertyTurnNumber = new SimpleIntegerProperty(0);
@@ -120,77 +119,56 @@ public class Turn {
 
 		propertyCurrentPhase = new SimpleObjectProperty<>(beginning);
 
-		propertyListPhases.add(beginning);
-		propertyListPhases.add(precombatMain);
-		propertyListPhases.add(combat);
-		propertyListPhases.add(postcombatMain);
-		propertyListPhases.add(ending);
+		listPhases.add(beginning);
+		listPhases.add(precombatMain);
+		listPhases.add(combat);
+		listPhases.add(postcombatMain);
+		listPhases.add(ending);
 
-		iteratorPhases = propertyListPhases.listIterator();
+		iteratorPhases = listPhases.listIterator();
 	}
 
 	Turn(Turn turn) {
 		playerComputer = turn.getPlayerComputer();
 		playerHuman = turn.getPlayerHuman();
 
+		listPhases = turn.getListPhases();
 		propertyCurrentPhase = turn.propertyCurrentPhase();
 		propertyFlagTurnRunning = turn.propertyFlagTurnRunning();
 		propertyFlagTurnSkipped = turn.propertyFlagTurnSkipped();
-		propertyListPhases = turn.propertyListPhases();
 		propertyPlayerActive = turn.propertyPlayerActive();
 		propertyPlayerPrioritized = turn.propertyPlayerPrioritized();
 		propertyTurnNumber = turn.propertyTurnNumber();
 
-		iteratorPhases = propertyListPhases.listIterator();
-		propertyCurrentPhase.set(propertyListPhases.get(0));
+		iteratorPhases = listPhases.listIterator();
+		propertyCurrentPhase.set(listPhases.get(0));
 	}
 
-	public boolean hasNextPhase() {
-		return iteratorPhases.hasNext();
+	private List<Phase> getListPhases() {
+		return listPhases;
 	}
 
-	public void skipStepCombatDamage() {
-		for (final Phase phase : propertyListPhases) {
-			if (phase.equals(PhaseType.COMBAT_PHASE)) {
-				phase.stepSkip(StepType.COMBAT_DAMAGE_STEP);
-			}
-		}
+	private IsPlayer getPlayerComputer() {
+		return playerComputer;
 	}
 
-	public void skipStepDeclareBlockers() {
-		for (final Phase phase : propertyListPhases) {
-			if (phase.equals(PhaseType.COMBAT_PHASE)) {
-				phase.stepSkip(StepType.DECLARE_BLOCKERS);
-			}
-		}
+	private IsPlayer getPlayerHuman() {
+		return playerHuman;
 	}
 
-	ObjectProperty<Phase> propertyCurrentPhase() {
-		return propertyCurrentPhase;
+	/**
+	 * Liefert den gegnerischen Spieler zu einen gegeben Spieler.
+	 *
+	 * @param player
+	 *            der Spieler, dessen Gegener zurückgegeben werden soll.
+	 * @return Gegener des übergeben Spielers.
+	 */
+	private IsPlayer getPlayerOpponent(IsPlayer player) {
+		return player.equals(PlayerType.HUMAN) ? getPlayerComputer() : getPlayerHuman();
 	}
 
-	private BooleanProperty propertyFlagTurnRunning() {
-		return propertyFlagTurnRunning;
-	}
-
-	private BooleanProperty propertyFlagTurnSkipped() {
-		return propertyFlagTurnSkipped;
-	}
-
-	private ListProperty<Phase> propertyListPhases() {
-		return propertyListPhases;
-	}
-
-	ObjectProperty<IsPlayer> propertyPlayerActive() {
-		return propertyPlayerActive;
-	}
-
-	ObjectProperty<IsPlayer> propertyPlayerPrioritized() {
-		return propertyPlayerPrioritized;
-	}
-
-	IntegerProperty propertyTurnNumber() {
-		return propertyTurnNumber;
+	private int getTurnNumber() {
+		return propertyTurnNumber().get();
 	}
 
 	private void setFlagTurnRunning(boolean flagRunning) {
@@ -229,14 +207,6 @@ public class Turn {
 		return propertyPlayerActive().get();
 	}
 
-	IsPlayer getPlayerComputer() {
-		return playerComputer;
-	}
-
-	IsPlayer getPlayerHuman() {
-		return playerHuman;
-	}
-
 	/**
 	 * Liefert den nichtaktiven Spieler.
 	 *
@@ -246,23 +216,8 @@ public class Turn {
 		return getPlayerOpponent(getPlayerActive());
 	}
 
-	/**
-	 * Liefert den gegnerischen Spieler zu einen gegeben Spieler.
-	 *
-	 * @param player
-	 *            der Spieler, dessen Gegener zurückgegeben werden soll.
-	 * @return Gegener des übergeben Spielers.
-	 */
-	IsPlayer getPlayerOpponent(IsPlayer player) {
-		return player.equals(PlayerType.HUMAN) ? getPlayerComputer() : getPlayerHuman();
-	}
-
-	IsPlayer getPlayerPrioritized() {
-		return propertyPlayerPrioritized().get();
-	}
-
-	int getTurnNumber() {
-		return propertyTurnNumber().get();
+	boolean hasNextPhase() {
+		return iteratorPhases.hasNext();
 	}
 
 	/**
@@ -289,6 +244,30 @@ public class Turn {
 		getCurrentPhase().phaseEnd();
 	}
 
+	ObjectProperty<Phase> propertyCurrentPhase() {
+		return propertyCurrentPhase;
+	}
+
+	BooleanProperty propertyFlagTurnRunning() {
+		return propertyFlagTurnRunning;
+	}
+
+	BooleanProperty propertyFlagTurnSkipped() {
+		return propertyFlagTurnSkipped;
+	}
+
+	ObjectProperty<IsPlayer> propertyPlayerActive() {
+		return propertyPlayerActive;
+	}
+
+	ObjectProperty<IsPlayer> propertyPlayerPrioritized() {
+		return propertyPlayerPrioritized;
+	}
+
+	IntegerProperty propertyTurnNumber() {
+		return propertyTurnNumber;
+	}
+
 	void setCurrentPhase() {
 		propertyCurrentPhase().set(iteratorPhases.next());
 	}
@@ -306,6 +285,22 @@ public class Turn {
 	void setPlayerPrioritized(IsPlayer playerPrioritized) {
 		this.propertyPlayerPrioritized.set(playerPrioritized);
 		playerPrioritized.setPlayerState(PlayerState.PRIORITIZED);
+	}
+
+	void skipStepCombatDamage() {
+		for (final Phase phase : getListPhases()) {
+			if (phase.equals(PhaseType.COMBAT_PHASE)) {
+				phase.stepSkip(StepType.COMBAT_DAMAGE_STEP);
+			}
+		}
+	}
+
+	void skipStepDeclareBlockers() {
+		for (final Phase phase : getListPhases()) {
+			if (phase.equals(PhaseType.COMBAT_PHASE)) {
+				phase.stepSkip(StepType.DECLARE_BLOCKERS);
+			}
+		}
 	}
 
 	void stepBegin() {

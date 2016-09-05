@@ -32,6 +32,9 @@ public final class ZoneDefault<E extends MagicCard> implements IsZone<E> {
 	 * Speichert die Karten der Zone.
 	 */
 	private final ListProperty<E> cardList;
+	/**
+	 * Speichert den Spielertyp des Spielers.
+	 */
 	private final PlayerType playerType;
 	/**
 	 * Speichert den Zonentyp.

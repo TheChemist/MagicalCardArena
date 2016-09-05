@@ -1,7 +1,6 @@
 package de.mca.model;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
 
@@ -21,25 +20,26 @@ import de.mca.model.enums.PlayerState;
 import de.mca.model.enums.PlayerType;
 import de.mca.model.enums.ZoneType;
 import de.mca.model.interfaces.IsAttackTarget;
-import de.mca.model.interfaces.IsMatch;
 import de.mca.model.interfaces.IsPlayer;
 import de.mca.model.interfaces.IsStackable;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.ListProperty;
 import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SetProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleListProperty;
-import javafx.beans.property.SimpleSetProperty;
 import javafx.collections.FXCollections;
 
 /**
+ * Bildet ein Match ab, an dessen Ende ein Ergebnis feststeht. Ein Match läuft
+ * so lange, bis ein Spieler gewinnt oder unentschieden gespielt wird. Die
+ * Rundenstruktur wird in verschiedene Hilfsklassen ausgelagert und vollständig
+ * gekapselt (Turn, Phase, Step).
  *
  * @author Maximilian Werling
  *
  */
-public final class Match implements IsMatch {
+public final class Match {
 
 	/**
 	 * Speichert den Logger.
@@ -79,11 +79,6 @@ public final class Match implements IsMatch {
 	 */
 	private final RuleEnforcer ruleEnforcer;
 	/**
-	 * Sammelts StateBasedActions. Diese werden zu bestimmten Zeitpunkten
-	 * abgearbeitet.
-	 */
-	private final SetProperty<StateBasedAction> setStateBasedActions;
-	/**
 	 * Speichert die geteilte Spieldfeld-Zone.
 	 */
 	private final ZoneDefault<MagicPermanent> zoneBattlefield;
@@ -116,7 +111,6 @@ public final class Match implements IsMatch {
 		propertyListAttacks = new SimpleListProperty<>(FXCollections.observableArrayList(new ArrayList<>()));
 		propertyListAttackTargets = new SimpleListProperty<>(FXCollections.observableArrayList(new ArrayList<>()));
 		propertyListTurns = new SimpleListProperty<>(FXCollections.observableArrayList(new ArrayList<>()));
-		setStateBasedActions = new SimpleSetProperty<>(FXCollections.observableSet(new HashSet<>()));
 
 		propertyListAttackTargets.add(playerComputer);
 		propertyListAttackTargets.add(playerHuman);
@@ -125,276 +119,36 @@ public final class Match implements IsMatch {
 		propertyListTurns.add(firstTurn);
 	}
 
-	public void addStateBasedAction(StateBasedAction stateBasedAction) {
-		setStateBasedActions.add(stateBasedAction);
-	}
-
-	public boolean checkCanActivate(IsPlayer p, ActivatedAbility aa) {
-		if (aa.isManaAbility()) {
-			final boolean prioritised = p.isPrioritised();
-			final boolean castingSpell = p.isCastingSpell() || p.isPaying();
-			final boolean activatingAbility = p.isActivatingAbility();
-			final boolean checkCanPay = checkCanPay((MagicPermanent) aa.getSource(), aa.getAdditionalCostType());
-			LOGGER.debug("{} checkCanActivate({}, {}) = {}", this, p, aa,
-					(prioritised || castingSpell || activatingAbility) && checkCanPay);
-			return (prioritised || castingSpell || activatingAbility) && checkCanPay;
-		}
-		return false;
-	}
-
-	public boolean checkCanCast(IsPlayer p, MagicSpell ms) {
-		final boolean isActivePlayer = isPlayerActive(p);
-		final boolean currentStepIsMain = getCurrentPhase().isMain();
-		final boolean stackEmpty = magicStack.isEmpty();
-		LOGGER.debug("{} checkCanCast({}, {}) = {}", this, p, ms, (isActivePlayer && currentStepIsMain && stackEmpty));
-		return isActivePlayer && currentStepIsMain && stackEmpty;
-	}
-
-	public boolean checkCanPlayLandCard(IsPlayer p) {
-		final boolean isActivePlayer = isPlayerActive(p);
-		final boolean currentStepIsMain = getCurrentPhase().isMain();
-		final boolean stackEmpty = magicStack.isEmpty();
-		final boolean landFlag = !getPlayerActive().getFlagPlayedLand();
-		LOGGER.debug("{} checkCanPlayLandCard({}) = {}", this, p,
-				(isActivePlayer && currentStepIsMain && landFlag && stackEmpty));
-		return isActivePlayer && currentStepIsMain && landFlag && stackEmpty;
-	}
-
-	@Override
-	public boolean checkSkipPhase() {
-		return getCurrentPhase().getFlagSkipped();
-	}
-
-	@Override
-	public boolean checkSkipStep() {
-		return getCurrentStep().getFlagStepSkipped();
-	}
-
-	@Override
-	public boolean checkSkipTurn() {
-		return getCurrentTurn().getFlagTurnSkipped();
-	}
-
-	/**
-	 * Fügt dem Spieler einen neuen Angriff auf ihn oder einen von ihm
-	 * kontrollierten Planeswalker hinzu.
-	 *
-	 * @param attack
-	 *            ein Angriff kapselt den Angreifer und das Angriffziel.
-	 */
-	public void declareAttacker(Attack attack) {
-		propertyListAttacks.add(attack);
-	}
-
-	public void declareBlocker(int attackIndex, MagicPermanent blocker) {
-		propertyListAttacks.get(attackIndex).blockerAdd(blocker);
-	}
-
-	public Turn getCurrentTurn() {
-		return propertyListTurns.get(propertyListTurns.getSize() - 1);
-	}
-
-	@Override
-	public boolean getFlagMatchRunning() {
-		return propertyMatchRunning.get();
-	}
-
-	@Override
-	public List<IsAttackTarget> getListAttackTargets() {
-		return propertyListAttackTargets;
-	}
-
-	/**
-	 * Liefert eine Liste aller kontrollierten Karten auf dem Spielfeld.
-	 *
-	 * @return eine Liste aller kontrollierten Karten auf dem Spielfeld.
-	 */
-
-	public List<MagicPermanent> getListControlledCards(IsPlayer player) {
-		return zoneBattlefield.getAll(player.getPlayerType());
-	}
-
-	public List<MagicPermanent> getListLegalAttackers(IsPlayer player) {
-		final List<MagicPermanent> result = new ArrayList<>();
-		getControlledCreatures(player).forEach(magicPermanent -> {
-			final MagicPermanent attacker = magicPermanent;
-			if (attacker.checkCanAttack()) {
-				result.add(attacker);
-			}
-		});
-		return result;
-	}
-
-	public List<MagicPermanent> getListLegalBlockers(IsPlayer player) {
-		final List<MagicPermanent> result = new ArrayList<>();
-		for (final MagicPermanent mp : getControlledCreatures(player)) {
-			final MagicPermanent blocker = mp;
-			if (blocker.checkCanBlock()) {
-				result.add(blocker);
-			}
-		}
-		return result;
-	}
-
-	public MagicStack getMagicStack() {
-		return magicStack;
-	}
-
 	public IsPlayer getPlayer(PlayerType playerType) {
 		return getCurrentTurn().getPlayer(playerType);
 	}
 
-	public IsPlayer getPlayerActive() {
-		return getCurrentTurn().getPlayerActive();
-	}
-
-	@Override
-	public IsPlayer getPlayerComputer() {
-		return getCurrentTurn().getPlayerComputer();
-	}
-
-	@Override
-	public IsPlayer getPlayerHuman() {
-		return getCurrentTurn().getPlayerHuman();
-	}
-
-	public IsPlayer getPlayerNonactive() {
-		return getCurrentTurn().getPlayerNonactive();
-	}
-
-	public RuleEnforcer getRuleEnforcer() {
-		return ruleEnforcer;
-	}
-
-	public int getTotalAttackers() {
-		return propertyListAttacks.size();
-	}
-
-	@Override
 	public ZoneDefault<MagicPermanent> getZoneBattlefield() {
 		return zoneBattlefield;
 	}
 
-	@Override
 	public ZoneDefault<MagicCard> getZoneExile() {
 		return zoneExile;
 	}
 
-	@Override
-	public boolean isPhaseRunning() {
-		return getCurrentPhase().getFlagPhaseRunning();
+	public ObjectProperty<Phase> propertyCurrentPhase() {
+		return getCurrentTurn().propertyCurrentPhase();
 	}
 
-	public boolean isStepRunning() {
-		return getCurrentStep().getFlagStepRunning();
+	public ObjectProperty<Step> propertyCurrentStep() {
+		return getCurrentPhase().propertyCurrentStep();
 	}
 
-	@Override
-	public boolean isTurnRunning() {
-		return getCurrentTurn().getFlagTurnRunning();
+	public ObjectProperty<IsPlayer> propertyPlayerActive() {
+		return getCurrentTurn().propertyPlayerActive();
 	}
 
-	@Override
-	public void matchBegin(boolean alreadyRunning) {
-		if (!alreadyRunning) {
-			LOGGER.debug("{} matchBegin()", this);
-
-			ruleEnforcer.actionDraw(getPlayerHuman(), Constants.HAND_SIZE);
-			ruleEnforcer.actionDraw(getPlayerComputer(), Constants.HAND_SIZE);
-
-			setFlagIsMatchRunning(true);
-		}
+	public ObjectProperty<IsPlayer> propertyPlayerPrioritized() {
+		return getCurrentTurn().propertyPlayerPrioritized();
 	}
 
-	@Override
-	public void matchEnd(boolean needPlayerInput) {
-		if (!needPlayerInput) {
-			LOGGER.debug("{} matchEnd()", this);
-			setFlagIsMatchRunning(false);
-		}
-	}
-
-	@Override
-	public void phaseBegin(boolean alreadyRunning) {
-		if (!alreadyRunning) {
-			LOGGER.debug("{} phaseBegin()", this);
-			getCurrentTurn().phaseBegin();
-		}
-	}
-
-	@Override
-	public void phaseEnd(boolean hasNextStep, boolean isPhaseRunning) {
-		if (!hasNextStep && isPhaseRunning) {
-			LOGGER.debug("{} phaseEnd()", this);
-			getCurrentTurn().phaseEnd();
-		}
-	}
-
-	@Override
-	public BooleanProperty propertyFlagNeedPlayerInput() {
-		return propertyNeedPlayerInput;
-	}
-
-	public ListProperty<Attack> propertyListAttacks() {
-		return propertyListAttacks;
-	}
-
-	public void resetFlagsPassedPriority() {
-		getPlayerActive().setFlagPassedPriority(false);
-		getPlayerNonactive().setFlagPassedPriority(false);
-	}
-
-	/**
-	 * Setzt den Spielerstatus nach dem Beschwören eines Zaubers, dem Aktivieren
-	 * einer Fähigkeit, dem Ausführen einer Spezialhandlung oder dem Abgeben der
-	 * Priorität zurück auf den ursprünglichen "aktiv"/"nichtaktiv"-Status.
-	 *
-	 * @param player
-	 *            Der Spieler, dessen Status zurückgesetzt werden soll.
-	 */
-	public void resetPlayerState(IsPlayer player) {
-		final boolean isCombatPhase = getCurrentPhase().isCombatPhase();
-		if (isPlayerActive(player)) {
-			player.setPlayerState(isCombatPhase ? PlayerState.ATTACKING : PlayerState.ACTIVE);
-		} else {
-			player.setPlayerState(isCombatPhase ? PlayerState.DEFENDING : PlayerState.NONACTIVE);
-		}
-	}
-
-	public void setFlagIsMatchRunning(boolean flagIsMatchRunning) {
-		LOGGER.trace("{} setFlagIsMatchRunning() -> {}", this, flagIsMatchRunning);
-		this.propertyMatchRunning.set(flagIsMatchRunning);
-	}
-
-	public void setFlagNeedPlayerInput(boolean flagNeedPlayerInput) {
-		LOGGER.debug("{} setFlagNeedPlayerInput() -> {}", this, flagNeedPlayerInput);
-		this.propertyNeedPlayerInput.set(flagNeedPlayerInput);
-	}
-
-	@Override
-	public void skipCurrentPhase() {
-		LOGGER.debug("{} skipCurrentPhase()", this);
-		getCurrentPhase().setFlagSkipped(false);
-	}
-
-	@Override
-	public void skipCurrentStep() {
-		LOGGER.debug("{} skipCurrentStep()", this);
-		getCurrentStep().setFlagSkipped(false);
-	}
-
-	@Override
-	public void stepBegin(boolean alreadyRunning) {
-		if (!isStepRunning()) {
-			LOGGER.debug("{} stepBegin()", this);
-			getCurrentTurn().stepBegin();
-		}
-	}
-
-	@Override
-	public void stepEnd() {
-		LOGGER.debug("{} stepEnd()", this);
-		getCurrentTurn().stepEnd();
+	public IntegerProperty propertyTurnNumber() {
+		return getCurrentTurn().propertyTurnNumber();
 	}
 
 	@Override
@@ -404,30 +158,6 @@ public final class Match implements IsMatch {
 				.toString();
 	}
 
-	@Override
-	public void turnBegin(boolean alreadyRunning) {
-		if (!alreadyRunning) {
-			LOGGER.debug("{} turnBegin()", this);
-			if (getTurnNumber() == 0) {
-				setPlayerActive(determinePlayerStarting());
-			} else {
-				propertyListTurns.add(new Turn(getCurrentTurn()));
-				setPlayerActive(determinePlayerActive());
-			}
-			getCurrentTurn().turnBegin();
-		}
-	}
-
-	@Override
-	public void turnEnd(boolean hasNextPhase, boolean hasNextStep) {
-		if (!hasNextPhase && !hasNextStep) {
-			LOGGER.debug("{} turnEnd()", this);
-			getCurrentTurn().turnEnd();
-		}
-
-	}
-
-	@Override
 	public void update() {
 		if (getFlagNeedPlayerInput()) {
 			return;
@@ -471,7 +201,7 @@ public final class Match implements IsMatch {
 			 */
 
 			// Spiele Hauptphasen
-			processStateBasedActions();
+			ruleEnforcer.processStateBasedActions();
 			determinePlayerPrioritised();
 			if (getPlayerActive().getFlagPassedPriority() && getPlayerNonactive().getFlagPassedPriority()
 					&& !getMagicStack().isEmpty()) {
@@ -526,7 +256,7 @@ public final class Match implements IsMatch {
 				// Spieler erhalten in diesem Schritt Priorität.
 
 				// Spiele Schritt
-				processStateBasedActions();
+				ruleEnforcer.processStateBasedActions();
 				determinePlayerPrioritised();
 				if (getPlayerActive().getFlagPassedPriority() && getPlayerNonactive().getFlagPassedPriority()
 						&& !getMagicStack().isEmpty()) {
@@ -603,10 +333,38 @@ public final class Match implements IsMatch {
 	}
 
 	/**
+	 * Prüft, ob die anstehende Phase übersprungen wird.
+	 *
+	 * @return true, wenn die Phase übersprungen wird.
+	 */
+	private boolean checkSkipPhase() {
+		return getCurrentPhase().getFlagSkipped();
+	}
+
+	/**
+	 * Prüft, ob der anstehende Spielschritt übersprungen wird.
+	 *
+	 * @return true, wenn der Spielschritt übersprungen wird.
+	 */
+	private boolean checkSkipStep() {
+		return getCurrentStep().getFlagStepSkipped();
+	}
+
+	/**
+	 * Prüft, ob die anstehende Runde übersprungen wird.
+	 *
+	 * @return true, wenn die Runde übersprungen wird.
+	 */
+	private boolean checkSkipTurn() {
+		return getCurrentTurn().getFlagTurnSkipped();
+	}
+
+	/**
 	 * Bestimmt den aktiven Spieler.
 	 */
 	private IsPlayer determinePlayerActive() {
-		IsPlayer playerActive = (isPlayerActive(getPlayerHuman())) ? getPlayerComputer() : getPlayerHuman();
+		IsPlayer playerActive = (isPlayerActive(getPlayer(PlayerType.HUMAN))) ? getPlayer(PlayerType.COMPUTER)
+				: getPlayer(PlayerType.NONE);
 		LOGGER.debug("{} determinePlayerActive() -> {}", this, playerActive);
 		return playerActive;
 	}
@@ -618,7 +376,7 @@ public final class Match implements IsMatch {
 	 */
 	private void determinePlayerPrioritised() {
 		final IsPlayer playerActive = getPlayerActive();
-		final IsPlayer playerNonactive = getPlayerOpponent(playerActive);
+		final IsPlayer playerNonactive = getPlayerNonactive();
 
 		if (!playerActive.getFlagPassedPriority() && !playerActive.isPaying()) {
 			LOGGER.debug("{} determinePlayerPrioritised() -> {}", this, playerActive);
@@ -647,7 +405,8 @@ public final class Match implements IsMatch {
 	 * Bestimmt, welcher Spieler das Spiel beginnt.
 	 */
 	private IsPlayer determinePlayerStarting() {
-		IsPlayer playerStarting = (new Random().nextInt(2) == 0) ? getPlayerComputer() : getPlayerHuman();
+		IsPlayer playerStarting = (new Random().nextInt(2) == 0) ? getPlayer(PlayerType.COMPUTER)
+				: getPlayer(PlayerType.HUMAN);
 		LOGGER.debug("{} determinePlayerStarting() -> {}", this, playerStarting);
 		return playerStarting;
 	}
@@ -675,16 +434,128 @@ public final class Match implements IsMatch {
 		return getCurrentPhase().getCurrentStep();
 	}
 
-	private IsPlayer getPlayerOpponent(IsPlayer playerActive) {
-		return getCurrentTurn().getPlayerOpponent(playerActive);
+	private Turn getCurrentTurn() {
+		return propertyListTurns.get(propertyListTurns.getSize() - 1);
+	}
+
+	/**
+	 * Prüft, ob das Match zuende ist.
+	 *
+	 * @return true, wenn das Match zuende ist.
+	 */
+	private boolean getFlagMatchRunning() {
+		return propertyMatchRunning.get();
+	}
+
+	private List<IsAttackTarget> getListAttackTargets() {
+		return propertyListAttackTargets.get();
+	}
+
+	private List<MagicPermanent> getListLegalAttackers(IsPlayer player) {
+		final List<MagicPermanent> result = new ArrayList<>();
+		getControlledCreatures(player).forEach(magicPermanent -> {
+			final MagicPermanent attacker = magicPermanent;
+			if (attacker.checkCanAttack()) {
+				result.add(attacker);
+			}
+		});
+		return result;
+	}
+
+	private List<MagicPermanent> getListLegalBlockers(IsPlayer player) {
+		final List<MagicPermanent> result = new ArrayList<>();
+		for (final MagicPermanent mp : getControlledCreatures(player)) {
+			final MagicPermanent blocker = mp;
+			if (blocker.checkCanBlock()) {
+				result.add(blocker);
+			}
+		}
+		return result;
+	}
+
+	private MagicStack getMagicStack() {
+		return magicStack;
 	}
 
 	private int getTurnNumber() {
-		return getCurrentTurn().getTurnNumber();
+		return getCurrentTurn().propertyTurnNumber().get();
+	}
+
+	/**
+	 * Prüft, ob eine Phase noch läuft.
+	 *
+	 * @return true, wenn die Phase noch läuft.
+	 */
+
+	private boolean isPhaseRunning() {
+		return getCurrentPhase().getFlagPhaseRunning();
 	}
 
 	private boolean isPlayerActive(IsPlayer player) {
 		return getCurrentTurn().isPlayerActive(player);
+	}
+
+	private boolean isStepRunning() {
+		return getCurrentStep().getFlagStepRunning();
+	}
+
+	/**
+	 * Prüft, ob eine Runde noch läuft.
+	 *
+	 * @return true, wenn die Runde noch läuft.
+	 */
+
+	private boolean isTurnRunning() {
+		return getCurrentTurn().getFlagTurnRunning();
+	}
+
+	/**
+	 * Startet ein neues Spiel (rule = 103.).
+	 */
+
+	private void matchBegin(boolean alreadyRunning) {
+		if (!alreadyRunning) {
+			LOGGER.debug("{} matchBegin()", this);
+
+			ruleEnforcer.actionDraw(getPlayer(PlayerType.COMPUTER), Constants.HAND_SIZE);
+			ruleEnforcer.actionDraw(getPlayer(PlayerType.HUMAN), Constants.HAND_SIZE);
+
+			setFlagIsMatchRunning(true);
+		}
+	}
+
+	/**
+	 * Beendet das Spiel (rule = 104.).
+	 */
+
+	private void matchEnd(boolean needPlayerInput) {
+		if (!needPlayerInput) {
+			LOGGER.debug("{} matchEnd()", this);
+			setFlagIsMatchRunning(false);
+		}
+	}
+
+	/**
+	 * Beginn eine neue Phase.
+	 */
+
+	private void phaseBegin(boolean alreadyRunning) {
+		if (!alreadyRunning) {
+			LOGGER.debug("{} phaseBegin()", this);
+			getCurrentTurn().phaseBegin();
+		}
+	}
+
+	/**
+	 * Beendet eine Phase. Eine Phase kann beendet werden, wenn keine weiteren
+	 * Schritt mehr in der Phase gespielt werden und die Runde gerade läuft.
+	 */
+
+	private void phaseEnd(boolean hasNextStep, boolean isPhaseRunning) {
+		if (!hasNextStep && isPhaseRunning) {
+			LOGGER.debug("{} phaseEnd()", this);
+			getCurrentTurn().phaseEnd();
+		}
 	}
 
 	/**
@@ -706,29 +577,8 @@ public final class Match implements IsMatch {
 		}
 	}
 
-	/**
-	 * Arbeitet die StateBasedActions ab, die sich während der Zeit seit der
-	 * letzten Prüfung angesammelt haben. Wird aufgerufen, bevor die Priorität
-	 * neu bestimmt wird.
-	 */
-	private void processStateBasedActions() {
-		LOGGER.debug("{} processStateBasedActions()", this);
-		for (final StateBasedAction sba : setStateBasedActions) {
-			switch (sba.getStateBasedActionType()) {
-			case CREATURE_TOUGHNESS_ZERO:
-				final SBACreatureToughnessZero sbactz = (SBACreatureToughnessZero) sba;
-				ruleEnforcer.actionBury(getPlayer(sbactz.getPlayerControlling()), (MagicPermanent) sba.getSource());
-				break;
-			case PLAYER_CANT_DRAW:
-				setFlagIsMatchRunning(false);
-				break;
-			case PLAYER_LIFE_ZERO:
-				setFlagIsMatchRunning(false);
-				break;
-			default:
-				break;
-			}
-		}
+	private BooleanProperty propertyFlagNeedPlayerInput() {
+		return propertyNeedPlayerInput;
 	}
 
 	/**
@@ -757,32 +607,209 @@ public final class Match implements IsMatch {
 		getCurrentTurn().setPlayerPrioritized(playerPrioritized);
 	}
 
+	/**
+	 * Überspringe eine Phase.
+	 */
+
+	private void skipCurrentPhase() {
+		LOGGER.debug("{} skipCurrentPhase()", this);
+		getCurrentPhase().setFlagSkipped(false);
+	}
+
+	/**
+	 * Überspringe einen Spielschritt.
+	 */
+
+	private void skipCurrentStep() {
+		LOGGER.debug("{} skipCurrentStep()", this);
+		getCurrentStep().setFlagSkipped(false);
+	}
+
+	/**
+	 * Beginnt den neuen Spielschritt. Es werden alle TurnBasedActions gefeuert,
+	 * die für den Beginn dieses Schrittes vorgesehen sind.
+	 */
+
+	private void stepBegin(boolean alreadyRunning) {
+		if (!isStepRunning()) {
+			LOGGER.debug("{} stepBegin()", this);
+			getCurrentTurn().stepBegin();
+		}
+	}
+
+	/**
+	 * Beendet einen Spielschritt. Die verbleibenden TurnBasedActions werden
+	 * gefeuert und die Prioritäts-Flags der Spieler zurück gesetzt.
+	 */
+
+	private void stepEnd() {
+		LOGGER.debug("{} stepEnd()", this);
+		getCurrentTurn().stepEnd();
+	}
+
+	/**
+	 * Beginnt eine neue Runde.
+	 */
+
+	private void turnBegin(boolean alreadyRunning) {
+		if (!alreadyRunning) {
+			LOGGER.debug("{} turnBegin()", this);
+			if (getTurnNumber() == 0) {
+				setPlayerActive(determinePlayerStarting());
+			} else {
+				propertyListTurns.add(new Turn(getCurrentTurn()));
+				setPlayerActive(determinePlayerActive());
+			}
+			getCurrentTurn().turnBegin();
+		}
+	}
+
+	/**
+	 * Beendet die aktuelle Runde. Der Phase- und Step-Iterator wird zurück
+	 * gesetzt und die playedLandThisTurn-Flag für den aktiven Spieler auf false
+	 * gesetzt. Eine Runde kann beendet werden, wenn keine weiteren Phasen (und
+	 * in der letzten Phase keine weiteren Schritte) mehr gespielt werden
+	 * können.
+	 */
+
+	private void turnEnd(boolean hasNextPhase, boolean hasNextStep) {
+		if (!hasNextPhase && !hasNextStep) {
+			LOGGER.debug("{} turnEnd()", this);
+			getCurrentTurn().turnEnd();
+		}
+
+	}
+
+	void addCard(MagicCard magicCard, ZoneType zoneType) {
+		// TODO: Implementieren
+	}
+
+	boolean checkCanActivate(IsPlayer p, ActivatedAbility aa) {
+		if (aa.isManaAbility()) {
+			final boolean prioritised = p.isPrioritised();
+			final boolean castingSpell = p.isCastingSpell() || p.isPaying();
+			final boolean activatingAbility = p.isActivatingAbility();
+			final boolean checkCanPay = checkCanPay((MagicPermanent) aa.getSource(), aa.getAdditionalCostType());
+			LOGGER.debug("{} checkCanActivate({}, {}) = {}", this, p, aa,
+					(prioritised || castingSpell || activatingAbility) && checkCanPay);
+			return (prioritised || castingSpell || activatingAbility) && checkCanPay;
+		}
+		return false;
+	}
+
+	boolean checkCanCast(IsPlayer p, MagicSpell ms) {
+		final boolean isActivePlayer = isPlayerActive(p);
+		final boolean currentStepIsMain = getCurrentPhase().isMain();
+		final boolean stackEmpty = magicStack.isEmpty();
+		LOGGER.debug("{} checkCanCast({}, {}) = {}", this, p, ms, (isActivePlayer && currentStepIsMain && stackEmpty));
+		return isActivePlayer && currentStepIsMain && stackEmpty;
+	}
+
+	boolean checkCanPlayLandCard(IsPlayer p) {
+		final boolean isActivePlayer = isPlayerActive(p);
+		final boolean currentStepIsMain = getCurrentPhase().isMain();
+		final boolean stackEmpty = magicStack.isEmpty();
+		final boolean landFlag = !getPlayerActive().getFlagPlayedLand();
+		LOGGER.debug("{} checkCanPlayLandCard({}) = {}", this, p,
+				(isActivePlayer && currentStepIsMain && landFlag && stackEmpty));
+		return isActivePlayer && currentStepIsMain && landFlag && stackEmpty;
+	}
+
+	/**
+	 * Fügt dem Spieler einen neuen Angriff auf ihn oder einen von ihm
+	 * kontrollierten Planeswalker hinzu.
+	 *
+	 * @param attack
+	 *            ein Angriff kapselt den Angreifer und das Angriffziel.
+	 */
+	void declareAttacker(Attack attack) {
+		propertyListAttacks.add(attack);
+	}
+
+	void declareBlocker(int attackIndex, MagicPermanent blocker) {
+		propertyListAttacks.get(attackIndex).blockerAdd(blocker);
+	}
+
+	List<MagicPermanent> getCardsBattlefield() {
+		return zoneBattlefield.getAll();
+	}
+
 	boolean getFlagNeedPlayerInput() {
 		return propertyFlagNeedPlayerInput().get();
 	}
 
-	@Override
-	public IntegerProperty propertyTurnNumber() {
-		return getCurrentTurn().propertyTurnNumber();
+	List<Attack> getListAttacks() {
+		return propertyListAttacks.get();
 	}
 
-	@Override
-	public ObjectProperty<Phase> propertyCurrentPhase() {
-		return getCurrentTurn().propertyCurrentPhase();
+	/**
+	 * Liefert eine Liste aller kontrollierten Karten auf dem Spielfeld.
+	 *
+	 * @return eine Liste aller kontrollierten Karten auf dem Spielfeld.
+	 */
+
+	List<MagicPermanent> getListControlledCards(IsPlayer player) {
+		return zoneBattlefield.getAll(player.getPlayerType());
 	}
 
-	@Override
-	public ObjectProperty<IsPlayer> propertyPlayerActive() {
-		return getCurrentTurn().propertyPlayerActive();
+	IsPlayer getPlayerActive() {
+		return getCurrentTurn().getPlayerActive();
 	}
 
-	@Override
-	public ObjectProperty<IsPlayer> propertyPlayerPrioritized() {
-		return getCurrentTurn().propertyPlayerPrioritized();
+	IsPlayer getPlayerNonactive() {
+		return getCurrentTurn().getPlayerNonactive();
 	}
 
-	@Override
-	public ObjectProperty<Step> propertyCurrentStep() {
-		return getCurrentPhase().propertyCurrentStep();
+	int getTotalAttackers() {
+		return propertyListAttacks.size();
+	}
+
+	void pushSpell(MagicSpell magicSpell) {
+		magicSpell.addZone(ZoneType.STACK);
+		magicStack.push(magicSpell);
+	}
+
+	void removeCard(MagicPermanent magicPermanent, ZoneType zoneType) {
+		// TODO: Implementieren
+	}
+
+	void resetFlagsPassedPriority() {
+		getPlayerActive().setFlagPassedPriority(false);
+		getPlayerNonactive().setFlagPassedPriority(false);
+	}
+
+	/**
+	 * Setzt den Spielerstatus nach dem Beschwören eines Zaubers, dem Aktivieren
+	 * einer Fähigkeit, dem Ausführen einer Spezialhandlung oder dem Abgeben der
+	 * Priorität zurück auf den ursprünglichen "aktiv"/"nichtaktiv"-Status.
+	 *
+	 * @param player
+	 *            Der Spieler, dessen Status zurückgesetzt werden soll.
+	 */
+	void resetPlayerState(IsPlayer player) {
+		final boolean isCombatPhase = getCurrentPhase().isCombatPhase();
+		if (isPlayerActive(player)) {
+			player.setPlayerState(isCombatPhase ? PlayerState.ATTACKING : PlayerState.ACTIVE);
+		} else {
+			player.setPlayerState(isCombatPhase ? PlayerState.DEFENDING : PlayerState.NONACTIVE);
+		}
+	}
+
+	void setFlagIsMatchRunning(boolean flagIsMatchRunning) {
+		LOGGER.trace("{} setFlagIsMatchRunning() -> {}", this, flagIsMatchRunning);
+		this.propertyMatchRunning.set(flagIsMatchRunning);
+	}
+
+	void setFlagNeedPlayerInput(boolean flagNeedPlayerInput) {
+		LOGGER.debug("{} setFlagNeedPlayerInput() -> {}", this, flagNeedPlayerInput);
+		this.propertyNeedPlayerInput.set(flagNeedPlayerInput);
+	}
+
+	void skipStepCombatDamage() {
+		getCurrentTurn().skipStepCombatDamage();
+	}
+
+	void skipStepDeclareBlockers() {
+		getCurrentTurn().skipStepDeclareBlockers();
 	}
 }

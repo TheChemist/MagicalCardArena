@@ -11,12 +11,9 @@ import de.mca.model.enums.PhaseType;
 import de.mca.model.enums.StepType;
 import de.mca.model.enums.TurnBasedActionType;
 import javafx.beans.property.BooleanProperty;
-import javafx.beans.property.ListProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
-import javafx.beans.property.SimpleListProperty;
 import javafx.beans.property.SimpleObjectProperty;
-import javafx.collections.FXCollections;
 
 /**
  *
@@ -33,6 +30,10 @@ public class Phase {
 	 * Speichert den Iterator, der über die Spielschritte läuft.
 	 */
 	private ListIterator<Step> iteratorSteps;
+	/**
+	 * Speichert die Spielschritte der Phase.
+	 */
+	private final List<Step> listSteps;
 	/**
 	 * Speichert den Phasentyp.
 	 */
@@ -53,24 +54,19 @@ public class Phase {
 	 * Zeigt an, ob die Phase übersprungen wird.
 	 */
 	private final BooleanProperty propertyFlagPhaseSkipped;
-	/**
-	 * Speichert die Spielschritte der Phase.
-	 */
-	// TODO: Muss kein Property sein.
-	private final ListProperty<Step> propertyListSteps;
 
 	@Inject
 	Phase(EventBus eventBus, @Assisted PhaseType phaseType, @Assisted List<Step> listSteps) {
 		this.eventBus = eventBus;
+		this.listSteps = listSteps;
 		this.phaseType = phaseType;
 
 		propertyCurrentStep = new SimpleObjectProperty<>(listSteps.get(0));
 		propertyFlagPhaseRepeated = new SimpleBooleanProperty(false);
 		propertyFlagPhaseRunning = new SimpleBooleanProperty(false);
 		propertyFlagPhaseSkipped = new SimpleBooleanProperty(false);
-		propertyListSteps = new SimpleListProperty<>(FXCollections.observableArrayList(listSteps));
 
-		iteratorSteps = this.propertyListSteps.listIterator();
+		iteratorSteps = this.listSteps.listIterator();
 	}
 
 	@Override
@@ -116,8 +112,8 @@ public class Phase {
 
 	void phaseBegin() {
 		setFlagPhaseRunning(true);
-		iteratorSteps = propertyListSteps.listIterator();
-		propertyCurrentStep.set(propertyListSteps.get(0));
+		iteratorSteps = listSteps.listIterator();
+		propertyCurrentStep.set(listSteps.get(0));
 	}
 
 	void phaseEnd() {
@@ -125,6 +121,10 @@ public class Phase {
 		if (isMain()) {
 			fireEndTBA();
 		}
+	}
+
+	ObjectProperty<Step> propertyCurrentStep() {
+		return propertyCurrentStep;
 	}
 
 	void setCurrentStep() {
@@ -158,15 +158,11 @@ public class Phase {
 	 *            Type des Spielschitts, der übersprungen werden soll.
 	 */
 	void stepSkip(StepType stepType) {
-		for (final Step step : propertyListSteps) {
+		for (final Step step : listSteps) {
 			if (step.equals(stepType)) {
 				step.setFlagSkipped(true);
 				return;
 			}
 		}
-	}
-
-	ObjectProperty<Step> propertyCurrentStep() {
-		return propertyCurrentStep;
 	}
 }

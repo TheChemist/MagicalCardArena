@@ -1,12 +1,12 @@
 package de.mca.model;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.eventbus.AllowConcurrentEvents;
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
 import com.google.inject.Inject;
@@ -28,6 +28,9 @@ import de.mca.model.enums.ZoneType;
 import de.mca.model.interfaces.IsAttackTarget;
 import de.mca.model.interfaces.IsManaMap;
 import de.mca.model.interfaces.IsPlayer;
+import javafx.beans.property.SetProperty;
+import javafx.beans.property.SimpleSetProperty;
+import javafx.collections.FXCollections;
 
 public class RuleEnforcer {
 
@@ -47,6 +50,11 @@ public class RuleEnforcer {
 	 * Speichert das Match.
 	 */
 	private Match match;
+	/**
+	 * Sammelts StateBasedActions. Diese werden zu bestimmten Zeitpunkten
+	 * abgearbeitet.
+	 */
+	private final SetProperty<StateBasedAction> setStateBasedActions;
 
 	@Inject
 	public RuleEnforcer(EventBus eventBus, FactoryMagicPermanent magicPermanentFactory,
@@ -54,255 +62,8 @@ public class RuleEnforcer {
 		eventBus.register(this);
 		this.magicPermanentFactory = magicPermanentFactory;
 		this.magicSpellFactory = magicSpellFactory;
-	}
 
-	public void actionActivateCharacteristicAbility(IsPlayer player, CharacteristicAbility activatedAbility) {
-		LOGGER.debug("{} actionActivateActivatedAbility({}, {})", this, player, activatedAbility);
-		player.setPlayerState(PlayerState.ACTIVATING_ABILITY);
-		activatedAbility.generateEffects();
-		switch (activatedAbility.getAdditionalCostType()) {
-		case NO_ADDITIONAL_COST:
-			return;
-		case TAP:
-			((MagicPermanent) activatedAbility.getSource()).setFlagTapped(true);
-			break;
-		}
-	}
-
-	public void actionBeginDeclareAttackers(IsPlayer player) {
-		LOGGER.debug("{} actionBeginDeclareAttackers({})", this, player);
-		player.setFlagDeclareAttackers(true);
-
-		match.setFlagNeedPlayerInput(true);
-	}
-
-	public void actionBeginDeclareBlockers(IsPlayer player) {
-		LOGGER.debug("{} actionBeginDeclareAttackers({})", this, player);
-		player.setFlagDeclareBlockers(true);
-
-		match.setFlagNeedPlayerInput(true);
-	}
-
-	public void actionBeginPayment(IsPlayer player) {
-		LOGGER.debug("{} beginPayment({})", this, player);
-		player.setPlayerState(PlayerState.PAYING);
-
-		final IsManaMap manaCostAlreadyPaid = player.getManaCostAlreadyPaid();
-		final IsManaMap manaCostGoal = player.getManaCostAlreadyPaid();
-		final IsManaMap manaPool = player.getManaPool();
-
-		final ColorType clm = ColorType.NONE;
-		// Bezahle farbloses mit farblosem Mana
-		int need = manaCostGoal.get(clm);
-		int have = manaPool.get(clm);
-		int value = have > need ? need : have;
-		if (have > 0) {
-			manaCostAlreadyPaid.add(clm, value);
-			player.removeMana(clm, value);
-		}
-		// Bezahle farbiges mit farbigem Mana
-		for (final ColorType key : manaCostGoal.getKeySet()) {
-			if (manaPool.containsKey(key)) {
-				need = manaCostGoal.get(key);
-				have = manaPool.get(key);
-				value = have > need ? need : have;
-				manaCostAlreadyPaid.add(key, value);
-				player.removeMana(key, value);
-			}
-		}
-		// Bezahle fabloses mit farbigem Mana
-		need = manaCostGoal.get(clm) - manaCostAlreadyPaid.get(clm);
-		if (need > 0) {
-			final int manaLeft = manaPool.getTotalColoredMana();
-			if (need >= manaLeft) {
-				manaCostAlreadyPaid.add(clm, manaLeft);
-				player.removeManaAll();
-			} else {
-				for (final ColorType key : manaPool.getKeySet()) {
-					value = manaPool.get(key);
-					manaCostAlreadyPaid.add(clm, value);
-					player.removeMana(key, value);
-				}
-			}
-		}
-	}
-
-	/**
-	 * Der Spieler legt eine Karte aus dem Spiel in den Friedhof ab.
-	 *
-	 * @param card
-	 *            die Karte, die aus der Kampfzone in den Friedhof abgelegt
-	 *            wird.
-	 */
-	public void actionBury(IsPlayer player, MagicPermanent magicPermanent) {
-		LOGGER.debug("{} actionBury({}, {})", this, player, magicPermanent);
-		match.getZoneBattlefield().remove(magicPermanent);
-		player.addCard(new MagicCard(magicPermanent), ZoneType.GRAVEYARD);
-	}
-
-	/**
-	 * Diese Methode wird vom Spiel aufgerufen, nachdem der Spieler eine Karte
-	 * gewählt hat, die in diesem Moment regelkonform gespielt werden kann.
-	 * Beschwört einen Zauberspruch (rule = 601.).
-	 *
-	 * @param magicCard
-	 *            Die Karte, die als Zauberspruch auf den Stack gespielt wird.
-	 */
-	public void actionCastSpell(IsPlayer player, MagicCard magicCard) {
-		LOGGER.debug("{} actionCastSpell({}, {})", this, player, magicCard);
-		player.setPlayerState(PlayerState.CASTING_SPELL);
-
-		final MagicSpell spell = magicSpellFactory.create(magicCard);
-		spell.addZone(ZoneType.STACK);
-
-		player.removeCard(magicCard, ZoneType.HAND);
-		match.getMagicStack().push(spell);
-	}
-
-	/**
-	 * Der Spieler legt eine Karte aus der Hand in den Friedhof ab.
-	 *
-	 * @param card
-	 *            Die abzulegende Karte.
-	 */
-	public void actionDiscard(IsPlayer player, MagicCard magicCard) {
-		LOGGER.debug("{} actionDiscard({}, {})", this, player, magicCard);
-		player.removeCard(magicCard, ZoneType.HAND);
-		player.addCard(magicCard, ZoneType.GRAVEYARD);
-	}
-
-	/**
-	 * Der Spieler legt alle verbleibende Karten aus der Hand in den Friedhof
-	 * ab.
-	 */
-	public void actionDiscardAll(IsPlayer player) {
-		LOGGER.debug("{} actionDiscardAll({})", this, player);
-		final List<MagicCard> cardList = player.getCardsHand();
-		player.removeAllCards(ZoneType.HAND);
-		player.addAllCards(cardList, ZoneType.GRAVEYARD);
-	}
-
-	/**
-	 * Der Spieler legt eine zufällige Karte aus der Hand in den Friedhof ab.
-	 */
-	public void actionDiscardRandom(IsPlayer player) {
-		LOGGER.debug("{} actionDiscardRandom({})", this, player);
-		final List<MagicCard> zoneHand = player.getCardsHand();
-		actionDiscard(player, zoneHand.get(new Random().nextInt(zoneHand.size())));
-	}
-
-	/**
-	 * Der Spieler legt n zufällige Karten aus der Hand in den Friedhof ab.
-	 *
-	 * @param howMany
-	 *            die Anzahl abzulegender Karten.
-	 */
-	public void actionDiscardRandom(IsPlayer player, int howMany) {
-		LOGGER.debug("{} actionDiscardRandom({}, {})", this, player, howMany);
-		if (checkCanDiscard(player, howMany)) {
-			for (int i = 0; i < howMany; i++) {
-				actionDiscardRandom(player);
-			}
-		} else {
-			actionDiscardAll(player);
-		}
-	}
-
-	/**
-	 * Der Spieler zieht eine Karte.
-	 */
-	public void actionDraw(IsPlayer player) {
-		LOGGER.debug("{} actionDraw({})", this, player);
-		player.actionDraw();
-	}
-
-	/**
-	 * Der Spieler zieht n Karten.
-	 *
-	 * @param howMany
-	 *            die Anzahl zu ziehender Karten.
-	 */
-	public void actionDraw(IsPlayer player, int howMany) {
-		LOGGER.debug("{} actionDraw({}, {})", this, player, howMany);
-		for (int i = 0; i < howMany; i++) {
-			actionDraw(player);
-		}
-	}
-
-	/**
-	 * Der Spieler zieht alle verbleibenden Karten.
-	 */
-	public void actionDrawAll(IsPlayer player) {
-		LOGGER.debug("{} actionDrawAll({})", this, player);
-		final List<MagicCard> cardList = player.getLibraryCards();
-		player.removeAllCards(ZoneType.LIBRARY);
-		player.addAllCards(cardList, ZoneType.HAND);
-	}
-
-	public void actionEndDeclareAttackers(IsPlayer player) {
-		LOGGER.debug("{} actionEndDeclareAttackers({})", this, player);
-		player.setFlagDeclareAttackers(false);
-	}
-
-	public void actionEndDeclareBlockers(IsPlayer player) {
-		LOGGER.debug("{} actionEndDeclareBlockers({})", this, player);
-		player.setFlagDeclareBlockers(false);
-	}
-
-	public void actionEndPayment(IsPlayer player) {
-		LOGGER.debug("{} endPayment()", this);
-		player.setPlayerState(PlayerState.CASTING_SPELL);
-		player.setManaCostAlreadyPaid(new ManaMapDefault());
-		player.setManaCostGoal(new ManaMapDefault());
-	}
-
-	/**
-	 * Verbannt eine Karte aus der Hand ins Exil.
-	 *
-	 * @param card
-	 *            Die zu verbannende Karte.
-	 */
-	public void actionExile(IsPlayer player, MagicCard magicCard) {
-		LOGGER.debug("{} actionExile({}, {})", this, player, magicCard);
-		player.removeCard(magicCard, ZoneType.HAND);
-		match.getZoneExile().add(magicCard);
-	}
-
-	/**
-	 * Verbannt ein Permanent aus dem Spielfeld ins Exil.
-	 *
-	 * @param permanent
-	 *            Das zu verbannende Permanent.
-	 */
-	public void actionExile(MagicPermanent magicPermanent) {
-		LOGGER.debug("{} actionExile({})", this, magicPermanent);
-		match.getZoneBattlefield().remove(magicPermanent);
-		match.getZoneExile().add(new MagicCard(magicPermanent));
-	}
-
-	public void actionPassPriority(IsPlayer player) {
-		LOGGER.debug("{} actionPassPriority({})", this, player);
-		player.setFlagPassedPriority(true);
-		match.resetPlayerState(player);
-		match.setFlagNeedPlayerInput(false);
-	}
-
-	public void actionPlayLand(IsPlayer player, MagicCard landCard) {
-		LOGGER.debug("{} actionPlayLand({}, {})", this, player, landCard);
-		player.setPlayerState(PlayerState.TAKING_SPECIAL_ACTION);
-		player.setFlagPlayedLand(true);
-		player.removeCard(landCard, ZoneType.HAND);
-
-		match.getZoneBattlefield().add(magicPermanentFactory.create(landCard));
-
-		match.resetFlagsPassedPriority();
-		match.resetPlayerState(player);
-		match.setFlagNeedPlayerInput(true);
-	}
-
-	public boolean checkIsPaid(IsPlayer player) {
-		LOGGER.debug("{} checkIsPaid({})", this, player);
-		return player.getManaCostGoal().equals(player.getManaCostAlreadyPaid());
+		setStateBasedActions = new SimpleSetProperty<>(FXCollections.observableSet(new HashSet<>()));
 	}
 
 	@Subscribe
@@ -337,7 +98,6 @@ public class RuleEnforcer {
 	}
 
 	@Subscribe
-	@AllowConcurrentEvents
 	public void examinePACastSpell(PACastSpell playerActionCastSpell) {
 		LOGGER.debug("{} examinePACastSpell({})", this, playerActionCastSpell);
 		final IsPlayer player = playerActionCastSpell.getSource();
@@ -376,7 +136,6 @@ public class RuleEnforcer {
 	}
 
 	@Subscribe
-	@AllowConcurrentEvents
 	public void examinePlayerAction(PlayerAction playerAction) {
 		LOGGER.debug("{} examinePlayerAction({})", this, playerAction);
 		final IsPlayer player = playerAction.getSource();
@@ -390,8 +149,8 @@ public class RuleEnforcer {
 		case END_DECLARE_ATTACKERS:
 			actionEndDeclareAttackers(player);
 			if (match.getTotalAttackers() == 0) {
-				match.getCurrentTurn().skipStepDeclareBlockers();
-				match.getCurrentTurn().skipStepCombatDamage();
+				match.skipStepDeclareBlockers();
+				match.skipStepCombatDamage();
 			}
 			break;
 		case END_DECLARE_BLOCKERS:
@@ -420,7 +179,7 @@ public class RuleEnforcer {
 	@Subscribe
 	public void examineStateBasedAction(StateBasedAction stateBasedAction) {
 		LOGGER.debug("{} examineStateBasedAction({})", this, stateBasedAction);
-		match.addStateBasedAction(stateBasedAction);
+		setStateBasedActions.add(stateBasedAction);
 	}
 
 	@Subscribe
@@ -434,12 +193,12 @@ public class RuleEnforcer {
 			playerNonactive.setPlayerState(PlayerState.DEFENDING);
 			break;
 		case CLEANUP:
-			for (final MagicPermanent mp : match.getZoneBattlefield().getAll()) {
+			for (final MagicPermanent mp : match.getCardsBattlefield()) {
 				mp.setDamage(0);
 			}
 			break;
 		case COMBAT_DAMAGE_ASSIGNMENT:
-			for (final Attack attack : match.propertyListAttacks()) {
+			for (final Attack attack : match.getListAttacks()) {
 				final MagicPermanent attacker = attack.getSource();
 				final IsAttackTarget attackTarget = attack.getTarget();
 				if (attacker.isFlagBlocked()) {
@@ -494,7 +253,7 @@ public class RuleEnforcer {
 			}
 			break;
 		case DECLARE_DAMAGE_ASSIGNMENT_ORDER_ATTACKER:
-			for (final Attack attack : match.propertyListAttacks()) {
+			for (final Attack attack : match.getListAttacks()) {
 				final List<MagicPermanent> blockers = attack.propertyListBlockers();
 				if (attack.getSource().isFlagBlocked() && blockers.size() > 1) {
 					match.setFlagNeedPlayerInput(true);
@@ -510,18 +269,242 @@ public class RuleEnforcer {
 		}
 	}
 
-	public void setMatch(Match match) {
-		this.match = match;
-	}
-
 	@Override
 	public String toString() {
 		return match.toString();
 	}
 
+	private void actionActivateCharacteristicAbility(IsPlayer player, CharacteristicAbility activatedAbility) {
+		LOGGER.debug("{} actionActivateActivatedAbility({}, {})", this, player, activatedAbility);
+		player.setPlayerState(PlayerState.ACTIVATING_ABILITY);
+		activatedAbility.generateEffects();
+		switch (activatedAbility.getAdditionalCostType()) {
+		case NO_ADDITIONAL_COST:
+			return;
+		case TAP:
+			((MagicPermanent) activatedAbility.getSource()).setFlagTapped(true);
+			break;
+		}
+	}
+
+	private void actionBeginDeclareAttackers(IsPlayer player) {
+		LOGGER.debug("{} actionBeginDeclareAttackers({})", this, player);
+		player.setFlagDeclareAttackers(true);
+
+		match.setFlagNeedPlayerInput(true);
+	}
+
+	private void actionBeginDeclareBlockers(IsPlayer player) {
+		LOGGER.debug("{} actionBeginDeclareAttackers({})", this, player);
+		player.setFlagDeclareBlockers(true);
+
+		match.setFlagNeedPlayerInput(true);
+	}
+
+	private void actionBeginPayment(IsPlayer player) {
+		LOGGER.debug("{} beginPayment({})", this, player);
+		player.setPlayerState(PlayerState.PAYING);
+
+		final IsManaMap manaCostAlreadyPaid = player.getManaCostAlreadyPaid();
+		final IsManaMap manaCostGoal = player.getManaCostAlreadyPaid();
+		final IsManaMap manaPool = player.getManaPool();
+
+		final ColorType clm = ColorType.NONE;
+		// Bezahle farbloses mit farblosem Mana
+		int need = manaCostGoal.get(clm);
+		int have = manaPool.get(clm);
+		int value = have > need ? need : have;
+		if (have > 0) {
+			manaCostAlreadyPaid.add(clm, value);
+			player.removeMana(clm, value);
+		}
+		// Bezahle farbiges mit farbigem Mana
+		for (final ColorType key : manaCostGoal.getKeySet()) {
+			if (manaPool.containsKey(key)) {
+				need = manaCostGoal.get(key);
+				have = manaPool.get(key);
+				value = have > need ? need : have;
+				manaCostAlreadyPaid.add(key, value);
+				player.removeMana(key, value);
+			}
+		}
+		// Bezahle fabloses mit farbigem Mana
+		need = manaCostGoal.get(clm) - manaCostAlreadyPaid.get(clm);
+		if (need > 0) {
+			final int manaLeft = manaPool.getTotalColoredMana();
+			if (need >= manaLeft) {
+				manaCostAlreadyPaid.add(clm, manaLeft);
+				player.removeManaAll();
+			} else {
+				for (final ColorType key : manaPool.getKeySet()) {
+					value = manaPool.get(key);
+					manaCostAlreadyPaid.add(clm, value);
+					player.removeMana(key, value);
+				}
+			}
+		}
+	}
+
+	/**
+	 * Der Spieler legt eine Karte aus dem Spiel in den Friedhof ab.
+	 *
+	 * @param card
+	 *            die Karte, die aus der Kampfzone in den Friedhof abgelegt
+	 *            wird.
+	 */
+	private void actionBury(IsPlayer player, MagicPermanent magicPermanent) {
+		LOGGER.debug("{} actionBury({}, {})", this, player, magicPermanent);
+		match.removeCard(magicPermanent, ZoneType.BATTLEFIELD);
+		player.addCard(new MagicCard(magicPermanent), ZoneType.GRAVEYARD);
+	}
+
+	/**
+	 * Diese Methode wird vom Spiel aufgerufen, nachdem der Spieler eine Karte
+	 * gewählt hat, die in diesem Moment regelkonform gespielt werden kann.
+	 * Beschwört einen Zauberspruch (rule = 601.).
+	 *
+	 * @param magicCard
+	 *            Die Karte, die als Zauberspruch auf den Stack gespielt wird.
+	 */
+	private void actionCastSpell(IsPlayer player, MagicCard magicCard) {
+		LOGGER.debug("{} actionCastSpell({}, {})", this, player, magicCard);
+		player.setPlayerState(PlayerState.CASTING_SPELL);
+
+		player.removeCard(magicCard, ZoneType.HAND);
+		match.pushSpell(magicSpellFactory.create(magicCard));
+	}
+
 	private void actionConcede() {
 		match.setFlagNeedPlayerInput(false);
 		match.setFlagIsMatchRunning(false);
+	}
+
+	/**
+	 * Der Spieler legt eine Karte aus der Hand in den Friedhof ab.
+	 *
+	 * @param card
+	 *            Die abzulegende Karte.
+	 */
+	private void actionDiscard(IsPlayer player, MagicCard magicCard) {
+		LOGGER.debug("{} actionDiscard({}, {})", this, player, magicCard);
+		player.removeCard(magicCard, ZoneType.HAND);
+		player.addCard(magicCard, ZoneType.GRAVEYARD);
+	}
+
+	/**
+	 * Der Spieler legt alle verbleibende Karten aus der Hand in den Friedhof
+	 * ab.
+	 */
+	private void actionDiscardAll(IsPlayer player) {
+		LOGGER.debug("{} actionDiscardAll({})", this, player);
+		final List<MagicCard> cardList = player.getCardsHand();
+		player.removeAllCards(ZoneType.HAND);
+		player.addAllCards(cardList, ZoneType.GRAVEYARD);
+	}
+
+	/**
+	 * Der Spieler legt eine zufällige Karte aus der Hand in den Friedhof ab.
+	 */
+	private void actionDiscardRandom(IsPlayer player) {
+		LOGGER.debug("{} actionDiscardRandom({})", this, player);
+		final List<MagicCard> zoneHand = player.getCardsHand();
+		actionDiscard(player, zoneHand.get(new Random().nextInt(zoneHand.size())));
+	}
+
+	/**
+	 * Der Spieler legt n zufällige Karten aus der Hand in den Friedhof ab.
+	 *
+	 * @param howMany
+	 *            die Anzahl abzulegender Karten.
+	 */
+	private void actionDiscardRandom(IsPlayer player, int howMany) {
+		LOGGER.debug("{} actionDiscardRandom({}, {})", this, player, howMany);
+		if (checkCanDiscard(player, howMany)) {
+			for (int i = 0; i < howMany; i++) {
+				actionDiscardRandom(player);
+			}
+		} else {
+			actionDiscardAll(player);
+		}
+	}
+
+	/**
+	 * Der Spieler zieht eine Karte.
+	 */
+	private void actionDraw(IsPlayer player) {
+		LOGGER.debug("{} actionDraw({})", this, player);
+		player.actionDraw();
+	}
+
+	/**
+	 * Der Spieler zieht alle verbleibenden Karten.
+	 */
+	private void actionDrawAll(IsPlayer player) {
+		LOGGER.debug("{} actionDrawAll({})", this, player);
+		final List<MagicCard> cardList = player.getLibraryCards();
+		player.removeAllCards(ZoneType.LIBRARY);
+		player.addAllCards(cardList, ZoneType.HAND);
+	}
+
+	private void actionEndDeclareAttackers(IsPlayer player) {
+		LOGGER.debug("{} actionEndDeclareAttackers({})", this, player);
+		player.setFlagDeclareAttackers(false);
+	}
+
+	private void actionEndDeclareBlockers(IsPlayer player) {
+		LOGGER.debug("{} actionEndDeclareBlockers({})", this, player);
+		player.setFlagDeclareBlockers(false);
+	}
+
+	private void actionEndPayment(IsPlayer player) {
+		LOGGER.debug("{} endPayment()", this);
+		player.setPlayerState(PlayerState.CASTING_SPELL);
+		player.setManaCostAlreadyPaid(new ManaMapDefault());
+		player.setManaCostGoal(new ManaMapDefault());
+	}
+
+	/**
+	 * Verbannt eine Karte aus der Hand ins Exil.
+	 *
+	 * @param card
+	 *            Die zu verbannende Karte.
+	 */
+	private void actionExile(IsPlayer player, MagicCard magicCard) {
+		LOGGER.debug("{} actionExile({}, {})", this, player, magicCard);
+		player.removeCard(magicCard, ZoneType.HAND);
+		match.addCard(magicCard, ZoneType.EXILE);
+	}
+
+	/**
+	 * Verbannt ein Permanent aus dem Spielfeld ins Exil.
+	 *
+	 * @param permanent
+	 *            Das zu verbannende Permanent.
+	 */
+	private void actionExile(MagicPermanent magicPermanent) {
+		LOGGER.debug("{} actionExile({})", this, magicPermanent);
+		match.removeCard(magicPermanent, ZoneType.BATTLEFIELD);
+		match.addCard(new MagicCard(magicPermanent), ZoneType.EXILE);
+	}
+
+	private void actionPassPriority(IsPlayer player) {
+		LOGGER.debug("{} actionPassPriority({})", this, player);
+		player.setFlagPassedPriority(true);
+		match.resetPlayerState(player);
+		match.setFlagNeedPlayerInput(false);
+	}
+
+	private void actionPlayLand(IsPlayer player, MagicCard landCard) {
+		LOGGER.debug("{} actionPlayLand({}, {})", this, player, landCard);
+		player.setPlayerState(PlayerState.TAKING_SPECIAL_ACTION);
+		player.setFlagPlayedLand(true);
+
+		player.removeCard(landCard, ZoneType.HAND);
+		match.addCard(magicPermanentFactory.create(landCard), ZoneType.BATTLEFIELD);
+
+		match.resetFlagsPassedPriority();
+		match.resetPlayerState(player);
+		match.setFlagNeedPlayerInput(true);
 	}
 
 	/**
@@ -531,6 +514,53 @@ public class RuleEnforcer {
 	 */
 	private boolean checkCanDiscard(IsPlayer player, int howMany) {
 		return player.propertyHandSize().get() >= howMany;
+	}
+
+	private boolean checkIsPaid(IsPlayer player) {
+		LOGGER.debug("{} checkIsPaid({})", this, player);
+		return player.getManaCostGoal().equals(player.getManaCostAlreadyPaid());
+	}
+
+	/**
+	 * Der Spieler zieht n Karten.
+	 *
+	 * @param howMany
+	 *            die Anzahl zu ziehender Karten.
+	 */
+	void actionDraw(IsPlayer player, int howMany) {
+		LOGGER.debug("{} actionDraw({}, {})", this, player, howMany);
+		for (int i = 0; i < howMany; i++) {
+			actionDraw(player);
+		}
+	}
+
+	/**
+	 * Arbeitet die StateBasedActions ab, die sich während der Zeit seit der
+	 * letzten Prüfung angesammelt haben. Wird aufgerufen, bevor die Priorität
+	 * neu bestimmt wird.
+	 */
+	void processStateBasedActions() {
+		LOGGER.debug("{} processStateBasedActions()", this);
+		for (final StateBasedAction sba : setStateBasedActions) {
+			switch (sba.getStateBasedActionType()) {
+			case CREATURE_TOUGHNESS_ZERO:
+				final SBACreatureToughnessZero sbactz = (SBACreatureToughnessZero) sba;
+				actionBury(match.getPlayer(sbactz.getPlayerControlling()), (MagicPermanent) sba.getSource());
+				break;
+			case PLAYER_CANT_DRAW:
+				match.setFlagIsMatchRunning(false);
+				break;
+			case PLAYER_LIFE_ZERO:
+				match.setFlagIsMatchRunning(false);
+				break;
+			default:
+				break;
+			}
+		}
+	}
+
+	void setMatch(Match match) {
+		this.match = match;
 	}
 
 }

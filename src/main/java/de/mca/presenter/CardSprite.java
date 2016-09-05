@@ -10,10 +10,10 @@ import javafx.scene.image.Image;
 
 /**
  * 
- * @author Maxiilian Werling
+ * @author Maximilian Werling
  *
  */
-public class Sprite {
+public class CardSprite {
 
 	private final MagicCard card;
 	private DoubleProperty height;
@@ -22,7 +22,7 @@ public class Sprite {
 	private double positionY;
 	private DoubleProperty width;
 
-	public Sprite(MagicCard card) {
+	public CardSprite(MagicCard card) {
 		this.card = card;
 		positionX = 0;
 		positionY = 0;
@@ -41,7 +41,7 @@ public class Sprite {
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		Sprite other = (Sprite) obj;
+		CardSprite other = (CardSprite) obj;
 		if (this.card == null) {
 			if (other.card != null)
 				return false;
