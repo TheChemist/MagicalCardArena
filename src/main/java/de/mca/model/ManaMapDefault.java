@@ -6,6 +6,7 @@ import de.mca.model.enums.ColorType;
 import de.mca.model.interfaces.IsManaMap;
 import javafx.beans.property.MapProperty;
 import javafx.beans.property.SimpleMapProperty;
+import javafx.collections.FXCollections;
 import javafx.collections.ObservableMap;
 
 /**
@@ -28,7 +29,7 @@ public class ManaMapDefault implements IsManaMap {
 	private final MapProperty<ColorType, Integer> manaMap;
 
 	public ManaMapDefault() {
-		this.manaMap = new SimpleMapProperty<>();
+		this.manaMap = new SimpleMapProperty<>(FXCollections.observableHashMap());
 	}
 
 	public ManaMapDefault(ObservableMap<ColorType, Integer> manaMap) {
@@ -44,9 +45,7 @@ public class ManaMapDefault implements IsManaMap {
 
 	@Override
 	public void addAll(IsManaMap manaMap) {
-		for (final ColorType key : manaMap.getKeySet()) {
-			add(key, manaMap.get(key));
-		}
+		manaMap.getKeySet().forEach(key -> add(key, manaMap.get(key)));
 	}
 
 	@Override

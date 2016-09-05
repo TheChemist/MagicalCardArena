@@ -18,6 +18,7 @@ import de.mca.factories.FactoryPlayer;
 import de.mca.io.FileManager;
 import de.mca.io.ResourceManager;
 import de.mca.model.MagicCard;
+import de.mca.model.enums.ColorType;
 import de.mca.model.enums.PlayerType;
 import de.mca.model.enums.ZoneType;
 import de.mca.model.interfaces.IsMatch;
@@ -31,6 +32,7 @@ import javafx.beans.binding.DoubleExpression;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.collections.ListChangeListener;
+import javafx.collections.MapChangeListener;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
@@ -194,39 +196,63 @@ public class MatchPresenter extends AnimationTimer implements Initializable, IsS
 	@FXML
 	private Label labelComputerAvatar;
 	@FXML
-	private Label labelComputerDeckSize;
-	@FXML
-	private Label labelComputerGraveSize;
-	@FXML
-	private Label labelComputerHandSize;
-	@FXML
 	private Label labelComputerLife;
 	@FXML
 	private Label labelHumanAvatar;
 	@FXML
-	private Label labelHumanDeckSize;
-	@FXML
-	private Label labelHumanGraveSize;
-	@FXML
-	private Label labelHumanHandSize;
-	@FXML
 	private Label labelHumanLife;
-	@FXML
-	private Label labelIconComputerDeckSize;
-	@FXML
-	private Label labelIconComputerGraveSize;
-	@FXML
-	private Label labelIconComputerHandSize;
 	@FXML
 	private Label labelIconComputerLife;
 	@FXML
-	private Label labelIconHumanDeckSize;
-	@FXML
-	private Label labelIconHumanGraveSize;
-	@FXML
-	private Label labelIconHumanHandSize;
-	@FXML
 	private Label labelIconHumanLife;
+	@FXML
+	private Label labelIconHumanBlueMana;
+	@FXML
+	private Label labelIconHumanBlackMana;
+	@FXML
+	private Label labelIconHumanWhiteMana;
+	@FXML
+	private Label labelIconHumanRedMana;
+	@FXML
+	private Label labelIconHumanGreenMana;
+	@FXML
+	private Label labelIconHumanColorlessMana;
+	@FXML
+	private Label labelIconComputerBlueMana;
+	@FXML
+	private Label labelIconComputerBlackMana;
+	@FXML
+	private Label labelIconComputerWhiteMana;
+	@FXML
+	private Label labelIconComputerRedMana;
+	@FXML
+	private Label labelIconComputerGreenMana;
+	@FXML
+	private Label labelIconComputerColorlessMana;
+	@FXML
+	private Label labelHumanBlueMana;
+	@FXML
+	private Label labelHumanBlackMana;
+	@FXML
+	private Label labelHumanWhiteMana;
+	@FXML
+	private Label labelHumanRedMana;
+	@FXML
+	private Label labelHumanGreenMana;
+	@FXML
+	private Label labelHumanColorlessMana;
+	@FXML
+	private Label labelComputerBlueMana;
+	@FXML
+	private Label labelComputerBlackMana;
+	@FXML
+	private Label labelComputerWhiteMana;
+	@FXML
+	private Label labelComputerRedMana;
+	@FXML
+	private Label labelComputerGreenMana;
+	@FXML
+	private Label labelComputerColorlessMana;
 	@Inject
 	private MagicParser magicParser;
 	private IsMatch matchActive;
@@ -413,34 +439,43 @@ public class MatchPresenter extends AnimationTimer implements Initializable, IsS
 		// Binden der Status-Label der Spieler an entsprechende Werte
 		labelComputerAvatar.setGraphic(new AdaptableImageView(avatarComputer, labelComputerAvatar.heightProperty(),
 				labelComputerAvatar.widthProperty()));
-		labelIconComputerDeckSize.setGraphic(new AdaptableImageView(ResourceManager.getIcon("deck.png"),
-				labelIconComputerDeckSize.heightProperty(), labelIconComputerDeckSize.widthProperty()));
-		labelIconComputerGraveSize.setGraphic(new AdaptableImageView(ResourceManager.getIcon("grave.png"),
-				labelIconComputerGraveSize.heightProperty(), labelIconComputerGraveSize.widthProperty()));
-		labelIconComputerHandSize.setGraphic(new AdaptableImageView(ResourceManager.getIcon("hand.png"),
-				labelIconComputerHandSize.heightProperty(), labelIconComputerHandSize.widthProperty()));
 		labelIconComputerLife.setGraphic(new AdaptableImageView(ResourceManager.getIcon("heart.png"),
 				labelIconComputerLife.heightProperty(), labelIconComputerLife.widthProperty()));
 
-		labelComputerDeckSize.textProperty().bind(playerComputer.propertyDeckSize().asString());
-		labelComputerGraveSize.textProperty().bind(playerComputer.propertyGraveSize().asString());
-		labelComputerHandSize.textProperty().bind(playerComputer.propertyHandSize().asString());
+		labelIconComputerBlackMana.setGraphic(new AdaptableImageView(ResourceManager.getIcon("b.png"),
+				labelIconComputerBlackMana.heightProperty(), labelIconComputerBlackMana.widthProperty()));
+		labelIconComputerBlueMana.setGraphic(new AdaptableImageView(ResourceManager.getIcon("u.png"),
+				labelIconComputerBlueMana.heightProperty(), labelIconComputerBlueMana.widthProperty()));
+		labelIconComputerColorlessMana.setGraphic(new AdaptableImageView(ResourceManager.getIcon("1.png"),
+				labelIconComputerColorlessMana.heightProperty(), labelIconComputerColorlessMana.widthProperty()));
+		labelIconComputerGreenMana.setGraphic(new AdaptableImageView(ResourceManager.getIcon("g.png"),
+				labelIconComputerGreenMana.heightProperty(), labelIconComputerGreenMana.widthProperty()));
+		labelIconComputerRedMana.setGraphic(new AdaptableImageView(ResourceManager.getIcon("r.png"),
+				labelIconComputerRedMana.heightProperty(), labelIconComputerRedMana.widthProperty()));
+		labelIconComputerWhiteMana.setGraphic(new AdaptableImageView(ResourceManager.getIcon("w.png"),
+				labelIconComputerWhiteMana.heightProperty(), labelIconComputerWhiteMana.widthProperty()));
+
 		labelComputerLife.textProperty().bind(playerComputer.propertyLife().asString());
 
 		labelHumanAvatar.setGraphic(new AdaptableImageView(avatarHuman, labelHumanAvatar.heightProperty(),
 				labelHumanAvatar.widthProperty()));
-		labelIconHumanDeckSize.setGraphic(new AdaptableImageView(ResourceManager.getIcon("deck.png"),
-				labelIconHumanDeckSize.heightProperty(), labelIconHumanDeckSize.widthProperty()));
-		labelIconHumanGraveSize.setGraphic(new AdaptableImageView(ResourceManager.getIcon("grave.png"),
-				labelIconHumanGraveSize.heightProperty(), labelIconHumanGraveSize.widthProperty()));
-		labelIconHumanHandSize.setGraphic(new AdaptableImageView(ResourceManager.getIcon("hand.png"),
-				labelIconHumanHandSize.heightProperty(), labelIconHumanHandSize.widthProperty()));
+
+		labelIconHumanBlackMana.setGraphic(new AdaptableImageView(ResourceManager.getIcon("b.png"),
+				labelIconHumanBlackMana.heightProperty(), labelIconHumanBlackMana.widthProperty()));
+		labelIconHumanBlueMana.setGraphic(new AdaptableImageView(ResourceManager.getIcon("u.png"),
+				labelIconHumanBlueMana.heightProperty(), labelIconHumanBlueMana.widthProperty()));
+		labelIconHumanColorlessMana.setGraphic(new AdaptableImageView(ResourceManager.getIcon("1.png"),
+				labelIconHumanColorlessMana.heightProperty(), labelIconHumanColorlessMana.widthProperty()));
+		labelIconHumanGreenMana.setGraphic(new AdaptableImageView(ResourceManager.getIcon("g.png"),
+				labelIconHumanGreenMana.heightProperty(), labelIconHumanGreenMana.widthProperty()));
+		labelIconHumanRedMana.setGraphic(new AdaptableImageView(ResourceManager.getIcon("r.png"),
+				labelIconHumanRedMana.heightProperty(), labelIconHumanRedMana.widthProperty()));
+		labelIconHumanWhiteMana.setGraphic(new AdaptableImageView(ResourceManager.getIcon("w.png"),
+				labelIconHumanWhiteMana.heightProperty(), labelIconHumanWhiteMana.widthProperty()));
+
 		labelIconHumanLife.setGraphic(new AdaptableImageView(ResourceManager.getIcon("heart.png"),
 				labelIconHumanLife.heightProperty(), labelIconHumanLife.widthProperty()));
 
-		labelHumanDeckSize.textProperty().bind(playerHuman.propertyDeckSize().asString());
-		labelHumanGraveSize.textProperty().bind(playerHuman.propertyGraveSize().asString());
-		labelHumanHandSize.textProperty().bind(playerHuman.propertyHandSize().asString());
 		labelHumanLife.textProperty().bind(playerHuman.propertyLife().asString());
 
 		// Binden der Zonen an GUI-Elemente
@@ -450,6 +485,47 @@ public class MatchPresenter extends AnimationTimer implements Initializable, IsS
 		bindZone(matchActive.getZoneExile(), spriteListExile);
 		bindZone(playerHuman.getZoneGraveyard(), spriteListHumanGraveyard);
 		bindZone(playerHuman.getZoneHand(), spriteListHumanHand);
+		playerComputer.getManaPool().propertyManaMap().addListener(new MapChangeListener<ColorType, Integer>() {
+
+			@Override
+			public void onChanged(
+					javafx.collections.MapChangeListener.Change<? extends ColorType, ? extends Integer> change) {
+				if (change.getKey().equals(ColorType.BLACK)) {
+					labelComputerBlackMana.setText(change.getMap().get(ColorType.BLACK).toString());
+				} else if (change.getKey().equals(ColorType.BLUE)) {
+					labelComputerBlueMana.setText(change.getMap().get(ColorType.BLUE).toString());
+				} else if (change.getKey().equals(ColorType.GREEN)) {
+					labelComputerGreenMana.setText(change.getMap().get(ColorType.GREEN).toString());
+				} else if (change.getKey().equals(ColorType.NONE)) {
+					labelComputerColorlessMana.setText(change.getMap().get(ColorType.NONE).toString());
+				} else if (change.getKey().equals(ColorType.RED)) {
+					labelComputerRedMana.setText(change.getMap().get(ColorType.RED).toString());
+				} else if (change.getKey().equals(ColorType.WHITE)) {
+					labelComputerWhiteMana.setText(change.getMap().get(ColorType.WHITE).toString());
+				}
+			}
+		});
+		playerHuman.getManaPool().propertyManaMap().addListener(new MapChangeListener<ColorType, Integer>() {
+
+			@Override
+			public void onChanged(
+					javafx.collections.MapChangeListener.Change<? extends ColorType, ? extends Integer> change) {
+				if (change.getKey().equals(ColorType.BLACK)) {
+					labelComputerBlackMana.setText(change.getMap().get(ColorType.BLACK).toString());
+				} else if (change.getKey().equals(ColorType.BLUE)) {
+					labelComputerBlueMana.setText(change.getMap().get(ColorType.BLUE).toString());
+				} else if (change.getKey().equals(ColorType.GREEN)) {
+					labelComputerGreenMana.setText(change.getMap().get(ColorType.GREEN).toString());
+				} else if (change.getKey().equals(ColorType.NONE)) {
+					labelComputerColorlessMana.setText(change.getMap().get(ColorType.NONE).toString());
+				} else if (change.getKey().equals(ColorType.RED)) {
+					labelComputerRedMana.setText(change.getMap().get(ColorType.RED).toString());
+				} else if (change.getKey().equals(ColorType.WHITE)) {
+					labelComputerWhiteMana.setText(change.getMap().get(ColorType.WHITE).toString());
+				}
+			}
+
+		});
 
 		tabComputerGraveyard.textProperty()
 				.bind(Bindings.concat("(").concat(playerComputer.propertyGraveSize().asString()).concat(") ")
@@ -524,10 +600,6 @@ public class MatchPresenter extends AnimationTimer implements Initializable, IsS
 		return factoryMatch.create(playerComputer, playerHuman, nameHuman, nameComputer,
 				magicParser.parseDeckFromPath(FileManager.getDeckPath(deckHuman)),
 				magicParser.parseDeckFromPath(FileManager.getDeckPath(deckComputer)));
-	}
-
-	private IsMatch getMatchActive() {
-		return matchActive;
 	}
 
 	private void setMatchActive(IsMatch matchActive) {
