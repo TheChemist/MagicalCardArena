@@ -28,6 +28,7 @@ import javafx.beans.property.ListProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleListProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
 
 /**
@@ -54,6 +55,18 @@ public final class Match {
 	 */
 	private final MagicStack magicStack;
 	/**
+	 * Speichert die aktuelle Spielphase.
+	 */
+	private final ObjectProperty<Phase> propertyCurrentPhase;
+	/**
+	 * Speichert den aktuellen Spielschritt.
+	 */
+	private final ObjectProperty<Step> propertyCurrentStep;
+	/**
+	 * Speichert die aktuelle Runde.
+	 */
+	private final ObjectProperty<Turn> propertyCurrentTurn;
+	/**
 	 * Speichert alle Angriffe.
 	 */
 	private final ListProperty<Attack> propertyListAttacks;
@@ -74,6 +87,14 @@ public final class Match {
 	 * Zeigt an, ob Input von Spieler benötigt wird.
 	 */
 	private final BooleanProperty propertyNeedPlayerInput;
+	/**
+	 * Speichert den aktiven Spieler.
+	 */
+	private final ObjectProperty<IsPlayer> propertyPlayerActive;
+	/**
+	 * Speichert den priorisierten Spieler.
+	 */
+	private final ObjectProperty<IsPlayer> propertyPlayerPrioritized;
 	/**
 	 * Speichert den RuleEnforcer.
 	 */
@@ -115,8 +136,14 @@ public final class Match {
 		propertyListAttackTargets.add(playerComputer);
 		propertyListAttackTargets.add(playerHuman);
 
-		final Turn firstTurn = turnFactory.create(playerComputer, playerHuman);
-		propertyListTurns.add(firstTurn);
+		propertyCurrentTurn = new SimpleObjectProperty<>(null);
+		propertyCurrentPhase = new SimpleObjectProperty<>(null);
+		propertyCurrentStep = new SimpleObjectProperty<Step>(null);
+
+		propertyPlayerActive = new SimpleObjectProperty<>(playerComputer);
+		propertyPlayerPrioritized = new SimpleObjectProperty<>(playerComputer);
+
+		setCurrentTurn(turnFactory.create(playerComputer, playerHuman, this));
 	}
 
 	public IsPlayer getPlayer(PlayerType playerType) {
@@ -132,19 +159,19 @@ public final class Match {
 	}
 
 	public ObjectProperty<Phase> propertyCurrentPhase() {
-		return getCurrentTurn().propertyCurrentPhase();
+		return propertyCurrentPhase;
 	}
 
 	public ObjectProperty<Step> propertyCurrentStep() {
-		return getCurrentPhase().propertyCurrentStep();
+		return propertyCurrentStep;
 	}
 
 	public ObjectProperty<IsPlayer> propertyPlayerActive() {
-		return getCurrentTurn().propertyPlayerActive();
+		return propertyPlayerActive;
 	}
 
 	public ObjectProperty<IsPlayer> propertyPlayerPrioritized() {
-		return getCurrentTurn().propertyPlayerPrioritized();
+		return propertyPlayerPrioritized;
 	}
 
 	public IntegerProperty propertyTurnNumber() {
@@ -426,16 +453,12 @@ public final class Match {
 		return result;
 	}
 
-	private Phase getCurrentPhase() {
-		return getCurrentTurn().getCurrentPhase();
-	}
-
 	private Step getCurrentStep() {
-		return getCurrentPhase().getCurrentStep();
+		return propertyCurrentStep().get();
 	}
 
 	private Turn getCurrentTurn() {
-		return propertyListTurns.get(propertyListTurns.getSize() - 1);
+		return propertyCurrentTurn().get();
 	}
 
 	/**
@@ -486,7 +509,6 @@ public final class Match {
 	 *
 	 * @return true, wenn die Phase noch läuft.
 	 */
-
 	private boolean isPhaseRunning() {
 		return getCurrentPhase().getFlagPhaseRunning();
 	}
@@ -577,6 +599,10 @@ public final class Match {
 		}
 	}
 
+	private ObjectProperty<Turn> propertyCurrentTurn() {
+		return propertyCurrentTurn;
+	}
+
 	private BooleanProperty propertyFlagNeedPlayerInput() {
 		return propertyNeedPlayerInput;
 	}
@@ -599,12 +625,15 @@ public final class Match {
 
 	private void setPlayerActive(IsPlayer playerActive) {
 		LOGGER.trace("{} setPlayerActive({})", this, playerActive);
-		getCurrentTurn().setPlayerActive(playerActive);
+		propertyPlayerActive().set(playerActive);
+		playerActive.setPlayerState(PlayerState.ACTIVE);
+		getCurrentTurn().getPlayerOpponent(playerActive).setPlayerState(PlayerState.NONACTIVE);
 	}
 
 	private void setPlayerPrioritized(IsPlayer playerPrioritized) {
 		LOGGER.trace("{} setPlayerPrioritized({})", this, playerPrioritized);
-		getCurrentTurn().setPlayerPrioritized(playerPrioritized);
+		propertyPlayerPrioritized().set(playerPrioritized);
+		playerPrioritized.setPlayerState(PlayerState.PRIORITIZED);
 	}
 
 	/**
@@ -657,11 +686,16 @@ public final class Match {
 			if (getTurnNumber() == 0) {
 				setPlayerActive(determinePlayerStarting());
 			} else {
-				propertyListTurns.add(new Turn(getCurrentTurn()));
+				setCurrentTurn(new Turn(getCurrentTurn(), this));
 				setPlayerActive(determinePlayerActive());
 			}
 			getCurrentTurn().turnBegin();
 		}
+	}
+
+	private void setCurrentTurn(Turn turn) {
+		propertyCurrentTurn.set(turn);
+		propertyListTurns.add(turn);
 	}
 
 	/**
@@ -734,6 +768,10 @@ public final class Match {
 		return zoneBattlefield.getAll();
 	}
 
+	Phase getCurrentPhase() {
+		return propertyCurrentPhase().get();
+	}
+
 	boolean getFlagNeedPlayerInput() {
 		return propertyFlagNeedPlayerInput().get();
 	}
@@ -752,12 +790,22 @@ public final class Match {
 		return zoneBattlefield.getAll(player.getPlayerType());
 	}
 
+	/**
+	 * Liefert den aktiven Spieler.
+	 *
+	 * @return den aktiven Spieler.
+	 */
 	IsPlayer getPlayerActive() {
-		return getCurrentTurn().getPlayerActive();
+		return propertyPlayerActive().get();
 	}
 
+	/**
+	 * Liefert den nichtaktiven Spieler.
+	 *
+	 * @return den nichtaktiven Spieler.
+	 */
 	IsPlayer getPlayerNonactive() {
-		return getCurrentTurn().getPlayerNonactive();
+		return getCurrentTurn().getPlayerOpponent(getPlayerActive());
 	}
 
 	int getTotalAttackers() {
@@ -793,6 +841,10 @@ public final class Match {
 		} else {
 			player.setPlayerState(isCombatPhase ? PlayerState.DEFENDING : PlayerState.NONACTIVE);
 		}
+	}
+
+	void setCurrentStep(Step step) {
+		propertyCurrentStep().set(step);
 	}
 
 	void setFlagIsMatchRunning(boolean flagIsMatchRunning) {

@@ -11,9 +11,7 @@ import de.mca.model.enums.PhaseType;
 import de.mca.model.enums.StepType;
 import de.mca.model.enums.TurnBasedActionType;
 import javafx.beans.property.BooleanProperty;
-import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
-import javafx.beans.property.SimpleObjectProperty;
 
 /**
  *
@@ -35,13 +33,13 @@ public class Phase {
 	 */
 	private final List<Step> listSteps;
 	/**
+	 * Speichert eine Referenz auf das Match.
+	 */
+	private Match parent;
+	/**
 	 * Speichert den Phasentyp.
 	 */
 	private final PhaseType phaseType;
-	/**
-	 * Speichert den aktuellen Spielschritt.
-	 */
-	private final ObjectProperty<Step> propertyCurrentStep;
 	/**
 	 * Zeigt an, ob die Phase wiederholt wird.
 	 */
@@ -56,17 +54,18 @@ public class Phase {
 	private final BooleanProperty propertyFlagPhaseSkipped;
 
 	@Inject
-	Phase(EventBus eventBus, @Assisted PhaseType phaseType, @Assisted List<Step> listSteps) {
+	Phase(EventBus eventBus, @Assisted PhaseType phaseType, @Assisted List<Step> listSteps, @Assisted Match parent) {
 		this.eventBus = eventBus;
 		this.listSteps = listSteps;
+		this.parent = parent;
 		this.phaseType = phaseType;
 
-		propertyCurrentStep = new SimpleObjectProperty<>(listSteps.get(0));
 		propertyFlagPhaseRepeated = new SimpleBooleanProperty(false);
 		propertyFlagPhaseRunning = new SimpleBooleanProperty(false);
 		propertyFlagPhaseSkipped = new SimpleBooleanProperty(false);
 
 		iteratorSteps = this.listSteps.listIterator();
+		parent.propertyCurrentStep().set(listSteps.get(0));
 	}
 
 	@Override
@@ -83,7 +82,7 @@ public class Phase {
 	}
 
 	Step getCurrentStep() {
-		return propertyCurrentStep().get();
+		return parent.propertyCurrentStep().get();
 	}
 
 	boolean getFlagPhaseRunning() {
@@ -113,7 +112,7 @@ public class Phase {
 	void phaseBegin() {
 		setFlagPhaseRunning(true);
 		iteratorSteps = listSteps.listIterator();
-		propertyCurrentStep.set(listSteps.get(0));
+		parent.propertyCurrentStep().set(listSteps.get(0));
 	}
 
 	void phaseEnd() {
@@ -123,12 +122,8 @@ public class Phase {
 		}
 	}
 
-	ObjectProperty<Step> propertyCurrentStep() {
-		return propertyCurrentStep;
-	}
-
 	void setCurrentStep() {
-		propertyCurrentStep.set(iteratorSteps.next());
+		parent.propertyCurrentStep().set(iteratorSteps.next());
 	}
 
 	void setFlagPhaseRunning(boolean flagRunning) {
