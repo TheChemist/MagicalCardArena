@@ -269,7 +269,6 @@ public class MatchPresenter extends AnimationTimer implements Initializable, IsS
 	private Label labelTurnNumber;
 	@Inject
 	private MagicParser magicParser;
-	@SuppressWarnings("unused")
 	private Match matchActive;
 	private Runnable matchUpdater;
 	@FXML
@@ -388,8 +387,8 @@ public class MatchPresenter extends AnimationTimer implements Initializable, IsS
 		});
 
 		// Center Pane
-		canvasBattlefield = new CanvasZone(paneBattlefield, inputHuman, spriteListBattlefield,
-				ZoneType.BATTLEFIELD, imageViewCardZoom);
+		canvasBattlefield = new CanvasZone(paneBattlefield, inputHuman, spriteListBattlefield, ZoneType.BATTLEFIELD,
+				imageViewCardZoom);
 		paneBattlefield.getChildren().add(canvasBattlefield);
 		tabBattlefield.setContent(paneBattlefield);
 
@@ -440,6 +439,7 @@ public class MatchPresenter extends AnimationTimer implements Initializable, IsS
 		Match matchActive = createMatch(nameComputer, nameHuman, deckHuman, deckComputer, avatarComputer, avatarHuman);
 		IsPlayer playerComputer = matchActive.getPlayer(PlayerType.COMPUTER);
 		IsPlayer playerHuman = matchActive.getPlayer(PlayerType.HUMAN);
+		setMatchActive(matchActive);
 
 		// Game Loop
 		matchUpdater = () -> matchActive.update();
@@ -484,11 +484,15 @@ public class MatchPresenter extends AnimationTimer implements Initializable, IsS
 		 * Mittleres Panel
 		 */
 		// Elemente binden
-		tabComputerGraveyard.textProperty().bind(createTabBinding(playerComputer, ZoneType.GRAVEYARD));
-		tabComputerHand.textProperty().bind(createTabBinding(playerComputer, ZoneType.HAND));
+		tabBattlefield.textProperty().bind(createMatchTabBinding(ZoneType.BATTLEFIELD));
 
-		tabHumanGraveyard.textProperty().bind(createTabBinding(playerHuman, ZoneType.GRAVEYARD));
-		tabHumanHand.textProperty().bind(createTabBinding(playerHuman, ZoneType.HAND));
+		tabComputerGraveyard.textProperty().bind(createPlayerTabBinding(playerComputer, ZoneType.GRAVEYARD));
+		tabComputerHand.textProperty().bind(createPlayerTabBinding(playerComputer, ZoneType.HAND));
+
+		tabExile.textProperty().bind(createMatchTabBinding(ZoneType.EXILE));
+
+		tabHumanGraveyard.textProperty().bind(createPlayerTabBinding(playerHuman, ZoneType.GRAVEYARD));
+		tabHumanHand.textProperty().bind(createPlayerTabBinding(playerHuman, ZoneType.HAND));
 
 		bindZone(matchActive.getZoneBattlefield(), spriteListBattlefield);
 		bindZone(playerComputer.getZoneGraveyard(), spriteListComputerGraveyard);
@@ -612,13 +616,24 @@ public class MatchPresenter extends AnimationTimer implements Initializable, IsS
 				magicParser.parseDeckFromPath(FileManager.getDeckPath(deckComputer)));
 	}
 
-	private StringExpression createTabBinding(IsPlayer player, ZoneType zoneType) {
+	private StringExpression createPlayerTabBinding(IsPlayer player, ZoneType zoneType) {
 		if (zoneType.equals(ZoneType.HAND)) {
 			return Bindings.concat("(").concat(player.propertyHandSize().asString()).concat(") ")
 					.concat(player.getDisplayName());
 		} else if (zoneType.equals(ZoneType.GRAVEYARD)) {
 			return Bindings.concat("(").concat(player.propertyGraveSize().asString()).concat(") ")
 					.concat(player.getDisplayName());
+		} else {
+			throw new IllegalArgumentException();
+		}
+	}
+
+	private StringExpression createMatchTabBinding(ZoneType zoneType) {
+		if (zoneType.equals(ZoneType.BATTLEFIELD)) {
+			return Bindings.concat("(").concat(matchActive.propertyBattlefieldSize().asString())
+					.concat(") Battlefield");
+		} else if (zoneType.equals(ZoneType.EXILE)) {
+			return Bindings.concat("(").concat(matchActive.propertyExileSize().asString()).concat(") Exile");
 		} else {
 			throw new IllegalArgumentException();
 		}

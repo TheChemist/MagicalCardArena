@@ -27,6 +27,7 @@ import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.ListProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleListProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
@@ -49,11 +50,12 @@ public final class Match {
 	/**
 	 * Speichert die PermanentFactory zum Erstellen bleibender Karten.
 	 */
-	private final FactoryMagicPermanent magicPermanentFactory;
+	private final FactoryMagicPermanent factoryMagicPermanent;
 	/**
 	 * Speichert den geteilten Stack.
 	 */
 	private final MagicStack magicStack;
+	private final IntegerProperty propertyBattlefieldSize;
 	/**
 	 * Speichert die aktuelle Spielphase.
 	 */
@@ -66,6 +68,7 @@ public final class Match {
 	 * Speichert die aktuelle Runde.
 	 */
 	private final ObjectProperty<Turn> propertyCurrentTurn;
+	private final IntegerProperty propertyExileSize;
 	/**
 	 * Speichert alle Angriffe.
 	 */
@@ -119,7 +122,7 @@ public final class Match {
 		playerHuman.setDisplayName(nameHuman);
 		playerHuman.setDeck(deckHuman);
 
-		this.magicPermanentFactory = magicPermanentFactory;
+		this.factoryMagicPermanent = magicPermanentFactory;
 		this.magicStack = magicStack;
 		this.ruleEnforcer = ruleEnforcer;
 		this.zoneBattlefield = zoneBattlefield;
@@ -127,6 +130,8 @@ public final class Match {
 
 		ruleEnforcer.setMatch(this);
 
+		propertyBattlefieldSize = new SimpleIntegerProperty(0);
+		propertyExileSize = new SimpleIntegerProperty(0);
 		propertyMatchRunning = new SimpleBooleanProperty(false);
 		propertyNeedPlayerInput = new SimpleBooleanProperty(false);
 		propertyListAttacks = new SimpleListProperty<>(FXCollections.observableArrayList(new ArrayList<>()));
@@ -591,7 +596,7 @@ public final class Match {
 		for (int i = 0; i < sizeMagicStack; i++) {
 			final IsStackable stackable = getMagicStack().peek();
 			if (stackable.isPermanentSpell()) {
-				getZoneBattlefield().add(magicPermanentFactory.create((MagicSpell) stackable));
+				getZoneBattlefield().add(factoryMagicPermanent.create((MagicSpell) stackable));
 			} else {
 				stackable.resolve();
 			}
@@ -599,8 +604,16 @@ public final class Match {
 		}
 	}
 
+	public IntegerProperty propertyBattlefieldSize() {
+		return propertyBattlefieldSize;
+	}
+
 	private ObjectProperty<Turn> propertyCurrentTurn() {
 		return propertyCurrentTurn;
+	}
+
+	public IntegerProperty propertyExileSize() {
+		return propertyExileSize;
 	}
 
 	private BooleanProperty propertyFlagNeedPlayerInput() {
@@ -621,6 +634,11 @@ public final class Match {
 	private void setCurrentStep() {
 		getCurrentTurn().setCurrentStep();
 		LOGGER.trace("{} setCurrentStep() -> {}", this, getCurrentStep());
+	}
+
+	private void setCurrentTurn(Turn turn) {
+		propertyCurrentTurn.set(turn);
+		propertyListTurns.add(turn);
 	}
 
 	private void setPlayerActive(IsPlayer playerActive) {
@@ -693,11 +711,6 @@ public final class Match {
 		}
 	}
 
-	private void setCurrentTurn(Turn turn) {
-		propertyCurrentTurn.set(turn);
-		propertyListTurns.add(turn);
-	}
-
 	/**
 	 * Beendet die aktuelle Runde. Der Phase- und Step-Iterator wird zurück
 	 * gesetzt und die playedLandThisTurn-Flag für den aktiven Spieler auf false
@@ -715,7 +728,13 @@ public final class Match {
 	}
 
 	void addCard(MagicCard magicCard, ZoneType zoneType) {
-		// TODO: Implementieren
+		if (zoneType.equals(ZoneType.BATTLEFIELD)) {
+			zoneBattlefield.add(factoryMagicPermanent.create(magicCard));
+			propertyBattlefieldSize.set(zoneBattlefield.getSize());
+		} else if (zoneType.equals(ZoneType.EXILE)) {
+			zoneExile.add(magicCard);
+			propertyExileSize.set(zoneExile.getSize());
+		}
 	}
 
 	boolean checkCanActivate(IsPlayer p, ActivatedAbility aa) {
@@ -817,8 +836,14 @@ public final class Match {
 		magicStack.push(magicSpell);
 	}
 
-	void removeCard(MagicPermanent magicPermanent, ZoneType zoneType) {
-		// TODO: Implementieren
+	void removeCard(MagicCard magicCard, ZoneType zoneType) {
+		if (zoneType.equals(ZoneType.BATTLEFIELD)) {
+			getZoneBattlefield().remove(factoryMagicPermanent.create(magicCard));
+			propertyBattlefieldSize().set(getZoneBattlefield().getSize());
+		} else if (zoneType.equals(ZoneType.EXILE)) {
+			getZoneExile().remove(magicCard);
+			propertyExileSize().set(getZoneExile().getSize());
+		}
 	}
 
 	void resetFlagsPassedPriority() {
