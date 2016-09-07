@@ -549,4 +549,9 @@ public final class Player implements IsPlayer {
 	private void setHandSize(int handSize) {
 		propertyHandSize.set(handSize);
 	}
+
+	@Override
+	public boolean isDiscarding() {
+		return getPlayerState().equals(PlayerState.DISCARDING);
+	}
 }

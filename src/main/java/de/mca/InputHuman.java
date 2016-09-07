@@ -274,11 +274,16 @@ public class InputHuman implements IsInput {
 			// Karte in Hand geklickt
 
 			MagicCard magicCard = (MagicCard) object;
-			if (magicCard.isLand()) {
-				player.firePlayLand(magicCard);
+			if (getPlayer().isDiscarding()) {
+				getPlayer().fireDiscard(magicCard);
 			} else {
-				player.fireCastSpell(magicCard);
+				if (magicCard.isLand()) {
+					getPlayer().firePlayLand(magicCard);
+				} else {
+					getPlayer().fireCastSpell(magicCard);
+				}
 			}
+
 		} else if (zoneType.equals(ZoneType.BATTLEFIELD)) {
 			// Karte auf Spielfeld geklickt
 

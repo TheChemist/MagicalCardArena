@@ -16,6 +16,7 @@ import de.mca.PAActivateAbility;
 import de.mca.PACastSpell;
 import de.mca.PADeclareAttacker;
 import de.mca.PADeclareBlocker;
+import de.mca.PADiscard;
 import de.mca.PASelectCostMap;
 import de.mca.PlayerAction;
 import de.mca.SAPlayLand;
@@ -95,6 +96,19 @@ public class RuleEnforcer {
 			match.resetFlagsPassedPriority();
 			match.resetPlayerState(player);
 		}
+	}
+
+	@Subscribe
+	public void examinePADiscard(PADiscard playerActionDiscard) {
+		LOGGER.debug("{} examinePADicard({})", this, playerActionDiscard);
+		IsPlayer player = playerActionDiscard.getSource();
+
+		// Werfe Karte ab
+		actionDiscard(player, playerActionDiscard.getMagicCard());
+
+		// Setze Spielerstatus zurück
+		match.setFlagNeedPlayerInput(false);
+		match.resetPlayerState(player);
 	}
 
 	@Subscribe
@@ -235,8 +249,8 @@ public class RuleEnforcer {
 		case DISCARD:
 			final int originalHandSize = playerActive.propertyHandSize().get();
 			for (int i = 0; i < (originalHandSize - Constants.HAND_SIZE); i++) {
-				// TODO: Wieder reinnehmen
-				// match.setFlagNeedPlayerInput(true);
+				playerActive.setPlayerState(PlayerState.DISCARDING);
+				match.setFlagNeedPlayerInput(true);
 			}
 			break;
 		case DRAW:

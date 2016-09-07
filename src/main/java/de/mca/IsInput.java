@@ -54,6 +54,10 @@ public interface IsInput {
 		getPlayer().fireConcede();
 	}
 
+	public default void inputDiscard(MagicCard magicCard) {
+		getPlayer().fireDiscard(magicCard);
+	}
+
 	public default void inputDeclareAttacker(Attack attack) {
 		getPlayer().fireDeclareAttacker(attack);
 	}

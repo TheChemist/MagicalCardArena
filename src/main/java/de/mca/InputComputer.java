@@ -78,7 +78,7 @@ public class InputComputer implements IsInput {
 	}
 
 	@Override
-	public MagicCard determineCardToDiscard(List<MagicCard> handCards) throws UnsupportedOperationException {
+	public MagicCard determineCardToDiscard(List<MagicCard> handCards) {
 		return handCards.get(new Random().nextInt(handCards.size()));
 	}
 
@@ -97,13 +97,19 @@ public class InputComputer implements IsInput {
 
 	@Override
 	public void determineInput(PlayerState playerState) {
-		if (player.isAttacking()) {
-			player.fireEndDeclareAttackers();
-		} else if (player.isDefending()) {
-			player.fireEndDeclareAttackers();
-		} else if (playerState.equals(PlayerState.PRIORITIZED)) {
+		if (getPlayer().isAttacking()) {
+			LOGGER.debug("{} determineInput({})", this, playerState);
+			inputEndDeclareAttackers();
+		} else if (getPlayer().isDefending()) {
+			LOGGER.debug("{} determineInput({})", this, playerState);
+			inputEndDeclareBlockers();
+		} else if (getPlayer().isPrioritised()) {
 			LOGGER.debug("{} determineInput({})", this, playerState);
 			inputPassPriority();
+		} else if (getPlayer().isDiscarding()) {
+			LOGGER.debug("{} determineInput({})", this, playerState);
+			// Computer wirft zufällige Karte ab.
+			inputDiscard(determineCardToDiscard(getPlayer().getCardsHand()));
 		}
 	}
 

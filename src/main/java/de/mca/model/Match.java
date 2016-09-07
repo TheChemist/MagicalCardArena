@@ -55,6 +55,9 @@ public final class Match {
 	 * Speichert den geteilten Stack.
 	 */
 	private final MagicStack magicStack;
+	/**
+	 * Speichert die Kartenanzahl im Battlefield.
+	 */
 	private final IntegerProperty propertyBattlefieldSize;
 	/**
 	 * Speichert die aktuelle Spielphase.
@@ -68,6 +71,9 @@ public final class Match {
 	 * Speichert die aktuelle Runde.
 	 */
 	private final ObjectProperty<Turn> propertyCurrentTurn;
+	/**
+	 * Speichert die Kartenanzahl im Exil.
+	 */
 	private final IntegerProperty propertyExileSize;
 	/**
 	 * Speichert alle Angriffe.
@@ -131,22 +137,20 @@ public final class Match {
 		ruleEnforcer.setMatch(this);
 
 		propertyBattlefieldSize = new SimpleIntegerProperty(0);
+		propertyCurrentPhase = new SimpleObjectProperty<>(null);
+		propertyCurrentStep = new SimpleObjectProperty<Step>(null);
+		propertyCurrentTurn = new SimpleObjectProperty<>(null);
 		propertyExileSize = new SimpleIntegerProperty(0);
 		propertyMatchRunning = new SimpleBooleanProperty(false);
 		propertyNeedPlayerInput = new SimpleBooleanProperty(false);
 		propertyListAttacks = new SimpleListProperty<>(FXCollections.observableArrayList(new ArrayList<>()));
 		propertyListAttackTargets = new SimpleListProperty<>(FXCollections.observableArrayList(new ArrayList<>()));
 		propertyListTurns = new SimpleListProperty<>(FXCollections.observableArrayList(new ArrayList<>()));
+		propertyPlayerActive = new SimpleObjectProperty<>(playerComputer);
+		propertyPlayerPrioritized = new SimpleObjectProperty<>(playerComputer);
 
 		propertyListAttackTargets.add(playerComputer);
 		propertyListAttackTargets.add(playerHuman);
-
-		propertyCurrentTurn = new SimpleObjectProperty<>(null);
-		propertyCurrentPhase = new SimpleObjectProperty<>(null);
-		propertyCurrentStep = new SimpleObjectProperty<Step>(null);
-
-		propertyPlayerActive = new SimpleObjectProperty<>(playerComputer);
-		propertyPlayerPrioritized = new SimpleObjectProperty<>(playerComputer);
 
 		setCurrentTurn(turnFactory.create(playerComputer, playerHuman, this));
 	}
@@ -249,7 +253,7 @@ public final class Match {
 				// Spieler haben gespasst, es liegt nichts auf dem Stack.
 
 				// Beende Phase
-				phaseEnd(false, isPhaseRunning());
+				phaseEnd(false, isPhaseRunning(), getFlagNeedPlayerInput());
 			}
 
 		} else {
@@ -280,7 +284,7 @@ public final class Match {
 					 */
 
 					// Beende Phase
-					phaseEnd(false, isPhaseRunning());
+					phaseEnd(false, isPhaseRunning(), getFlagNeedPlayerInput());
 				}
 			}
 
@@ -305,16 +309,16 @@ public final class Match {
 					// Spieler haben gespasst, es liegt nichts auf dem Stack.
 
 					// Beende Schritt
-					stepEnd();
+					stepEnd(getFlagNeedPlayerInput());
 				}
 			} else {
 				// Spieler erhalten keine Priorität.
 
 				// Beende Schritt
-				stepEnd();
+				stepEnd(getFlagNeedPlayerInput());
 
 				// Beende Phase
-				phaseEnd(getCurrentPhase().hasNextStep(), isPhaseRunning());
+				phaseEnd(getCurrentPhase().hasNextStep(), isPhaseRunning(), getFlagNeedPlayerInput());
 			}
 		}
 
@@ -324,7 +328,7 @@ public final class Match {
 		}
 
 		// Beende Phase
-		phaseEnd(getCurrentPhase().hasNextStep(), isPhaseRunning());
+		phaseEnd(getCurrentPhase().hasNextStep(), isPhaseRunning(), getFlagNeedPlayerInput());
 
 		// Beende Runde
 		turnEnd(getCurrentTurn().hasNextPhase(), getCurrentPhase().hasNextStep());
@@ -396,7 +400,7 @@ public final class Match {
 	 */
 	private IsPlayer determinePlayerActive() {
 		IsPlayer playerActive = (isPlayerActive(getPlayer(PlayerType.HUMAN))) ? getPlayer(PlayerType.COMPUTER)
-				: getPlayer(PlayerType.NONE);
+				: getPlayer(PlayerType.HUMAN);
 		LOGGER.debug("{} determinePlayerActive() -> {}", this, playerActive);
 		return playerActive;
 	}
@@ -578,8 +582,8 @@ public final class Match {
 	 * Schritt mehr in der Phase gespielt werden und die Runde gerade läuft.
 	 */
 
-	private void phaseEnd(boolean hasNextStep, boolean isPhaseRunning) {
-		if (!hasNextStep && isPhaseRunning) {
+	private void phaseEnd(boolean hasNextStep, boolean isPhaseRunning, boolean needPlayerInput) {
+		if (!hasNextStep && isPhaseRunning && !needPlayerInput) {
 			LOGGER.debug("{} phaseEnd()", this);
 			getCurrentTurn().phaseEnd();
 		}
@@ -686,12 +690,16 @@ public final class Match {
 
 	/**
 	 * Beendet einen Spielschritt. Die verbleibenden TurnBasedActions werden
-	 * gefeuert und die Prioritäts-Flags der Spieler zurück gesetzt.
+	 * gefeuert und die Prioritäts-Flags der Spieler zurück gesetzt. Ein Schritt
+	 * kann beendet werden, wenn kein Spielerinput mehr benötigt wird. Das wird
+	 * vor allem im letzten Schritt (Aufräumen) relevant.
 	 */
 
-	private void stepEnd() {
-		LOGGER.debug("{} stepEnd()", this);
-		getCurrentTurn().stepEnd();
+	private void stepEnd(boolean needPlayerInput) {
+		if (!needPlayerInput) {
+			LOGGER.debug("{} stepEnd()", this);
+			getCurrentTurn().stepEnd();
+		}
 	}
 
 	/**

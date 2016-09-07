@@ -8,6 +8,7 @@ import de.mca.PAActivateAbility;
 import de.mca.PACastSpell;
 import de.mca.PADeclareAttacker;
 import de.mca.PADeclareBlocker;
+import de.mca.PADiscard;
 import de.mca.PlayerAction;
 import de.mca.PlayerActionType;
 import de.mca.SAPlayLand;
@@ -90,6 +91,10 @@ public interface IsPlayer extends IsAttackTarget {
 		getEventBus().post(new PADeclareBlocker(this, attackerIndex, blocker));
 	}
 
+	public default void fireDiscard(MagicCard magicCard) {
+		getEventBus().post(new PADiscard(this, magicCard));
+	}
+
 	/**
 	 * Wird aufgerufen, wenn der Spieler alle Angreifer deklariert hat.
 	 */
@@ -152,12 +157,6 @@ public interface IsPlayer extends IsAttackTarget {
 	public IsManaMap getManaCostAlreadyPaid();
 
 	public IsManaMap getManaCostGoal();
-
-	// public ZoneDefault<MagicCard> getZoneGraveyard();
-	//
-	// public ZoneDefault<MagicCard> getZoneHand();
-	//
-	// public ZoneDefault<MagicCard> getZoneLibrary();
 
 	public IsManaMap getManaPool();
 
@@ -287,5 +286,7 @@ public interface IsPlayer extends IsAttackTarget {
 	public void setManaCostGoal(IsManaMap manaCostGoal);
 
 	public void setPlayerState(PlayerState ps);
+
+	public boolean isDiscarding();
 
 }
