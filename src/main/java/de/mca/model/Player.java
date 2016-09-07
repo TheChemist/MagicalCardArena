@@ -343,6 +343,11 @@ public final class Player implements IsPlayer {
 	}
 
 	@Override
+	public boolean isDiscarding() {
+		return getPlayerState().equals(PlayerState.DISCARDING);
+	}
+
+	@Override
 	public boolean isNonactive() {
 		return getPlayerState().equals(PlayerState.NONACTIVE) || isDefending();
 	}
@@ -548,10 +553,5 @@ public final class Player implements IsPlayer {
 
 	private void setHandSize(int handSize) {
 		propertyHandSize.set(handSize);
-	}
-
-	@Override
-	public boolean isDiscarding() {
-		return getPlayerState().equals(PlayerState.DISCARDING);
 	}
 }

@@ -275,13 +275,17 @@ public class InputHuman implements IsInput {
 
 			MagicCard magicCard = (MagicCard) object;
 			if (getPlayer().isDiscarding()) {
+
 				getPlayer().fireDiscard(magicCard);
+
 			} else {
+
 				if (magicCard.isLand()) {
 					getPlayer().firePlayLand(magicCard);
 				} else {
 					getPlayer().fireCastSpell(magicCard);
 				}
+
 			}
 
 		} else if (zoneType.equals(ZoneType.BATTLEFIELD)) {

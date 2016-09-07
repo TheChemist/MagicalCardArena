@@ -99,19 +99,6 @@ public class RuleEnforcer {
 	}
 
 	@Subscribe
-	public void examinePADiscard(PADiscard playerActionDiscard) {
-		LOGGER.debug("{} examinePADicard({})", this, playerActionDiscard);
-		IsPlayer player = playerActionDiscard.getSource();
-
-		// Werfe Karte ab
-		actionDiscard(player, playerActionDiscard.getMagicCard());
-
-		// Setze Spielerstatus zurück
-		match.setFlagNeedPlayerInput(false);
-		match.resetPlayerState(player);
-	}
-
-	@Subscribe
 	public void examinePACastSpell(PACastSpell playerActionCastSpell) {
 		LOGGER.debug("{} examinePACastSpell({})", this, playerActionCastSpell);
 		final IsPlayer player = playerActionCastSpell.getSource();
@@ -138,6 +125,19 @@ public class RuleEnforcer {
 	public void examinePADeclareBlocker(PADeclareBlocker playerActionDeclareBlockers) {
 		LOGGER.debug("{} examinePADeclareAttacker({})", this, playerActionDeclareBlockers);
 		match.declareBlocker(playerActionDeclareBlockers.getAttackIndex(), playerActionDeclareBlockers.getBlocker());
+	}
+
+	@Subscribe
+	public void examinePADiscard(PADiscard playerActionDiscard) {
+		LOGGER.debug("{} examinePADicard({})", this, playerActionDiscard);
+		IsPlayer player = playerActionDiscard.getSource();
+
+		// Werfe Karte ab
+		actionDiscard(player, playerActionDiscard.getMagicCard());
+
+		// Setze Spielerstatus zurück
+		match.setFlagNeedPlayerInput(false);
+		match.resetPlayerState(player);
 	}
 
 	@Subscribe

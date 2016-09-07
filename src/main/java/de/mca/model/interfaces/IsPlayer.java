@@ -203,6 +203,8 @@ public interface IsPlayer extends IsAttackTarget {
 	 */
 	public boolean isDefending();
 
+	public boolean isDiscarding();
+
 	/**
 	 * Liefert, ob der Spieler der nichtaktive Spieler ist.
 	 *
@@ -286,7 +288,5 @@ public interface IsPlayer extends IsAttackTarget {
 	public void setManaCostGoal(IsManaMap manaCostGoal);
 
 	public void setPlayerState(PlayerState ps);
-
-	public boolean isDiscarding();
 
 }

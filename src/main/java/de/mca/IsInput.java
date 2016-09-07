@@ -54,10 +54,6 @@ public interface IsInput {
 		getPlayer().fireConcede();
 	}
 
-	public default void inputDiscard(MagicCard magicCard) {
-		getPlayer().fireDiscard(magicCard);
-	}
-
 	public default void inputDeclareAttacker(Attack attack) {
 		getPlayer().fireDeclareAttacker(attack);
 	}
@@ -65,6 +61,10 @@ public interface IsInput {
 	public default void inputDeclareBlocker(int attackerIndex, MagicPermanent blocker) {
 		// TODO: Vllt lieber Permanent anstatt Index übergeben
 		getPlayer().fireDeclareBlocker(attackerIndex, blocker);
+	}
+
+	public default void inputDiscard(MagicCard magicCard) {
+		getPlayer().fireDiscard(magicCard);
 	}
 
 	public default void inputEndDeclareAttackers() {

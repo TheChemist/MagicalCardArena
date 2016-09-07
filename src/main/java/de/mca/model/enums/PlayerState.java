@@ -8,8 +8,8 @@ package de.mca.model.enums;
 public enum PlayerState {
 
 	ACTIVATING_ABILITY("Aktiviert Fähigkeit"), ACTIVE("Aktiv"), ATTACKING("Greift an"), CASTING_SPELL(
-			"Beschwört Zauberspruch"), DEFENDING("Verteidigt"), NONACTIVE("Nichtaktiv"), PAYING("Bezahlt"), PRIORITIZED(
-					"Priorisiert"), TAKING_SPECIAL_ACTION("Führt Spezialhandlung aus"), DISCARDING("Wirft Karte ab");
+			"Beschwört Zauberspruch"), DEFENDING("Verteidigt"), DISCARDING("Wirft Karte ab"), NONACTIVE("Nichtaktiv"), PAYING("Bezahlt"), PRIORITIZED(
+							"Priorisiert"), TAKING_SPECIAL_ACTION("Führt Spezialhandlung aus");
 
 	private final String displayName;
 
