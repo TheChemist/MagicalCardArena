@@ -8,7 +8,6 @@ import java.util.function.Consumer;
 
 import com.google.inject.Inject;
 
-import de.mca.Constants;
 import de.mca.InputComputer;
 import de.mca.InputHuman;
 import de.mca.MagicParser;
@@ -18,39 +17,30 @@ import de.mca.factories.FactoryPlayer;
 import de.mca.io.FileManager;
 import de.mca.io.ResourceManager;
 import de.mca.model.MagicCard;
+import de.mca.model.MagicStack;
 import de.mca.model.Match;
 import de.mca.model.enums.ColorType;
 import de.mca.model.enums.PlayerType;
 import de.mca.model.enums.ZoneType;
-import de.mca.model.interfaces.IsObject;
 import de.mca.model.interfaces.IsPlayer;
+import de.mca.model.interfaces.IsStackable;
 import de.mca.model.interfaces.IsZone;
 import javafx.animation.AnimationTimer;
 import javafx.beans.binding.Bindings;
-import javafx.beans.binding.DoubleBinding;
-import javafx.beans.binding.DoubleExpression;
 import javafx.beans.binding.StringExpression;
-import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.collections.ListChangeListener;
 import javafx.collections.MapChangeListener;
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
-import javafx.geometry.Point2D;
-import javafx.scene.canvas.Canvas;
-import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.Tab;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.GridPane;
-import javafx.scene.layout.Pane;
 
 /**
  * 
@@ -59,129 +49,15 @@ import javafx.scene.layout.Pane;
  */
 public class MatchPresenter extends AnimationTimer implements Initializable, IsStackableScreen {
 
-	/**
-	 * Hilfsklasse zur schnelleren Erstellung der Icon-Labels.
-	 * 
-	 * @author Maximilian Werling
-	 *
-	 */
-	class AdaptableImageView extends ImageView {
-
-		public AdaptableImageView(Image image, DoubleExpression heightProperty, DoubleExpression widthProperty) {
-			super(image);
-
-			fitHeightProperty().bind(heightProperty);
-			fitWidthProperty().bind(widthProperty);
-			setPreserveRatio(true);
-		}
-
-	}
-
-	/**
-	 * Hilfsklasse zur schnelleren Erstellung der Zeichenflächen für die Zonen
-	 * der Spieler.
-	 * 
-	 * @author Maximilian Werling
-	 *
-	 */
-	class CanvasZone extends Canvas {
-
-		private List<CardSprite> spriteList;
-
-		public CanvasZone(Pane parent, InputHuman input, List<CardSprite> spriteList, ZoneType zoneType,
-				ImageView zoomView) {
-			this.spriteList = spriteList;
-			widthProperty().bind(parent.widthProperty());
-			heightProperty().bind(parent.heightProperty());
-
-			addEventHandler(MouseEvent.MOUSE_CLICKED, new EventHandler<MouseEvent>() {
-				@Override
-				public void handle(MouseEvent e) {
-					input.input(determineClickedCard(e, spriteList), zoneType);
-				}
-			});
-
-			addEventHandler(MouseEvent.MOUSE_MOVED, new EventHandler<MouseEvent>() {
-
-				@Override
-				public void handle(MouseEvent event) {
-					CardSprite mouseOverSprite = null;
-					for (CardSprite sprite : spriteList) {
-						if (sprite.getBoundary().contains(new Point2D(event.getX(), event.getY()))) {
-							mouseOverSprite = sprite;
-							break;
-						}
-					}
-					if (mouseOverSprite != null) {
-						zoomView.setImage(mouseOverSprite.getImage());
-						zoomView.setPreserveRatio(true);
-					} else {
-						zoomView.setImage(null);
-					}
-				}
-
-			});
-		}
-
-		public void draw() {
-			GraphicsContext gc = getGraphicsContext2D();
-
-			gc.clearRect(0, 0, getWidth(), getHeight());
-
-			for (int i = 0; i < spriteList.size(); i++) {
-				CardSprite sprite = spriteList.get(i);
-				double positionX = 0;
-				double positionY = 0;
-
-				DoubleProperty heightBoundSpriteHeight = heightProperty();
-				DoubleBinding heightBoundSpriteWidth = heightBoundSpriteHeight.multiply(Constants.CARD_RATIO);
-
-				DoubleBinding widthBoundSpriteWidth = widthProperty().divide(spriteList.size());
-				DoubleBinding widthBoundSpriteHeight = widthBoundSpriteWidth.divide(Constants.CARD_RATIO);
-
-				if (heightBoundSpriteWidth.greaterThan(widthBoundSpriteWidth).get()) {
-					sprite.propertyHeight().bind(widthBoundSpriteHeight);
-					sprite.propertyWidth().bind(widthBoundSpriteWidth);
-				} else {
-					sprite.propertyHeight().bind(heightBoundSpriteHeight);
-					sprite.propertyWidth().bind(heightBoundSpriteWidth);
-				}
-
-				positionX = sprite.getWidth() * i;
-				positionY = 0;
-
-				sprite.setPosition(positionX, positionY);
-
-				sprite.render(gc);
-			}
-		}
-
-		@Override
-		public boolean isResizable() {
-			return true;
-		}
-
-		private IsObject determineClickedCard(MouseEvent e, List<CardSprite> listSprites) {
-			int zCoordinate = -1;
-			List<MagicCard> listClicked = new ArrayList<>();
-			for (CardSprite sprite : listSprites) {
-				if (sprite.getBoundary().contains(new Point2D(e.getX(), e.getY()))) {
-					listClicked.add(sprite.getCard());
-					zCoordinate++;
-				}
-			}
-			return listClicked.get(zCoordinate);
-		}
-	}
-
 	@FXML
 	private Button buttonPassPriority;
-	private CanvasZone canvasBattlefield;
-	private CanvasZone canvasComputerGraveyard;
-	private CanvasZone canvasComputerHand;
-	private CanvasZone canvasExile;
-	private CanvasZone canvasHumanGraveyard;
-	private CanvasZone canvasHumanHand;
+	private CanvasZoneDefault canvasBattlefield;
+	private CanvasZoneDefault canvasComputerGraveyard;
+	private CanvasZoneDefault canvasComputerHand;
+	private CanvasZoneDefault canvasExile;
+	private CanvasZoneDefault canvasHumanGraveyard;
+	private CanvasZoneDefault canvasHumanHand;
+	private CanvasZoneStack canvasStack;
 	@Inject
 	private FactoryMatch factoryMatch;
 	@Inject
@@ -291,6 +167,8 @@ public class MatchPresenter extends AnimationTimer implements Initializable, IsS
 	private AnchorPane paneLeft;
 	@FXML
 	private AnchorPane paneRight;
+	@FXML
+	private AnchorPane paneStack;
 	private long previousTime = 0;
 	private Runnable rendererBattlefield;
 	private Runnable rendererComputerGraveyard;
@@ -298,15 +176,17 @@ public class MatchPresenter extends AnimationTimer implements Initializable, IsS
 	private Runnable rendererExile;
 	private Runnable rendererHumanGraveyard;
 	private Runnable rendererHumanHand;
+	private Runnable rendererStack;
 	@SuppressWarnings("unused")
 	private Main screenController;
 	private float secondsElapsedSinceLastFpsUpdate = 0f;
-	private List<CardSprite> spriteListBattlefield;
-	private List<CardSprite> spriteListComputerGraveyard;
-	private List<CardSprite> spriteListComputerHand;
-	private List<CardSprite> spriteListExile;
-	private List<CardSprite> spriteListHumanGraveyard;
-	private List<CardSprite> spriteListHumanHand;
+	private final List<SpriteMagicObject> spriteListBattlefield;
+	private final List<SpriteMagicObject> spriteListComputerGraveyard;
+	private final List<SpriteMagicObject> spriteListComputerHand;
+	private final List<SpriteMagicObject> spriteListExile;
+	private final List<SpriteMagicObject> spriteListHumanGraveyard;
+	private final List<SpriteMagicObject> spriteListHumanHand;
+	private final List<SpriteStackable> spriteListStack;
 	@FXML
 	private Tab tabBattlefield;
 	@FXML
@@ -326,6 +206,13 @@ public class MatchPresenter extends AnimationTimer implements Initializable, IsS
 
 	public MatchPresenter() {
 		// TODO: Threading?
+		spriteListBattlefield = new ArrayList<>();
+		spriteListComputerGraveyard = new ArrayList<>();
+		spriteListComputerHand = new ArrayList<>();
+		spriteListExile = new ArrayList<>();
+		spriteListHumanGraveyard = new ArrayList<>();
+		spriteListHumanHand = new ArrayList<>();
+		spriteListStack = new ArrayList<>();
 	}
 
 	@Override
@@ -351,6 +238,7 @@ public class MatchPresenter extends AnimationTimer implements Initializable, IsS
 		rendererExile.run();
 		rendererHumanGraveyard.run();
 		rendererHumanHand.run();
+		rendererStack.run();
 
 		secondsElapsedSinceLastFpsUpdate += secondsElapsed;
 		framesSinceLastFpsUpdate++;
@@ -364,60 +252,53 @@ public class MatchPresenter extends AnimationTimer implements Initializable, IsS
 
 	@Override
 	public void initialize(URL location, ResourceBundle resources) {
-		spriteListBattlefield = new ArrayList<>();
-		spriteListComputerGraveyard = new ArrayList<>();
-		spriteListComputerHand = new ArrayList<>();
-		spriteListExile = new ArrayList<>();
-		spriteListHumanGraveyard = new ArrayList<>();
-		spriteListHumanHand = new ArrayList<>();
-
 		// Left Pane
+		canvasStack = new CanvasZoneStack(paneStack, spriteListStack);
+		paneStack.getChildren().add(canvasStack);
+		tabStack.setContent(paneStack);
+
 		imageViewCardZoom = new AdaptableImageView(null, paneCardZoom.heightProperty(), paneCardZoom.widthProperty());
 		AnchorPane.setLeftAnchor(imageViewCardZoom, 5.0);
 		AnchorPane.setRightAnchor(imageViewCardZoom, 5.0);
 		paneCardZoom.getChildren().add(imageViewCardZoom);
 		tabCardZoom.setContent(paneCardZoom);
 
-		buttonPassPriority.setOnAction(new EventHandler<ActionEvent>() {
-
-			@Override
-			public void handle(ActionEvent event) {
-				inputHuman.inputPassPriority();
-			}
+		buttonPassPriority.setOnAction((actionEvent) -> {
+			inputHuman.inputPassPriority();
 		});
 
 		// Center Pane
-		canvasBattlefield = new CanvasZone(paneBattlefield, inputHuman, spriteListBattlefield, ZoneType.BATTLEFIELD,
-				imageViewCardZoom);
+		canvasBattlefield = new CanvasZoneDefault(paneBattlefield, inputHuman, spriteListBattlefield,
+				ZoneType.BATTLEFIELD, imageViewCardZoom);
 		paneBattlefield.getChildren().add(canvasBattlefield);
 		tabBattlefield.setContent(paneBattlefield);
 
-		canvasComputerGraveyard = new CanvasZone(paneComputerGraveyard, inputHuman, spriteListComputerGraveyard,
+		canvasComputerGraveyard = new CanvasZoneDefault(paneComputerGraveyard, inputHuman, spriteListComputerGraveyard,
 				ZoneType.GRAVEYARD, imageViewCardZoom);
 		paneComputerGraveyard.getChildren().add(canvasComputerGraveyard);
 		tabComputerGraveyard.setContent(paneComputerGraveyard);
 		tabComputerGraveyard.setGraphic(new AdaptableImageView(ResourceManager.getIcon("grave.png"),
 				new SimpleDoubleProperty(16.0), new SimpleDoubleProperty(16.0)));
 
-		canvasComputerHand = new CanvasZone(paneComputerHand, inputHuman, spriteListComputerHand, ZoneType.HAND,
+		canvasComputerHand = new CanvasZoneDefault(paneComputerHand, inputHuman, spriteListComputerHand, ZoneType.HAND,
 				imageViewCardZoom);
 		paneComputerHand.getChildren().add(canvasComputerHand);
 		tabComputerHand.setContent(paneComputerHand);
 		tabComputerHand.setGraphic(new AdaptableImageView(ResourceManager.getIcon("hand.png"),
 				new SimpleDoubleProperty(16.0), new SimpleDoubleProperty(16.0)));
 
-		canvasExile = new CanvasZone(paneExile, inputHuman, spriteListExile, ZoneType.EXILE, imageViewCardZoom);
+		canvasExile = new CanvasZoneDefault(paneExile, inputHuman, spriteListExile, ZoneType.EXILE, imageViewCardZoom);
 		paneExile.getChildren().add(canvasExile);
 		tabExile.setContent(paneExile);
 
-		canvasHumanGraveyard = new CanvasZone(paneHumanGraveyard, inputHuman, spriteListHumanGraveyard,
+		canvasHumanGraveyard = new CanvasZoneDefault(paneHumanGraveyard, inputHuman, spriteListHumanGraveyard,
 				ZoneType.GRAVEYARD, imageViewCardZoom);
 		paneHumanGraveyard.getChildren().add(canvasHumanGraveyard);
 		tabHumanGraveyard.setContent(paneComputerGraveyard);
 		tabHumanGraveyard.setGraphic(new AdaptableImageView(ResourceManager.getIcon("grave.png"),
 				new SimpleDoubleProperty(16.0), new SimpleDoubleProperty(16.0)));
 
-		canvasHumanHand = new CanvasZone(paneHumanHand, inputHuman, spriteListHumanHand, ZoneType.HAND,
+		canvasHumanHand = new CanvasZoneDefault(paneHumanHand, inputHuman, spriteListHumanHand, ZoneType.HAND,
 				imageViewCardZoom);
 		paneHumanHand.getChildren().add(canvasHumanHand);
 		tabHumanHand.setContent(paneHumanHand);
@@ -449,60 +330,62 @@ public class MatchPresenter extends AnimationTimer implements Initializable, IsS
 		rendererExile = () -> canvasExile.draw();
 		rendererHumanGraveyard = () -> canvasHumanGraveyard.draw();
 		rendererHumanHand = () -> canvasHumanHand.draw();
+		rendererStack = () -> canvasStack.draw();
 		fpsReporter = fps -> fpsLabel.setText(String.format("FPS: %d", fps));
 
 		/**
 		 * Linkes Panel
 		 */
 		// Elemente erstellen
-		setIconLabel(avatarComputer, labelComputerAvatar);
-		setIconLabel(ResourceManager.getIcon("heart.png"), labelIconComputerLife);
+		initializeIconLabel(avatarComputer, labelComputerAvatar);
+		initializeIconLabel(ResourceManager.getIcon("heart.png"), labelIconComputerLife);
 
-		setIconLabel(ResourceManager.getIcon("b.png"), labelIconComputerBlackMana);
-		setIconLabel(ResourceManager.getIcon("u.png"), labelIconComputerBlueMana);
-		setIconLabel(ResourceManager.getIcon("1.png"), labelIconComputerColorlessMana);
-		setIconLabel(ResourceManager.getIcon("g.png"), labelIconComputerGreenMana);
-		setIconLabel(ResourceManager.getIcon("r.png"), labelIconComputerRedMana);
-		setIconLabel(ResourceManager.getIcon("w.png"), labelIconComputerWhiteMana);
+		initializeIconLabel(ResourceManager.getIcon("b.png"), labelIconComputerBlackMana);
+		initializeIconLabel(ResourceManager.getIcon("u.png"), labelIconComputerBlueMana);
+		initializeIconLabel(ResourceManager.getIcon("1.png"), labelIconComputerColorlessMana);
+		initializeIconLabel(ResourceManager.getIcon("g.png"), labelIconComputerGreenMana);
+		initializeIconLabel(ResourceManager.getIcon("r.png"), labelIconComputerRedMana);
+		initializeIconLabel(ResourceManager.getIcon("w.png"), labelIconComputerWhiteMana);
 
-		setIconLabel(avatarHuman, labelHumanAvatar);
-		setIconLabel(ResourceManager.getIcon("heart.png"), labelIconHumanLife);
+		initializeIconLabel(avatarHuman, labelHumanAvatar);
+		initializeIconLabel(ResourceManager.getIcon("heart.png"), labelIconHumanLife);
 
-		setIconLabel(ResourceManager.getIcon("b.png"), labelIconHumanBlackMana);
-		setIconLabel(ResourceManager.getIcon("u.png"), labelIconHumanBlueMana);
-		setIconLabel(ResourceManager.getIcon("1.png"), labelIconHumanColorlessMana);
-		setIconLabel(ResourceManager.getIcon("g.png"), labelIconHumanGreenMana);
-		setIconLabel(ResourceManager.getIcon("r.png"), labelIconHumanRedMana);
-		setIconLabel(ResourceManager.getIcon("w.png"), labelIconHumanWhiteMana);
+		initializeIconLabel(ResourceManager.getIcon("b.png"), labelIconHumanBlackMana);
+		initializeIconLabel(ResourceManager.getIcon("u.png"), labelIconHumanBlueMana);
+		initializeIconLabel(ResourceManager.getIcon("1.png"), labelIconHumanColorlessMana);
+		initializeIconLabel(ResourceManager.getIcon("g.png"), labelIconHumanGreenMana);
+		initializeIconLabel(ResourceManager.getIcon("r.png"), labelIconHumanRedMana);
+		initializeIconLabel(ResourceManager.getIcon("w.png"), labelIconHumanWhiteMana);
 
 		// Elemente binden
-		labelComputerLife.textProperty().bind(playerComputer.propertyLife().asString());
+		bindLifeLabel(labelComputerLife, playerComputer);
+		bindManaPool(playerComputer);
 
-		labelHumanLife.textProperty().bind(playerHuman.propertyLife().asString());
+		bindSizeTab(tabStack, PlayerType.NONE, ZoneType.STACK);
+		bindZoneStack(matchActive.getZoneStack(), spriteListStack);
+
+		bindLifeLabel(labelHumanLife, playerHuman);
+		bindManaPool(playerHuman);
 
 		/**
 		 * Mittleres Panel
 		 */
 		// Elemente binden
-		tabBattlefield.textProperty().bind(createMatchTabBinding(ZoneType.BATTLEFIELD));
-
-		tabComputerGraveyard.textProperty().bind(createPlayerTabBinding(playerComputer, ZoneType.GRAVEYARD));
-		tabComputerHand.textProperty().bind(createPlayerTabBinding(playerComputer, ZoneType.HAND));
-
-		tabExile.textProperty().bind(createMatchTabBinding(ZoneType.EXILE));
-
-		tabHumanGraveyard.textProperty().bind(createPlayerTabBinding(playerHuman, ZoneType.GRAVEYARD));
-		tabHumanHand.textProperty().bind(createPlayerTabBinding(playerHuman, ZoneType.HAND));
-
+		bindSizeTab(tabBattlefield, PlayerType.NONE, ZoneType.BATTLEFIELD);
 		bindZone(matchActive.getZoneBattlefield(), spriteListBattlefield);
+
+		bindSizeTab(tabComputerGraveyard, PlayerType.COMPUTER, ZoneType.GRAVEYARD);
+		bindSizeTab(tabComputerHand, PlayerType.COMPUTER, ZoneType.HAND);
 		bindZone(playerComputer.getZoneGraveyard(), spriteListComputerGraveyard);
 		bindZone(playerComputer.getZoneHand(), spriteListComputerHand);
+
+		bindSizeTab(tabExile, PlayerType.NONE, ZoneType.EXILE);
 		bindZone(matchActive.getZoneExile(), spriteListExile);
+
+		bindSizeTab(tabHumanGraveyard, PlayerType.HUMAN, ZoneType.GRAVEYARD);
+		bindSizeTab(tabHumanHand, PlayerType.HUMAN, ZoneType.HAND);
 		bindZone(playerHuman.getZoneGraveyard(), spriteListHumanGraveyard);
 		bindZone(playerHuman.getZoneHand(), spriteListHumanHand);
-
-		bindManaPool(playerComputer);
-		bindManaPool(playerHuman);
 
 		/**
 		 * Unteres Panel
@@ -530,6 +413,10 @@ public class MatchPresenter extends AnimationTimer implements Initializable, IsS
 		secondsElapsedSinceLastFpsUpdate = 0f;
 		framesSinceLastFpsUpdate = 0;
 		super.stop();
+	}
+
+	private void bindLifeLabel(Label statusLabel, IsPlayer player) {
+		statusLabel.textProperty().bind(player.propertyLife().asString());
 	}
 
 	private void bindManaPool(IsPlayer player) {
@@ -579,22 +466,48 @@ public class MatchPresenter extends AnimationTimer implements Initializable, IsS
 		});
 	}
 
-	private void bindZone(IsZone<? extends MagicCard> zone, List<CardSprite> spriteList) {
-		zone.propertyListZoneCards().addListener((ListChangeListener.Change<? extends MagicCard> c) -> {
-			while (c.next()) {
-				if (c.wasAdded()) {
-					c.getAddedSubList().forEach(addedCard -> {
-						spriteList.add(new CardSprite(addedCard));
+	private void bindSizeTab(Tab sizeTab, PlayerType playerType, ZoneType zoneType) {
+		sizeTab.textProperty().bind(createTabBinding(playerType, zoneType));
+	}
+
+	private void bindZone(IsZone<? extends MagicCard> zone, List<SpriteMagicObject> listSprites) {
+		zone.propertyListZoneCards().addListener((ListChangeListener.Change<? extends MagicCard> listChanges) -> {
+			while (listChanges.next()) {
+				if (listChanges.wasAdded()) {
+					listChanges.getAddedSubList().forEach(magicCard -> {
+						listSprites.add(new SpriteMagicObject(magicCard));
 					});
-				} else if (c.wasRemoved()) {
-					c.getRemoved().forEach(removedCard -> {
-						CardSprite spriteToRemove = null;
-						for (CardSprite sprite : spriteList) {
-							if (sprite.getCard().equals(removedCard)) {
+				} else if (listChanges.wasRemoved()) {
+					listChanges.getRemoved().forEach(magicCard -> {
+						Sprite spriteToRemove = null;
+						for (SpriteMagicObject sprite : listSprites) {
+							if (sprite.getMagicObject().equals(magicCard)) {
 								spriteToRemove = sprite;
 							}
 						}
-						spriteList.remove(spriteToRemove);
+						listSprites.remove(spriteToRemove);
+					});
+				}
+			}
+		});
+	}
+
+	private void bindZoneStack(MagicStack stack, List<SpriteStackable> listSprites) {
+		stack.getList().addListener((ListChangeListener.Change<? extends IsStackable> listChanges) -> {
+			while (listChanges.next()) {
+				if (listChanges.wasAdded()) {
+					listChanges.getAddedSubList().forEach(stackable -> {
+						listSprites.add(new SpriteStackable(stackable));
+					});
+				} else if (listChanges.wasRemoved()) {
+					listChanges.getRemoved().forEach(stackable -> {
+						Sprite spriteToRemove = null;
+						for (SpriteStackable sprite : listSprites) {
+							if (sprite.getMagicObject().equals(stackable)) {
+								spriteToRemove = sprite;
+							}
+						}
+						listSprites.remove(spriteToRemove);
 					});
 				}
 			}
@@ -616,11 +529,20 @@ public class MatchPresenter extends AnimationTimer implements Initializable, IsS
 				magicParser.parseDeckFromPath(FileManager.getDeckPath(deckComputer)));
 	}
 
-	private StringExpression createPlayerTabBinding(IsPlayer player, ZoneType zoneType) {
-		if (zoneType.equals(ZoneType.HAND)) {
+	private StringExpression createTabBinding(PlayerType playerType, ZoneType zoneType) {
+		if (zoneType.equals(ZoneType.BATTLEFIELD)) {
+			return Bindings.concat("(").concat(matchActive.propertyBattlefieldSize().asString())
+					.concat(") Battlefield");
+		} else if (zoneType.equals(ZoneType.EXILE)) {
+			return Bindings.concat("(").concat(matchActive.propertyExileSize().asString()).concat(") Exile");
+		} else if (zoneType.equals(ZoneType.STACK)) {
+			return Bindings.concat("(").concat(matchActive.propertyStackSize().asString()).concat(") Stack");
+		} else if (zoneType.equals(ZoneType.HAND)) {
+			IsPlayer player = getMatchActive().getPlayer(playerType);
 			return Bindings.concat("(").concat(player.propertyHandSize().asString()).concat(") ")
 					.concat(player.getDisplayName());
 		} else if (zoneType.equals(ZoneType.GRAVEYARD)) {
+			IsPlayer player = getMatchActive().getPlayer(playerType);
 			return Bindings.concat("(").concat(player.propertyGraveSize().asString()).concat(") ")
 					.concat(player.getDisplayName());
 		} else {
@@ -628,18 +550,11 @@ public class MatchPresenter extends AnimationTimer implements Initializable, IsS
 		}
 	}
 
-	private StringExpression createMatchTabBinding(ZoneType zoneType) {
-		if (zoneType.equals(ZoneType.BATTLEFIELD)) {
-			return Bindings.concat("(").concat(matchActive.propertyBattlefieldSize().asString())
-					.concat(") Battlefield");
-		} else if (zoneType.equals(ZoneType.EXILE)) {
-			return Bindings.concat("(").concat(matchActive.propertyExileSize().asString()).concat(") Exile");
-		} else {
-			throw new IllegalArgumentException();
-		}
+	private Match getMatchActive() {
+		return matchActive;
 	}
 
-	private void setIconLabel(Image icon, Label label) {
+	private void initializeIconLabel(Image icon, Label label) {
 		label.setGraphic(new AdaptableImageView(icon, label.heightProperty(), label.widthProperty()));
 	}
 

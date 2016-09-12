@@ -105,6 +105,10 @@ public final class Match {
 	 */
 	private final ObjectProperty<IsPlayer> propertyPlayerPrioritized;
 	/**
+	 * Speichert die Anzahl der Elemente auf dem Stack.
+	 */
+	private IntegerProperty propertyStackSize;
+	/**
 	 * Speichert den RuleEnforcer.
 	 */
 	private final RuleEnforcer ruleEnforcer;
@@ -138,7 +142,7 @@ public final class Match {
 
 		propertyBattlefieldSize = new SimpleIntegerProperty(0);
 		propertyCurrentPhase = new SimpleObjectProperty<>(null);
-		propertyCurrentStep = new SimpleObjectProperty<Step>(null);
+		propertyCurrentStep = new SimpleObjectProperty<>(null);
 		propertyCurrentTurn = new SimpleObjectProperty<>(null);
 		propertyExileSize = new SimpleIntegerProperty(0);
 		propertyMatchRunning = new SimpleBooleanProperty(false);
@@ -148,6 +152,7 @@ public final class Match {
 		propertyListTurns = new SimpleListProperty<>(FXCollections.observableArrayList(new ArrayList<>()));
 		propertyPlayerActive = new SimpleObjectProperty<>(playerComputer);
 		propertyPlayerPrioritized = new SimpleObjectProperty<>(playerComputer);
+		propertyStackSize = new SimpleIntegerProperty(0);
 
 		propertyListAttackTargets.add(playerComputer);
 		propertyListAttackTargets.add(playerHuman);
@@ -167,6 +172,14 @@ public final class Match {
 		return zoneExile;
 	}
 
+	public MagicStack getZoneStack() {
+		return magicStack;
+	}
+
+	public IntegerProperty propertyBattlefieldSize() {
+		return propertyBattlefieldSize;
+	}
+
 	public ObjectProperty<Phase> propertyCurrentPhase() {
 		return propertyCurrentPhase;
 	}
@@ -175,12 +188,20 @@ public final class Match {
 		return propertyCurrentStep;
 	}
 
+	public IntegerProperty propertyExileSize() {
+		return propertyExileSize;
+	}
+
 	public ObjectProperty<IsPlayer> propertyPlayerActive() {
 		return propertyPlayerActive;
 	}
 
 	public ObjectProperty<IsPlayer> propertyPlayerPrioritized() {
 		return propertyPlayerPrioritized;
+	}
+
+	public IntegerProperty propertyStackSize() {
+		return propertyStackSize;
 	}
 
 	public IntegerProperty propertyTurnNumber() {
@@ -222,7 +243,7 @@ public final class Match {
 				/**
 				 * Hier darf eine Runde nicht beendet werden. Immer wenn eine
 				 * neue Phase begonnen werden kann gibt es mindestens einen
-				 * Schritt, der noch gespielt werdne kann. Ist das nicht der
+				 * Schritt, der noch gespielt werden kann. Ist das nicht der
 				 * Fall, handelt es sich um eine Hauptphase. Dann muss die Phase
 				 * erst ausgespielt werden.
 				 */
@@ -240,7 +261,7 @@ public final class Match {
 			ruleEnforcer.processStateBasedActions();
 			determinePlayerPrioritised();
 			if (getPlayerActive().getFlagPassedPriority() && getPlayerNonactive().getFlagPassedPriority()
-					&& !getMagicStack().isEmpty()) {
+					&& !getZoneStack().isEmpty()) {
 				// Spieler haben gepasst, aber es liegt etwas auf dem Stack.
 
 				processStack();
@@ -295,7 +316,7 @@ public final class Match {
 				ruleEnforcer.processStateBasedActions();
 				determinePlayerPrioritised();
 				if (getPlayerActive().getFlagPassedPriority() && getPlayerNonactive().getFlagPassedPriority()
-						&& !getMagicStack().isEmpty()) {
+						&& !getZoneStack().isEmpty()) {
 					// Spieler haben gepasst, aber es liegt etwas auf dem Stack.
 
 					processStack();
@@ -505,10 +526,6 @@ public final class Match {
 		return result;
 	}
 
-	private MagicStack getMagicStack() {
-		return magicStack;
-	}
-
 	private int getTurnNumber() {
 		return getCurrentTurn().propertyTurnNumber().get();
 	}
@@ -535,7 +552,6 @@ public final class Match {
 	 *
 	 * @return true, wenn die Runde noch läuft.
 	 */
-
 	private boolean isTurnRunning() {
 		return getCurrentTurn().getFlagTurnRunning();
 	}
@@ -543,7 +559,6 @@ public final class Match {
 	/**
 	 * Startet ein neues Spiel (rule = 103.).
 	 */
-
 	private void matchBegin(boolean alreadyRunning) {
 		if (!alreadyRunning) {
 			LOGGER.debug("{} matchBegin()", this);
@@ -558,7 +573,6 @@ public final class Match {
 	/**
 	 * Beendet das Spiel (rule = 104.).
 	 */
-
 	private void matchEnd(boolean needPlayerInput) {
 		if (!needPlayerInput) {
 			LOGGER.debug("{} matchEnd()", this);
@@ -569,7 +583,6 @@ public final class Match {
 	/**
 	 * Beginn eine neue Phase.
 	 */
-
 	private void phaseBegin(boolean alreadyRunning) {
 		if (!alreadyRunning) {
 			LOGGER.debug("{} phaseBegin()", this);
@@ -581,12 +594,16 @@ public final class Match {
 	 * Beendet eine Phase. Eine Phase kann beendet werden, wenn keine weiteren
 	 * Schritt mehr in der Phase gespielt werden und die Runde gerade läuft.
 	 */
-
 	private void phaseEnd(boolean hasNextStep, boolean isPhaseRunning, boolean needPlayerInput) {
 		if (!hasNextStep && isPhaseRunning && !needPlayerInput) {
 			LOGGER.debug("{} phaseEnd()", this);
 			getCurrentTurn().phaseEnd();
 		}
+	}
+
+	private void popSpell() {
+		getZoneStack().pop();
+		propertyStackSize().set(getZoneStack().getSize());
 	}
 
 	/**
@@ -596,28 +613,21 @@ public final class Match {
 	 */
 	private void processStack() {
 		LOGGER.debug("{} processStack()", this);
-		final int sizeMagicStack = getMagicStack().getSize();
+		final int sizeMagicStack = getZoneStack().getSize();
+
 		for (int i = 0; i < sizeMagicStack; i++) {
-			final IsStackable stackable = getMagicStack().peek();
+			final IsStackable stackable = getZoneStack().peek();
 			if (stackable.isPermanentSpell()) {
-				getZoneBattlefield().add(factoryMagicPermanent.create((MagicSpell) stackable));
+				addCard(factoryMagicPermanent.create((MagicSpell) stackable), ZoneType.BATTLEFIELD);
 			} else {
 				stackable.resolve();
 			}
-			getMagicStack().pop();
+			popSpell();
 		}
-	}
-
-	public IntegerProperty propertyBattlefieldSize() {
-		return propertyBattlefieldSize;
 	}
 
 	private ObjectProperty<Turn> propertyCurrentTurn() {
 		return propertyCurrentTurn;
-	}
-
-	public IntegerProperty propertyExileSize() {
-		return propertyExileSize;
 	}
 
 	private BooleanProperty propertyFlagNeedPlayerInput() {
@@ -737,11 +747,11 @@ public final class Match {
 
 	void addCard(MagicCard magicCard, ZoneType zoneType) {
 		if (zoneType.equals(ZoneType.BATTLEFIELD)) {
-			zoneBattlefield.add(factoryMagicPermanent.create(magicCard));
-			propertyBattlefieldSize.set(zoneBattlefield.getSize());
+			getZoneBattlefield().add(factoryMagicPermanent.create(magicCard));
+			propertyBattlefieldSize().set(getZoneBattlefield().getSize());
 		} else if (zoneType.equals(ZoneType.EXILE)) {
-			zoneExile.add(magicCard);
-			propertyExileSize.set(zoneExile.getSize());
+			getZoneExile().add(magicCard);
+			propertyExileSize().set(getZoneExile().getSize());
 		}
 	}
 
@@ -841,7 +851,8 @@ public final class Match {
 
 	void pushSpell(MagicSpell magicSpell) {
 		magicSpell.addZone(ZoneType.STACK);
-		magicStack.push(magicSpell);
+		getZoneStack().push(magicSpell);
+		propertyStackSize().set(getZoneStack().getSize());
 	}
 
 	void removeCard(MagicCard magicCard, ZoneType zoneType) {

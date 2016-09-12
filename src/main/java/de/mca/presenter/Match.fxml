@@ -134,7 +134,7 @@
                     <tabs>
                       <Tab fx:id="tabStack" text="Stack">
                         <content>
-                          <AnchorPane />
+                          <AnchorPane fx:id="paneStack" />
                         </content>
                       </Tab>
                       <Tab fx:id="tabCardZoom" text="Card">
