@@ -163,7 +163,7 @@ public interface IsZone<T> {
 	 * @param card
 	 *            Die zu entfernende Karte.
 	 */
-	public void remove(T card);
+	public boolean remove(T card);
 
 	/**
 	 * Entfernt alle Karten aus der Zone.

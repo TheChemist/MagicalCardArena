@@ -184,8 +184,8 @@ public final class ZoneDefault<E extends MagicCard> implements IsZone<E> {
 	}
 
 	@Override
-	public void remove(E card) {
-		cardList.remove(card);
+	public boolean remove(E card) {
+		return cardList.remove(card);
 	}
 
 	@Override
