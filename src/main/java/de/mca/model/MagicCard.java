@@ -200,7 +200,20 @@ public class MagicCard implements IsObject {
 
 	@Override
 	public boolean equals(Object obj) {
-		return super.equals(obj) && id == ((MagicCard) obj).getId();
+		if (this == obj) {
+			return true;
+		}
+
+		if (obj == null) {
+			return false;
+		}
+
+		IsObject other = (IsObject) obj;
+		if (this.getId() != other.getId()) {
+			return false;
+		}
+
+		return true;
 	}
 
 	public boolean equalsColor(Set<ColorType> colors) {
@@ -294,7 +307,10 @@ public class MagicCard implements IsObject {
 
 	@Override
 	public int hashCode() {
-		return id;
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + this.getId();
+		return result;
 	}
 
 	public boolean isArtifact() {
@@ -506,10 +522,8 @@ public class MagicCard implements IsObject {
 
 	@Override
 	public String toString() {
-		return new StringBuilder("[").append(displayName)
-				// .append(" id=[").append(id)
-				.append("] z=[").append(getCurrentZone()).append("] cm=[").append(listCostMaps.size()).append("]]")
-				.toString();
+		return new StringBuilder("[").append(displayName).append(" id=[").append(id).append("] z=[")
+				.append(getCurrentZone()).append("] cm=[").append(listCostMaps.size()).append("]]").toString();
 	}
 
 }
