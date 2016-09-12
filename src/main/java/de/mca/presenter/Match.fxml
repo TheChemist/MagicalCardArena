@@ -320,8 +320,8 @@
                      <font>
                         <Font name="System Bold" size="12.0" />
                      </font></Label>
-                  <Label text="Prioritized Player:" />
-                  <Label fx:id="labelPlayerPrioritized">
+                  <Label text="Hint:" />
+                  <Label fx:id="labelHint" textFill="RED">
                      <font>
                         <Font name="System Bold" size="12.0" />
                      </font></Label>

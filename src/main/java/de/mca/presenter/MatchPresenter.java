@@ -140,7 +140,7 @@ public class MatchPresenter extends AnimationTimer implements Initializable, IsS
 	@FXML
 	private Label labelPlayerActive;
 	@FXML
-	private Label labelPlayerPrioritized;
+	private Label labelHint;
 	@FXML
 	private Label labelTurnNumber;
 	@Inject
@@ -395,7 +395,8 @@ public class MatchPresenter extends AnimationTimer implements Initializable, IsS
 		labelCurrentPhase.textProperty().bind(matchActive.propertyCurrentPhase().asString());
 		labelCurrentStep.textProperty().bind(matchActive.propertyCurrentStep().asString());
 		labelPlayerActive.textProperty().bind(matchActive.propertyPlayerActive().asString());
-		labelPlayerPrioritized.textProperty().bind(matchActive.propertyPlayerPrioritized().asString());
+
+		labelHint.textProperty().bind(playerHuman.propertyPlayerState().asString());
 
 		// Starten
 		setMatchActive(matchActive);

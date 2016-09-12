@@ -7,9 +7,10 @@ package de.mca.model.enums;
  */
 public enum PlayerState {
 
-	ACTIVATING_ABILITY("Aktiviert Fähigkeit"), ACTIVE("Aktiv"), ATTACKING("Greift an"), CASTING_SPELL(
-			"Beschwört Zauberspruch"), DEFENDING("Verteidigt"), DISCARDING("Wirft Karte ab"), NONACTIVE("Nichtaktiv"), PAYING("Bezahlt"), PRIORITIZED(
-							"Priorisiert"), TAKING_SPECIAL_ACTION("Führt Spezialhandlung aus");
+	ACTIVATING_ABILITY("Aktiviere Fähigkeit"), ACTIVE("Aktiv"), ATTACKING("Greife an"), CASTING_SPELL(
+			"Beschwöre Zauberspruch"), DEFENDING("Verteidige"), DISCARDING("Wirf Karte ab"), NONACTIVE(
+					"Nichtaktiv"), PAYING("Wähle Manaquelle aus"), PRIORITIZED(
+							"Passe, spiele Karte oder Fähigkeit"), TAKING_SPECIAL_ACTION("Führe Spezialhandlung aus");
 
 	private final String displayName;
 
