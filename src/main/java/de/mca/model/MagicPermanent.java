@@ -243,7 +243,11 @@ public class MagicPermanent extends MagicCard {
 	 * Karte unter 0 fällt.
 	 */
 	private void fireCreatureKill() {
-		eventBus.post(new SBACreatureToughnessZero(this, getPlayerControlling()));
+		getEventBus().post(new SBACreatureToughnessZero(this, getPlayerControlling()));
+	}
+
+	private EventBus getEventBus() {
+		return eventBus;
 	}
 
 }

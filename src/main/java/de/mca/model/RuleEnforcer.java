@@ -42,13 +42,13 @@ public class RuleEnforcer {
 	/**
 	 * Speichert die PermanentFactory zum Erstellen bleibender Karten.
 	 */
-	private final FactoryMagicPermanent magicPermanentFactory;
+	private final FactoryMagicPermanent factoryMagicPermanent;
 	/**
 	 * Speichert die SpellFactory zum Erstellen von Zaubersprüchen.
 	 */
-	private final FactoryMagicSpell magicSpellFactory;
+	private final FactoryMagicSpell factoryMagicSpell;
 	/**
-	 * Speichert das Match.
+	 * Speichert eine Referenz auf das Match.
 	 */
 	private Match match;
 	/**
@@ -58,11 +58,10 @@ public class RuleEnforcer {
 	private final SetProperty<StateBasedAction> setStateBasedActions;
 
 	@Inject
-	public RuleEnforcer(EventBus eventBus, FactoryMagicPermanent magicPermanentFactory,
-			FactoryMagicSpell magicSpellFactory) {
+	RuleEnforcer(EventBus eventBus, FactoryMagicPermanent factoryMagicPermanent, FactoryMagicSpell factoryMagicSpell) {
 		eventBus.register(this);
-		this.magicPermanentFactory = magicPermanentFactory;
-		this.magicSpellFactory = magicSpellFactory;
+		this.factoryMagicPermanent = factoryMagicPermanent;
+		this.factoryMagicSpell = factoryMagicSpell;
 
 		setStateBasedActions = new SimpleSetProperty<>(FXCollections.observableSet(new HashSet<>()));
 	}
@@ -103,7 +102,7 @@ public class RuleEnforcer {
 		LOGGER.debug("{} examinePACastSpell({})", this, playerActionCastSpell);
 		final IsPlayer player = playerActionCastSpell.getSource();
 		final MagicCard magicCard = playerActionCastSpell.getCard();
-		final MagicSpell spell = magicSpellFactory.create(magicCard);
+		final MagicSpell spell = factoryMagicSpell.create(magicCard);
 		if (match.checkCanCast(player, spell)) {
 			actionCastSpell(player, spell);
 			if (spell.getConvertedManaCost() <= 0) {
@@ -382,10 +381,13 @@ public class RuleEnforcer {
 	 */
 	private void actionCastSpell(IsPlayer player, MagicCard magicCard) {
 		LOGGER.debug("{} actionCastSpell({}, {})", this, player, magicCard);
+
+		// Neuen Spielerstatus setzen.
 		player.setPlayerState(PlayerState.CASTING_SPELL);
 
+		// Karte aus der Hand entfernen und auf den Stack schieben.
 		player.removeCard(magicCard, ZoneType.HAND);
-		match.pushSpell(magicSpellFactory.create(magicCard));
+		match.pushSpell(factoryMagicSpell.create(magicCard));
 	}
 
 	private void actionConcede() {
@@ -514,7 +516,7 @@ public class RuleEnforcer {
 		player.setFlagPlayedLand(true);
 
 		player.removeCard(landCard, ZoneType.HAND);
-		match.addCard(magicPermanentFactory.create(landCard), ZoneType.BATTLEFIELD);
+		match.addCard(factoryMagicPermanent.create(landCard), ZoneType.BATTLEFIELD);
 
 		match.resetFlagsPassedPriority();
 		match.resetPlayerState(player);

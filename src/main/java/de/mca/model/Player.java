@@ -132,10 +132,11 @@ public final class Player implements IsPlayer {
 		propertyGraveSize = new SimpleIntegerProperty(0);
 		propertyHandSize = new SimpleIntegerProperty(0);
 		propertyLife = new SimpleIntegerProperty(20);
+		propertyPlayerState = new SimpleObjectProperty<>(PlayerState.NONACTIVE);
+
 		manaPool = new ManaMapDefault();
 		manaCostAlreadyPaid = new ManaMapDefault();
 		manaCostGoal = new ManaMapDefault();
-		propertyPlayerState = new SimpleObjectProperty<>(PlayerState.NONACTIVE);
 
 		zoneGraveyard = zoneFactory.create(playerType, ZoneType.GRAVEYARD);
 		zoneHand = zoneFactory.create(playerType, ZoneType.HAND);
