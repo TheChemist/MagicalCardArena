@@ -465,6 +465,9 @@ public class MagicCard implements IsObject {
 
 	public void setListCharacteristicAbilities(ObservableList<CharacteristicAbility> listAbilities) {
 		this.listCharacteristicAbilities.set(listAbilities);
+		this.listCharacteristicAbilities.forEach(element -> {
+			element.setSource(this);
+		});
 	}
 
 	public void setListCostMaps(ObservableList<IsManaMap> listCostMaps) {

@@ -5,8 +5,8 @@ import java.util.List;
 
 import de.mca.Constants;
 import de.mca.InputHuman;
-import de.mca.model.MagicCard;
 import de.mca.model.enums.ZoneType;
+import de.mca.model.interfaces.IsObject;
 import javafx.beans.binding.DoubleBinding;
 import javafx.beans.property.DoubleProperty;
 import javafx.geometry.Point2D;
@@ -20,6 +20,8 @@ import javafx.scene.layout.Pane;
  * @author Maximilian Werling
  *
  */
+// TODO: Es wird eine eigene Canvas für das Battlefield benötigt. Tappen,
+// Permanent, mehrere Reihen...
 final class CanvasZoneDefault extends AdaptableCanvas {
 
 	private final List<SpriteMagicObject> spriteList;
@@ -70,7 +72,7 @@ final class CanvasZoneDefault extends AdaptableCanvas {
 	private void initializeMouseClicked(InputHuman input, List<SpriteMagicObject> spriteList, ZoneType zoneType) {
 		addEventHandler(MouseEvent.MOUSE_CLICKED, (mouseEvent) -> {
 			int zCoordinate = -1;
-			List<MagicCard> listClicked = new ArrayList<>();
+			List<IsObject> listClicked = new ArrayList<>();
 			for (SpriteMagicObject sprite : spriteList) {
 				if (sprite.getBoundary().contains(new Point2D(mouseEvent.getX(), mouseEvent.getY()))) {
 					listClicked.add(sprite.getMagicObject());

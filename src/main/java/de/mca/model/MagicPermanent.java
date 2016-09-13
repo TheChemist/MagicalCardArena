@@ -96,17 +96,17 @@ public class MagicPermanent extends MagicCard {
 		super(id);
 		this.eventBus = eventBus;
 		this.playerControlling = new SimpleObjectProperty<>(playerControlling);
-		damage = new SimpleIntegerProperty();
-		flagAttacking = new SimpleBooleanProperty();
-		flagAttackingAlone = new SimpleBooleanProperty();
-		flagBlocked = new SimpleBooleanProperty();
-		flagBlocking = new SimpleBooleanProperty();
-		flagBlockingAlone = new SimpleBooleanProperty();
-		flagFaceDown = new SimpleBooleanProperty();
-		flagFlipped = new SimpleBooleanProperty();
-		flagPhasedOut = new SimpleBooleanProperty();
+		damage = new SimpleIntegerProperty(0);
+		flagAttacking = new SimpleBooleanProperty(false);
+		flagAttackingAlone = new SimpleBooleanProperty(false);
+		flagBlocked = new SimpleBooleanProperty(false);
+		flagBlocking = new SimpleBooleanProperty(false);
+		flagBlockingAlone = new SimpleBooleanProperty(false);
+		flagFaceDown = new SimpleBooleanProperty(false);
+		flagFlipped = new SimpleBooleanProperty(false);
+		flagPhasedOut = new SimpleBooleanProperty(false);
 		flagSummoningSickness = new SimpleBooleanProperty(true);
-		flagTapped = new SimpleBooleanProperty();
+		flagTapped = new SimpleBooleanProperty(false);
 	}
 
 	/**

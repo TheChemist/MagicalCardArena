@@ -128,7 +128,7 @@ public class CharacteristicAbility implements IsAbility {
 	}
 
 	public boolean isManaAbility() {
-		return abilityType.isManaAbility();
+		return getAbilityType().isManaAbility();
 	}
 
 	public ObservableList<IsManaMap> propertyListCostMaps() {
@@ -162,7 +162,11 @@ public class CharacteristicAbility implements IsAbility {
 	}
 
 	protected void fireMagicEffect(Effect magicEffect) {
-		eventBus.post(magicEffect);
+		getEventBus().post(magicEffect);
+	}
+
+	public void setSource(IsObject magicCard) {
+		propertySource().set(magicCard);
 	}
 
 }

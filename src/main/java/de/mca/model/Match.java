@@ -14,7 +14,6 @@ import de.mca.Constants;
 import de.mca.factories.FactoryMagicPermanent;
 import de.mca.factories.FactoryTurn;
 import de.mca.factories.FactoryZone;
-import de.mca.model.enums.AdditionalCostType;
 import de.mca.model.enums.ObjectType;
 import de.mca.model.enums.PlayerState;
 import de.mca.model.enums.PlayerType;
@@ -359,26 +358,6 @@ public final class Match {
 	}
 
 	/**
-	 * Prüft, ob die zusätzlichen Kosten eines Permanents bezahlt werden können.
-	 *
-	 * @param mp
-	 *            das Permanent.
-	 * @param act
-	 *            der Typ der zusätzlichen Kosten
-	 * @return true, wenn die zusätzlichen Kosten bezahlt werden können.
-	 */
-	private boolean checkCanPay(MagicPermanent mp, AdditionalCostType act) {
-		switch (act) {
-		case NO_ADDITIONAL_COST:
-			return true;
-		case TAP:
-			return !mp.isFlagTapped();
-		default:
-			return false;
-		}
-	}
-
-	/**
 	 * Prüft, ob im aktuellen Spielschritt die Priorität an die Spieler erteilt
 	 * wird.
 	 *
@@ -431,7 +410,7 @@ public final class Match {
 	 * Step einmal seine Priorität abgegeben, kann er nicht wieder priorisiert
 	 * werden.
 	 */
-	private void determinePlayerPrioritised() {
+	void determinePlayerPrioritised() {
 		final IsPlayer playerActive = getPlayerActive();
 		final IsPlayer playerNonactive = getPlayerNonactive();
 
@@ -753,19 +732,6 @@ public final class Match {
 			getZoneExile().add(magicCard);
 			propertyExileSize().set(getZoneExile().getSize());
 		}
-	}
-
-	boolean checkCanActivate(IsPlayer p, ActivatedAbility aa) {
-		if (aa.isManaAbility()) {
-			final boolean prioritised = p.isPrioritised();
-			final boolean castingSpell = p.isCastingSpell() || p.isPaying();
-			final boolean activatingAbility = p.isActivatingAbility();
-			final boolean checkCanPay = checkCanPay((MagicPermanent) aa.getSource(), aa.getAdditionalCostType());
-			LOGGER.debug("{} checkCanActivate({}, {}) = {}", this, p, aa,
-					(prioritised || castingSpell || activatingAbility) && checkCanPay);
-			return (prioritised || castingSpell || activatingAbility) && checkCanPay;
-		}
-		return false;
 	}
 
 	boolean checkCanCast(IsPlayer p, MagicSpell ms) {

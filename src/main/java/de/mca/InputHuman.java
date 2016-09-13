@@ -46,15 +46,12 @@ public class InputHuman implements IsInput {
 	@Override
 	public CharacteristicAbility determineAbility(List<CharacteristicAbility> listLegalAbilities) {
 		LOGGER.debug("{} determineManaAbility({})", player, listLegalAbilities);
-		LOGGER.debug("{} -> Actions: [Manafähigkeit auswählen]", player);
-		for (int i = 0; i < listLegalAbilities.size(); i++) {
-			LOGGER.info("{} {}", i, listLegalAbilities.get(i));
-		}
-		try {
-			return listLegalAbilities.get(Integer.parseInt(sc.nextLine()));
-		} catch (final Exception e) {
-			e.printStackTrace();
-			return determineAbility(listLegalAbilities);
+		if (listLegalAbilities.isEmpty()) {
+			throw new RuntimeException("Keine Fähigkeit zum auswählen!");
+		} else if (listLegalAbilities.size() == 1) {
+			return listLegalAbilities.get(0);
+		} else {
+			throw new RuntimeException("Mehrere Fähigkeiten zum auswählen! Wähle zufällig...");
 		}
 	}
 
@@ -291,6 +288,10 @@ public class InputHuman implements IsInput {
 		} else if (zoneType.equals(ZoneType.BATTLEFIELD)) {
 			// Karte auf Spielfeld geklickt
 
+			MagicPermanent magicPermanent = (MagicPermanent) object;
+
+			getPlayer().fireActivateActivatedAbility(
+					determineAbility(magicPermanent.propertyListCharacteristicAbilities()));
 		}
 	}
 
@@ -319,14 +320,6 @@ public class InputHuman implements IsInput {
 			return new Attack(attacker, legalAttackTargets.get(0));
 		} else {
 			return new Attack(attacker, determineAttackTarget(legalAttackTargets));
-		}
-	}
-
-	private CharacteristicAbility filterAbilities(List<CharacteristicAbility> listLegalAbilities) {
-		if (listLegalAbilities.size() < 2) {
-			return listLegalAbilities.get(0);
-		} else {
-			return determineAbility(listLegalAbilities);
 		}
 	}
 

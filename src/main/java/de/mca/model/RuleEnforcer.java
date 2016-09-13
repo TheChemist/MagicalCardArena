@@ -23,6 +23,7 @@ import de.mca.SAPlayLand;
 import de.mca.SpecialAction;
 import de.mca.factories.FactoryMagicPermanent;
 import de.mca.factories.FactoryMagicSpell;
+import de.mca.model.enums.AdditionalCostType;
 import de.mca.model.enums.ColorType;
 import de.mca.model.enums.PlayerState;
 import de.mca.model.enums.ZoneType;
@@ -88,13 +89,10 @@ public class RuleEnforcer {
 	@Subscribe
 	public void examinePAActivateAbility(PAActivateAbility playerActionActivatedAbility) {
 		LOGGER.debug("{} examinePAActivateAbility({})", this, playerActionActivatedAbility);
-		final IsPlayer player = playerActionActivatedAbility.getSource();
-		final ActivatedAbility aa = playerActionActivatedAbility.getAbility();
-		if (match.checkCanActivate(player, aa)) {
-			actionActivateCharacteristicAbility(player, aa);
-			match.resetFlagsPassedPriority();
-			match.resetPlayerState(player);
-		}
+
+		// Führe Aktion aus.
+		actionActivateCharacteristicAbility(playerActionActivatedAbility.getSource(),
+				playerActionActivatedAbility.getAbility());
 	}
 
 	@Subscribe
@@ -287,16 +285,65 @@ public class RuleEnforcer {
 		return match.toString();
 	}
 
-	private void actionActivateCharacteristicAbility(IsPlayer player, CharacteristicAbility activatedAbility) {
-		LOGGER.debug("{} actionActivateActivatedAbility({}, {})", this, player, activatedAbility);
-		player.setPlayerState(PlayerState.ACTIVATING_ABILITY);
-		activatedAbility.generateEffects();
-		switch (activatedAbility.getAdditionalCostType()) {
+	/**
+	 * Prüft, ob die zusätzlichen Kosten eines Permanents bezahlt werden können.
+	 *
+	 * @param mp
+	 *            das Permanent.
+	 * @param act
+	 *            der Typ der zusätzlichen Kosten
+	 * @return true, wenn die zusätzlichen Kosten bezahlt werden können.
+	 */
+	private boolean checkCanPay(MagicPermanent mp, AdditionalCostType act) {
+		switch (act) {
 		case NO_ADDITIONAL_COST:
-			return;
+			return true;
 		case TAP:
-			((MagicPermanent) activatedAbility.getSource()).setFlagTapped(true);
-			break;
+			return !mp.isFlagTapped();
+		default:
+			return false;
+		}
+	}
+
+	private boolean checkCanActivate(IsPlayer p, ActivatedAbility aa) {
+		if (aa.isManaAbility()) {
+			final boolean prioritised = p.isPrioritised();
+			final boolean castingSpell = p.isCastingSpell() || p.isPaying();
+			final boolean activatingAbility = p.isActivatingAbility();
+			LOGGER.debug("{} checkCanActivate({}, {}) = {}", this, p, aa,
+					prioritised || castingSpell || activatingAbility);
+			return prioritised || castingSpell || activatingAbility;
+		}
+		return false;
+	}
+
+	private void actionActivateCharacteristicAbility(IsPlayer player, ActivatedAbility activatedAbility) {
+		LOGGER.debug("{} actionActivateActivatedAbility({}, {})", this, player, activatedAbility);
+		if (checkCanActivate(player, activatedAbility) && checkCanPay((MagicPermanent) activatedAbility.getSource(),
+				activatedAbility.getAdditionalCostType())) {
+			// Alle Voraussetungen sind erfüllt.
+
+			player.setPlayerState(PlayerState.ACTIVATING_ABILITY);
+
+			// Alle Effekte werden genertiert.
+			activatedAbility.generateEffects();
+
+			// Zusätzliche Kosten werden bezahlt.
+			switch (activatedAbility.getAdditionalCostType()) {
+			case NO_ADDITIONAL_COST:
+				return;
+			case TAP:
+				((MagicPermanent) activatedAbility.getSource()).setFlagTapped(true);
+				break;
+			}
+
+			match.resetFlagsPassedPriority();
+			match.resetPlayerState(player);
+			match.determinePlayerPrioritised();
+			match.setFlagNeedPlayerInput(true);
+		} else {
+			// Voraussetzungen sind nicht erfüllt.
+			// TODO: Reagiere mit Hinweis an den Spieler.
 		}
 	}
 
@@ -518,8 +565,14 @@ public class RuleEnforcer {
 		player.removeCard(landCard, ZoneType.HAND);
 		match.addCard(factoryMagicPermanent.create(landCard), ZoneType.BATTLEFIELD);
 
+		/**
+		 * Setze die priority flag beider Spieler zurück, sowie den
+		 * Spielerstatus des handelnden Spielers. Danach muss die Priorität neu
+		 * bestimmt werden. Zuletzt wird wieder Input benötigt.
+		 */
 		match.resetFlagsPassedPriority();
 		match.resetPlayerState(player);
+		match.determinePlayerPrioritised();
 		match.setFlagNeedPlayerInput(true);
 	}
 
