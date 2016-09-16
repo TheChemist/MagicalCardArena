@@ -208,7 +208,7 @@ public class MagicCard implements IsObject {
 			return false;
 		}
 
-		IsObject other = (IsObject) obj;
+		MagicCard other = (MagicCard) obj;
 		if (this.getId() != other.getId()) {
 			return false;
 		}

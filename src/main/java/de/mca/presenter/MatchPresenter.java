@@ -17,6 +17,7 @@ import de.mca.factories.FactoryPlayer;
 import de.mca.io.FileManager;
 import de.mca.io.ResourceManager;
 import de.mca.model.MagicCard;
+import de.mca.model.MagicPermanent;
 import de.mca.model.MagicStack;
 import de.mca.model.Match;
 import de.mca.model.enums.ColorType;
@@ -51,7 +52,7 @@ public class MatchPresenter extends AnimationTimer implements Initializable, IsS
 
 	@FXML
 	private Button buttonPassPriority;
-	private CanvasZoneDefault canvasBattlefield;
+	private CanvasZoneBattlefield canvasBattlefield;
 	private CanvasZoneDefault canvasComputerGraveyard;
 	private CanvasZoneDefault canvasComputerHand;
 	private CanvasZoneDefault canvasExile;
@@ -93,6 +94,8 @@ public class MatchPresenter extends AnimationTimer implements Initializable, IsS
 	private Label labelCurrentPhase;
 	@FXML
 	private Label labelCurrentStep;
+	@FXML
+	private Label labelHint;
 	@FXML
 	private Label labelHumanAvatar;
 	@FXML
@@ -140,8 +143,6 @@ public class MatchPresenter extends AnimationTimer implements Initializable, IsS
 	@FXML
 	private Label labelPlayerActive;
 	@FXML
-	private Label labelHint;
-	@FXML
 	private Label labelTurnNumber;
 	@Inject
 	private MagicParser magicParser;
@@ -180,12 +181,12 @@ public class MatchPresenter extends AnimationTimer implements Initializable, IsS
 	@SuppressWarnings("unused")
 	private Main screenController;
 	private float secondsElapsedSinceLastFpsUpdate = 0f;
-	private final List<SpriteMagicObject> spriteListBattlefield;
-	private final List<SpriteMagicObject> spriteListComputerGraveyard;
-	private final List<SpriteMagicObject> spriteListComputerHand;
-	private final List<SpriteMagicObject> spriteListExile;
-	private final List<SpriteMagicObject> spriteListHumanGraveyard;
-	private final List<SpriteMagicObject> spriteListHumanHand;
+	private final List<SpriteMagicPermanent> spriteListBattlefield;
+	private final List<SpriteMagicCard> spriteListComputerGraveyard;
+	private final List<SpriteMagicCard> spriteListComputerHand;
+	private final List<SpriteMagicCard> spriteListExile;
+	private final List<SpriteMagicCard> spriteListHumanGraveyard;
+	private final List<SpriteMagicCard> spriteListHumanHand;
 	private final List<SpriteStackable> spriteListStack;
 	@FXML
 	private Tab tabBattlefield;
@@ -268,7 +269,7 @@ public class MatchPresenter extends AnimationTimer implements Initializable, IsS
 		});
 
 		// Center Pane
-		canvasBattlefield = new CanvasZoneDefault(paneBattlefield, inputHuman, spriteListBattlefield,
+		canvasBattlefield = new CanvasZoneBattlefield(paneBattlefield, inputHuman, spriteListBattlefield,
 				ZoneType.BATTLEFIELD, imageViewCardZoom);
 		paneBattlefield.getChildren().add(canvasBattlefield);
 		tabBattlefield.setContent(paneBattlefield);
@@ -372,20 +373,20 @@ public class MatchPresenter extends AnimationTimer implements Initializable, IsS
 		 */
 		// Elemente binden
 		bindSizeTab(tabBattlefield, PlayerType.NONE, ZoneType.BATTLEFIELD);
-		bindZone(matchActive.getZoneBattlefield(), spriteListBattlefield);
+		bindZoneBattlefield(matchActive.getZoneBattlefield(), spriteListBattlefield);
 
 		bindSizeTab(tabComputerGraveyard, PlayerType.COMPUTER, ZoneType.GRAVEYARD);
 		bindSizeTab(tabComputerHand, PlayerType.COMPUTER, ZoneType.HAND);
-		bindZone(playerComputer.getZoneGraveyard(), spriteListComputerGraveyard);
-		bindZone(playerComputer.getZoneHand(), spriteListComputerHand);
+		bindZoneDefault(playerComputer.getZoneGraveyard(), spriteListComputerGraveyard);
+		bindZoneDefault(playerComputer.getZoneHand(), spriteListComputerHand);
 
 		bindSizeTab(tabExile, PlayerType.NONE, ZoneType.EXILE);
-		bindZone(matchActive.getZoneExile(), spriteListExile);
+		bindZoneDefault(matchActive.getZoneExile(), spriteListExile);
 
 		bindSizeTab(tabHumanGraveyard, PlayerType.HUMAN, ZoneType.GRAVEYARD);
 		bindSizeTab(tabHumanHand, PlayerType.HUMAN, ZoneType.HAND);
-		bindZone(playerHuman.getZoneGraveyard(), spriteListHumanGraveyard);
-		bindZone(playerHuman.getZoneHand(), spriteListHumanHand);
+		bindZoneDefault(playerHuman.getZoneGraveyard(), spriteListHumanGraveyard);
+		bindZoneDefault(playerHuman.getZoneHand(), spriteListHumanHand);
 
 		/**
 		 * Unteres Panel
@@ -471,17 +472,39 @@ public class MatchPresenter extends AnimationTimer implements Initializable, IsS
 		sizeTab.textProperty().bind(createTabBinding(playerType, zoneType));
 	}
 
-	private void bindZone(IsZone<? extends MagicCard> zone, List<SpriteMagicObject> listSprites) {
+	private void bindZoneBattlefield(IsZone<? extends MagicPermanent> zone, List<SpriteMagicPermanent> listSprites) {
+		zone.propertyListZoneCards().addListener((ListChangeListener.Change<? extends MagicPermanent> listChanges) -> {
+			while (listChanges.next()) {
+				if (listChanges.wasAdded()) {
+					listChanges.getAddedSubList().forEach(magicCard -> {
+						listSprites.add(new SpriteMagicPermanent(magicCard));
+					});
+				} else if (listChanges.wasRemoved()) {
+					listChanges.getRemoved().forEach(magicCard -> {
+						SpriteMagicPermanent spriteToRemove = null;
+						for (SpriteMagicPermanent sprite : listSprites) {
+							if (sprite.getMagicPermanent().equals(magicCard)) {
+								spriteToRemove = sprite;
+							}
+						}
+						listSprites.remove(spriteToRemove);
+					});
+				}
+			}
+		});
+	}
+
+	private void bindZoneDefault(IsZone<? extends MagicCard> zone, List<SpriteMagicCard> listSprites) {
 		zone.propertyListZoneCards().addListener((ListChangeListener.Change<? extends MagicCard> listChanges) -> {
 			while (listChanges.next()) {
 				if (listChanges.wasAdded()) {
 					listChanges.getAddedSubList().forEach(magicCard -> {
-						listSprites.add(new SpriteMagicObject(magicCard));
+						listSprites.add(new SpriteMagicCard(magicCard));
 					});
 				} else if (listChanges.wasRemoved()) {
 					listChanges.getRemoved().forEach(magicCard -> {
 						Sprite spriteToRemove = null;
-						for (SpriteMagicObject sprite : listSprites) {
+						for (SpriteMagicCard sprite : listSprites) {
 							if (sprite.getMagicObject().equals(magicCard)) {
 								spriteToRemove = sprite;
 							}

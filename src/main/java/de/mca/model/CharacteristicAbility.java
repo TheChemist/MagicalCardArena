@@ -156,6 +156,10 @@ public class CharacteristicAbility implements IsAbility {
 		this.playerControlling.set(playerControlling);
 	}
 
+	public void setSource(IsObject magicCard) {
+		propertySource().set(magicCard);
+	}
+
 	@Override
 	public String toString() {
 		return abilityType.toString();
@@ -163,10 +167,6 @@ public class CharacteristicAbility implements IsAbility {
 
 	protected void fireMagicEffect(Effect magicEffect) {
 		getEventBus().post(magicEffect);
-	}
-
-	public void setSource(IsObject magicCard) {
-		propertySource().set(magicCard);
 	}
 
 }

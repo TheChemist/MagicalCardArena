@@ -285,38 +285,6 @@ public class RuleEnforcer {
 		return match.toString();
 	}
 
-	/**
-	 * Prüft, ob die zusätzlichen Kosten eines Permanents bezahlt werden können.
-	 *
-	 * @param mp
-	 *            das Permanent.
-	 * @param act
-	 *            der Typ der zusätzlichen Kosten
-	 * @return true, wenn die zusätzlichen Kosten bezahlt werden können.
-	 */
-	private boolean checkCanPay(MagicPermanent mp, AdditionalCostType act) {
-		switch (act) {
-		case NO_ADDITIONAL_COST:
-			return true;
-		case TAP:
-			return !mp.isFlagTapped();
-		default:
-			return false;
-		}
-	}
-
-	private boolean checkCanActivate(IsPlayer p, ActivatedAbility aa) {
-		if (aa.isManaAbility()) {
-			final boolean prioritised = p.isPrioritised();
-			final boolean castingSpell = p.isCastingSpell() || p.isPaying();
-			final boolean activatingAbility = p.isActivatingAbility();
-			LOGGER.debug("{} checkCanActivate({}, {}) = {}", this, p, aa,
-					prioritised || castingSpell || activatingAbility);
-			return prioritised || castingSpell || activatingAbility;
-		}
-		return false;
-	}
-
 	private void actionActivateCharacteristicAbility(IsPlayer player, ActivatedAbility activatedAbility) {
 		LOGGER.debug("{} actionActivateActivatedAbility({}, {})", this, player, activatedAbility);
 		if (checkCanActivate(player, activatedAbility) && checkCanPay((MagicPermanent) activatedAbility.getSource(),
@@ -576,6 +544,18 @@ public class RuleEnforcer {
 		match.setFlagNeedPlayerInput(true);
 	}
 
+	private boolean checkCanActivate(IsPlayer p, ActivatedAbility aa) {
+		if (aa.isManaAbility()) {
+			final boolean prioritised = p.isPrioritised();
+			final boolean castingSpell = p.isCastingSpell() || p.isPaying();
+			final boolean activatingAbility = p.isActivatingAbility();
+			LOGGER.debug("{} checkCanActivate({}, {}) = {}", this, p, aa,
+					prioritised || castingSpell || activatingAbility);
+			return prioritised || castingSpell || activatingAbility;
+		}
+		return false;
+	}
+
 	/**
 	 * Prüft, ob noch mindestens n Karten auf der Hand des Spielers sind.
 	 *
@@ -583,6 +563,26 @@ public class RuleEnforcer {
 	 */
 	private boolean checkCanDiscard(IsPlayer player, int howMany) {
 		return player.propertyHandSize().get() >= howMany;
+	}
+
+	/**
+	 * Prüft, ob die zusätzlichen Kosten eines Permanents bezahlt werden können.
+	 *
+	 * @param mp
+	 *            das Permanent.
+	 * @param act
+	 *            der Typ der zusätzlichen Kosten
+	 * @return true, wenn die zusätzlichen Kosten bezahlt werden können.
+	 */
+	private boolean checkCanPay(MagicPermanent mp, AdditionalCostType act) {
+		switch (act) {
+		case NO_ADDITIONAL_COST:
+			return true;
+		case TAP:
+			return !mp.isFlagTapped();
+		default:
+			return false;
+		}
 	}
 
 	private boolean checkIsPaid(IsPlayer player) {

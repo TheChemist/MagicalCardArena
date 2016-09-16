@@ -17,7 +17,6 @@ import de.mca.model.enums.PlayerState;
 import de.mca.model.enums.ZoneType;
 import de.mca.model.interfaces.IsAttackTarget;
 import de.mca.model.interfaces.IsManaMap;
-import de.mca.model.interfaces.IsObject;
 import de.mca.model.interfaces.IsPlayer;
 
 /**
@@ -266,11 +265,11 @@ public class InputHuman implements IsInput {
 		return player;
 	}
 
-	public void input(IsObject object, ZoneType zoneType) {
+	public void input(MagicCard object, ZoneType zoneType) {
 		if (zoneType.equals(ZoneType.HAND)) {
 			// Karte in Hand geklickt
 
-			MagicCard magicCard = (MagicCard) object;
+			MagicCard magicCard = object;
 			if (getPlayer().isDiscarding()) {
 
 				getPlayer().fireDiscard(magicCard);

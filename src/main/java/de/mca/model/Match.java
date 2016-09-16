@@ -406,38 +406,6 @@ public final class Match {
 	}
 
 	/**
-	 * Bestimmt, welcher Spieler priorisiert wird. Hat ein Spieler im aktuellen
-	 * Step einmal seine Priorität abgegeben, kann er nicht wieder priorisiert
-	 * werden.
-	 */
-	void determinePlayerPrioritised() {
-		final IsPlayer playerActive = getPlayerActive();
-		final IsPlayer playerNonactive = getPlayerNonactive();
-
-		if (!playerActive.getFlagPassedPriority() && !playerActive.isPaying()) {
-			LOGGER.debug("{} determinePlayerPrioritised() -> {}", this, playerActive);
-			setPlayerPrioritized(playerActive);
-			return;
-		} else if (!playerNonactive.getFlagPassedPriority() && playerNonactive.isPaying()) {
-			LOGGER.debug("{} determinePlayerPrioritised() -> {}", this, playerNonactive);
-			setPlayerPrioritized(playerNonactive);
-			return;
-		}
-
-		if (!playerActive.getFlagPassedPriority() && !playerActive.isPaying()) {
-			LOGGER.debug("{} determinePlayerPrioritised() -> {}", this, playerActive);
-			setPlayerPrioritized(playerActive);
-			return;
-		} else if (!playerNonactive.getFlagPassedPriority() && !playerNonactive.isPaying()) {
-			LOGGER.debug("{} determinePlayerPrioritised() -> {}", this, playerNonactive);
-			setPlayerPrioritized(playerNonactive);
-			return;
-		}
-
-		LOGGER.debug("{} determinePlayerPrioritised() -> Beide Spieler haben schon gepasst", this);
-	}
-
-	/**
 	 * Bestimmt, welcher Spieler das Spiel beginnt.
 	 */
 	private IsPlayer determinePlayerStarting() {
@@ -765,6 +733,38 @@ public final class Match {
 
 	void declareBlocker(int attackIndex, MagicPermanent blocker) {
 		propertyListAttacks.get(attackIndex).blockerAdd(blocker);
+	}
+
+	/**
+	 * Bestimmt, welcher Spieler priorisiert wird. Hat ein Spieler im aktuellen
+	 * Step einmal seine Priorität abgegeben, kann er nicht wieder priorisiert
+	 * werden.
+	 */
+	void determinePlayerPrioritised() {
+		final IsPlayer playerActive = getPlayerActive();
+		final IsPlayer playerNonactive = getPlayerNonactive();
+
+		if (!playerActive.getFlagPassedPriority() && !playerActive.isPaying()) {
+			LOGGER.debug("{} determinePlayerPrioritised() -> {}", this, playerActive);
+			setPlayerPrioritized(playerActive);
+			return;
+		} else if (!playerNonactive.getFlagPassedPriority() && playerNonactive.isPaying()) {
+			LOGGER.debug("{} determinePlayerPrioritised() -> {}", this, playerNonactive);
+			setPlayerPrioritized(playerNonactive);
+			return;
+		}
+
+		if (!playerActive.getFlagPassedPriority() && !playerActive.isPaying()) {
+			LOGGER.debug("{} determinePlayerPrioritised() -> {}", this, playerActive);
+			setPlayerPrioritized(playerActive);
+			return;
+		} else if (!playerNonactive.getFlagPassedPriority() && !playerNonactive.isPaying()) {
+			LOGGER.debug("{} determinePlayerPrioritised() -> {}", this, playerNonactive);
+			setPlayerPrioritized(playerNonactive);
+			return;
+		}
+
+		LOGGER.debug("{} determinePlayerPrioritised() -> Beide Spieler haben schon gepasst", this);
 	}
 
 	List<MagicPermanent> getCardsBattlefield() {

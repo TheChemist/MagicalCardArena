@@ -5,10 +5,9 @@ import java.util.List;
 
 import de.mca.Constants;
 import de.mca.InputHuman;
+import de.mca.model.MagicCard;
 import de.mca.model.enums.ZoneType;
-import de.mca.model.interfaces.IsObject;
 import javafx.beans.binding.DoubleBinding;
-import javafx.beans.property.DoubleProperty;
 import javafx.geometry.Point2D;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.image.ImageView;
@@ -20,13 +19,14 @@ import javafx.scene.layout.Pane;
  * @author Maximilian Werling
  *
  */
-// TODO: Es wird eine eigene Canvas für das Battlefield benötigt. Tappen,
-// Permanent, mehrere Reihen...
 final class CanvasZoneDefault extends AdaptableCanvas {
 
-	private final List<SpriteMagicObject> spriteList;
+	private static final double X_OFFSET = 1.1;
+	private static final double Y_OFFSET = 10.0;
 
-	CanvasZoneDefault(Pane parent, InputHuman input, List<SpriteMagicObject> spriteList, ZoneType zoneType,
+	private final List<SpriteMagicCard> spriteList;
+
+	CanvasZoneDefault(Pane parent, InputHuman input, List<SpriteMagicCard> spriteList, ZoneType zoneType,
 			ImageView zoomView) {
 		super(parent);
 		this.spriteList = spriteList;
@@ -42,17 +42,18 @@ final class CanvasZoneDefault extends AdaptableCanvas {
 		gc.clearRect(0, 0, getWidth(), getHeight());
 
 		for (int i = 0; i < spriteList.size(); i++) {
-			SpriteMagicObject sprite = spriteList.get(i);
+			SpriteMagicCard sprite = spriteList.get(i);
 			double positionX = 0;
 			double positionY = 0;
 
-			DoubleProperty heightBoundSpriteHeight = heightProperty();
+			DoubleBinding heightBoundSpriteHeight = heightProperty().subtract(Y_OFFSET);
 			DoubleBinding heightBoundSpriteWidth = heightBoundSpriteHeight.multiply(Constants.CARD_RATIO);
 
-			DoubleBinding widthBoundSpriteWidth = widthProperty().divide(spriteList.size());
-			DoubleBinding widthBoundSpriteHeight = widthBoundSpriteWidth.divide(Constants.CARD_RATIO);
+			DoubleBinding widthBoundSpriteWidth = widthProperty().divide(spriteList.size()).divide(X_OFFSET);
+			DoubleBinding widthBoundSpriteHeight = widthBoundSpriteWidth.divide(Constants.CARD_RATIO)
+					.subtract(Y_OFFSET);
 
-			if (heightBoundSpriteWidth.greaterThan(widthBoundSpriteWidth).get()) {
+			if (heightBoundSpriteWidth.multiply(X_OFFSET).greaterThan(widthBoundSpriteWidth).get()) {
 				sprite.propertyHeight().bind(widthBoundSpriteHeight);
 				sprite.propertyWidth().bind(widthBoundSpriteWidth);
 			} else {
@@ -60,8 +61,8 @@ final class CanvasZoneDefault extends AdaptableCanvas {
 				sprite.propertyWidth().bind(heightBoundSpriteWidth);
 			}
 
-			positionX = sprite.getWidth() * i;
-			positionY = 0;
+			positionX = sprite.getWidth() * i * X_OFFSET;
+			positionY = Y_OFFSET / 2.0;
 
 			sprite.setPosition(positionX, positionY);
 
@@ -69,11 +70,11 @@ final class CanvasZoneDefault extends AdaptableCanvas {
 		}
 	}
 
-	private void initializeMouseClicked(InputHuman input, List<SpriteMagicObject> spriteList, ZoneType zoneType) {
+	private void initializeMouseClicked(InputHuman input, List<SpriteMagicCard> spriteList, ZoneType zoneType) {
 		addEventHandler(MouseEvent.MOUSE_CLICKED, (mouseEvent) -> {
 			int zCoordinate = -1;
-			List<IsObject> listClicked = new ArrayList<>();
-			for (SpriteMagicObject sprite : spriteList) {
+			List<MagicCard> listClicked = new ArrayList<>();
+			for (SpriteMagicCard sprite : spriteList) {
 				if (sprite.getBoundary().contains(new Point2D(mouseEvent.getX(), mouseEvent.getY()))) {
 					listClicked.add(sprite.getMagicObject());
 					zCoordinate++;
@@ -83,10 +84,10 @@ final class CanvasZoneDefault extends AdaptableCanvas {
 		});
 	}
 
-	private void initializeMouseMoved(List<SpriteMagicObject> spriteList, ImageView zoomView) {
+	private void initializeMouseMoved(List<SpriteMagicCard> spriteList, ImageView zoomView) {
 		addEventHandler(MouseEvent.MOUSE_MOVED, (mouseEvent) -> {
-			SpriteMagicObject mouseOverSprite = null;
-			for (SpriteMagicObject sprite : spriteList) {
+			SpriteMagicCard mouseOverSprite = null;
+			for (SpriteMagicCard sprite : spriteList) {
 				if (sprite.getBoundary().contains(new Point2D(mouseEvent.getX(), mouseEvent.getY()))) {
 					mouseOverSprite = sprite;
 					break;

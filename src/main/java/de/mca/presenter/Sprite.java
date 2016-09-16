@@ -1,5 +1,7 @@
 package de.mca.presenter;
 
+import javafx.beans.property.DoubleProperty;
+import javafx.beans.property.SimpleDoubleProperty;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.canvas.GraphicsContext;
 
@@ -8,20 +10,58 @@ import javafx.scene.canvas.GraphicsContext;
  * @author Maximilian Werling
  *
  */
-public interface Sprite {
+abstract class Sprite {
 
-	Rectangle2D getBoundary();
+	private double positionX;
+	private double positionY;
+	private final DoubleProperty propertyHeight;
+	private final DoubleProperty propertyWidth;
 
-	double getHeight();
+	Sprite() {
+		positionX = 0;
+		positionY = 0;
+		propertyHeight = new SimpleDoubleProperty(0);
+		propertyWidth = new SimpleDoubleProperty(0);
+	}
 
-	double getWidth();
+	public Rectangle2D getBoundary() {
+		return new Rectangle2D(getX(), getY(), getWidth(), getHeight());
+	}
 
-	double getX();
+	public double getHeight() {
+		return propertyHeight.get();
+	}
 
-	double getY();
+	public double getWidth() {
+		return propertyWidth.get();
+	}
 
-	void render(GraphicsContext gc);
+	public double getX() {
+		return positionX;
+	}
 
-	void setPosition(double x, double y);
+	public double getY() {
+		return positionY;
+	}
+
+	public void setPosition(double x, double y) {
+		positionX = x;
+		positionY = y;
+	}
+
+	@Override
+	public String toString() {
+		return "Position: [" + positionX + "," + positionY + "]";
+	}
+
+	DoubleProperty propertyHeight() {
+		return propertyHeight;
+	}
+
+	DoubleProperty propertyWidth() {
+		return propertyWidth;
+	}
+
+	abstract void render(GraphicsContext gc);
 
 }
