@@ -486,10 +486,6 @@ public final class Match {
 		return getCurrentPhase().getFlagPhaseRunning();
 	}
 
-	private boolean isPlayerActive(IsPlayer player) {
-		return getCurrentTurn().isPlayerActive(player);
-	}
-
 	private boolean isStepRunning() {
 		return getCurrentStep().getFlagStepRunning();
 	}
@@ -702,14 +698,6 @@ public final class Match {
 		}
 	}
 
-	boolean checkCanCast(IsPlayer p, MagicSpell ms) {
-		final boolean isActivePlayer = isPlayerActive(p);
-		final boolean currentStepIsMain = getCurrentPhase().isMain();
-		final boolean stackEmpty = magicStack.isEmpty();
-		LOGGER.debug("{} checkCanCast({}, {}) = {}", this, p, ms, (isActivePlayer && currentStepIsMain && stackEmpty));
-		return isActivePlayer && currentStepIsMain && stackEmpty;
-	}
-
 	boolean checkCanPlayLandCard(IsPlayer p) {
 		final boolean isActivePlayer = isPlayerActive(p);
 		final boolean currentStepIsMain = getCurrentPhase().isMain();
@@ -813,6 +801,10 @@ public final class Match {
 
 	int getTotalAttackers() {
 		return propertyListAttacks.size();
+	}
+
+	boolean isPlayerActive(IsPlayer player) {
+		return getCurrentTurn().isPlayerActive(player);
 	}
 
 	void pushSpell(MagicSpell magicSpell) {

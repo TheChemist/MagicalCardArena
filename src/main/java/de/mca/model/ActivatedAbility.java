@@ -14,9 +14,9 @@ import javafx.collections.ObservableSet;
  *
  */
 // TODO: Klasse ist sehr panne
-public final class ActivatedAbility extends CharacteristicAbility implements IsObject {
+public final class ActivatedAbility extends Ability implements IsObject {
 
-	public ActivatedAbility(CharacteristicAbility characteristicAbility) {
+	public ActivatedAbility(Ability characteristicAbility) {
 		super(characteristicAbility.getEventBus(), characteristicAbility.getMagicParser(),
 				characteristicAbility.getSource(), characteristicAbility.getAbilityType(),
 				characteristicAbility.getAdditionalCostType(), characteristicAbility.getEffectInformation(), characteristicAbility.propertyListCostMaps());
@@ -25,7 +25,7 @@ public final class ActivatedAbility extends CharacteristicAbility implements IsO
 	}
 
 	@Override
-	public void add(CharacteristicAbility characteristicAbilities) {
+	public void add(Ability characteristicAbilities) {
 		// Nicht relevant hier...
 	}
 
@@ -74,7 +74,7 @@ public final class ActivatedAbility extends CharacteristicAbility implements IsO
 	}
 
 	@Override
-	public ObservableList<CharacteristicAbility> propertyListCharacteristicAbilities() {
+	public ObservableList<Ability> propertyListCharacteristicAbilities() {
 		// Nicht relevant
 		return null;
 	}

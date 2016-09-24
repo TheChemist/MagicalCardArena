@@ -24,14 +24,16 @@ public class MagicSpell extends MagicCard implements IsStackable {
 	private final EventBus eventBus;
 	/**
 	 * Speichert den Spielertyp des kontrollierenden Spielers.
+	 * 
+	 * @see http://magiccards.info/rule/109-objects.html#rule-109-4
 	 */
 	private final ObjectProperty<PlayerType> playerControlling;
 
 	@Inject
-	MagicSpell(EventBus eventBus, @Assisted MagicCard magicCard) {
+	MagicSpell(EventBus eventBus, @Assisted MagicCard magicCard, @Assisted PlayerType playerControlling) {
 		super(magicCard.getId());
 		this.eventBus = eventBus;
-		this.playerControlling = new SimpleObjectProperty<>(magicCard.getPlayerOwning());
+		this.playerControlling = new SimpleObjectProperty<>(playerControlling);
 		setDisplayName(magicCard.getDisplayName());
 		setFileName(magicCard.getFileName());
 		setListCharacteristicAbilities(magicCard.propertyListCharacteristicAbilities());
@@ -56,14 +58,66 @@ public class MagicSpell extends MagicCard implements IsStackable {
 
 	@Override
 	public void resolve() {
-		for (final Effect effect : propertyListEffects()) {
-			eventBus.post(effect);
-		}
+		propertyListEffects().forEach(effect -> getEventBus().post(effect));
 	}
 
 	@Override
 	public void setPlayerControlling(PlayerType playerControlling) {
 		this.playerControlling.set(playerControlling);
+	}
+
+	private EventBus getEventBus() {
+		return eventBus;
+	}
+
+	public boolean isModal() {
+		// TODO: Unterstützung für modale Zaubersprüche.
+		return false;
+	}
+
+	public boolean canSplice() {
+		// TODO: Unterstützung für "Splice"-Fähigkeit.
+		return false;
+	}
+
+	public boolean hasBuyback() {
+		// TODO: Unterstützung für "Kicker"-Fähigkeit.
+		return false;
+	}
+
+	public boolean hasKicker() {
+		// TODO: Unterstützung für "Buyback"-Fähigkeit.
+		return false;
+	}
+
+	public boolean hasVariableCost() {
+		// TODO: Unterstützung für variable Kosten.
+		return false;
+	}
+
+	/**
+	 * Prüft, ob der Zauberspruch hybride Kosten enthält. Ein Zauberspruch mit
+	 * hybriden Kosten hat mehr als eine CostMap.
+	 * 
+	 * @return true, wenn die Anzahl der CostMaps größer 1 ist.
+	 */
+	public boolean hasHybridCost() {
+		return propertyListCostMaps().getSize() > 1;
+	}
+
+	public boolean hasPhyrexianCost() {
+		// TODO: Unterstützung für Phyrexanische Kosten.
+		return false;
+	}
+
+	public boolean requiresTarget() {
+		// TODO: Benötigt der Zauberspruch ein Ziel?
+		return false;
+	}
+
+	public boolean hasAdditionalCost() {
+		// TODO: Unterstützung für zusätzliche Kosten.
+		return false;
 	}
 
 }

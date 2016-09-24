@@ -11,7 +11,6 @@ import de.mca.MagicParser;
 import de.mca.model.enums.AbilityType;
 import de.mca.model.enums.AdditionalCostType;
 import de.mca.model.enums.PlayerType;
-import de.mca.model.interfaces.IsAbility;
 import de.mca.model.interfaces.IsManaMap;
 import de.mca.model.interfaces.IsObject;
 import javafx.beans.property.ListProperty;
@@ -27,7 +26,7 @@ import javafx.collections.ObservableList;
  * @author Maximilian Werling
  *
  */
-public class CharacteristicAbility implements IsAbility {
+public class Ability {
 
 	/**
 	 * Speichert den Fähigkeitstyp.
@@ -48,39 +47,39 @@ public class CharacteristicAbility implements IsAbility {
 	 */
 	private final EventBus eventBus;
 	/**
-	 * Speichert die verschiedenen Darstellungen der Kosten.
-	 */
-	private final ListProperty<IsManaMap> listCostMaps;
-	/**
-	 * Speichert die Liste der Effekte, die die Fähigkeit hervorruft.
-	 */
-	private final ListProperty<Effect> listMagicEffects;
-	/**
 	 * Speichert den MagicParser, um den Effekt zu parsen.
 	 */
 	private final MagicParser magicParser;
 	/**
+	 * Speichert die verschiedenen Darstellungen der Kosten.
+	 */
+	private final ListProperty<IsManaMap> propertyListCostMaps;
+	/**
+	 * Speichert die Liste der Effekte, die die Fähigkeit hervorruft.
+	 */
+	private final ListProperty<Effect> propertyListEffects;
+	/**
 	 * Speichert den Spielertyp des kontrollierenden Spielers.
 	 */
-	private final ObjectProperty<PlayerType> playerControlling;
+	private final ObjectProperty<PlayerType> propertyPlayerControlling;
 	/**
 	 * Speichert das Objekt, das durch die Fähigkeit charakterisiert wird.
 	 */
-	private final ObjectProperty<IsObject> source;
+	private final ObjectProperty<IsObject> propertySource;
 
 	@Inject
-	CharacteristicAbility(EventBus eventBus, MagicParser magicParser, @Assisted IsObject source,
-			@Assisted AbilityType abilityType, @Assisted AdditionalCostType additionalCostType,
-			@Assisted JsonArray effectObject, @Assisted ObservableList<IsManaMap> listCostMaps) {
+	Ability(EventBus eventBus, MagicParser magicParser, @Assisted IsObject source, @Assisted AbilityType abilityType,
+			@Assisted AdditionalCostType additionalCostType, @Assisted JsonArray effectObject,
+			@Assisted ObservableList<IsManaMap> listCostMaps) {
 		this.eventBus = eventBus;
 		this.magicParser = magicParser;
 		this.abilityType = abilityType;
 		this.additionalCostType = additionalCostType;
 		this.effectObject = effectObject;
-		this.source = new SimpleObjectProperty<>(source);
-		this.listCostMaps = new SimpleListProperty<>(listCostMaps);
-		listMagicEffects = new SimpleListProperty<>(FXCollections.observableArrayList(new ArrayList<>()));
-		playerControlling = new SimpleObjectProperty<>();
+		this.propertySource = new SimpleObjectProperty<>(source);
+		this.propertyListCostMaps = new SimpleListProperty<>(listCostMaps);
+		propertyListEffects = new SimpleListProperty<>(FXCollections.observableArrayList(new ArrayList<>()));
+		propertyPlayerControlling = new SimpleObjectProperty<>(PlayerType.NONE);
 
 		for (int i = 0; i < effectObject.size(); i++) {
 			Effect effect = magicParser.parseEffect(this, effectObject.get(i).getAsJsonObject());
@@ -89,12 +88,15 @@ public class CharacteristicAbility implements IsAbility {
 	}
 
 	public void add(Effect magicEffect) {
-		listMagicEffects.add(magicEffect);
+		propertyListEffects.add(magicEffect);
 	}
 
-	@Override
 	public void generateEffects() {
-		for (final Effect me : listMagicEffects) {
+		for (final Effect me : propertyListEffects) {
+			if (me.getPlayerType() != null) {
+				throw new NullPointerException("Effekt hat keinen Spielertyp.");
+			}
+
 			fireMagicEffect(me);
 		}
 	}
@@ -111,20 +113,16 @@ public class CharacteristicAbility implements IsAbility {
 		return effectObject;
 	}
 
-	public EventBus getEventBus() {
-		return eventBus;
-	}
-
 	public MagicParser getMagicParser() {
 		return magicParser;
 	}
 
 	public PlayerType getPlayerControlling() {
-		return playerControlling.get();
+		return propertyPlayerControlling.get();
 	}
 
 	public IsObject getSource() {
-		return source.get();
+		return propertySource().get();
 	}
 
 	public boolean isManaAbility() {
@@ -132,28 +130,29 @@ public class CharacteristicAbility implements IsAbility {
 	}
 
 	public ObservableList<IsManaMap> propertyListCostMaps() {
-		return listCostMaps;
+		return propertyListCostMaps;
 	}
 
-	@Override
 	public ObservableList<Effect> propertyListMagicEffects() {
-		return listMagicEffects;
+		return propertyListEffects;
 	}
 
 	public ObjectProperty<PlayerType> propertyPlayerControlling() {
-		return playerControlling;
+		return propertyPlayerControlling;
 	}
 
 	public ObjectProperty<IsObject> propertySource() {
-		return source;
+		return propertySource;
 	}
 
 	public void remove(Effect magicEffect) {
-		listMagicEffects.remove(magicEffect);
+		propertyListEffects.remove(magicEffect);
 	}
 
 	public void setPlayerControlling(PlayerType playerControlling) {
-		this.playerControlling.set(playerControlling);
+		this.propertyPlayerControlling.set(playerControlling);
+
+		propertyListEffects.forEach(effect -> effect.setPlayerType(playerControlling));
 	}
 
 	public void setSource(IsObject magicCard) {
@@ -167,6 +166,10 @@ public class CharacteristicAbility implements IsAbility {
 
 	protected void fireMagicEffect(Effect magicEffect) {
 		getEventBus().post(magicEffect);
+	}
+
+	protected EventBus getEventBus() {
+		return eventBus;
 	}
 
 }

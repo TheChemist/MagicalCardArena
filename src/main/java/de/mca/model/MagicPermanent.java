@@ -69,8 +69,27 @@ public class MagicPermanent extends MagicCard {
 	private final BooleanProperty flagTapped;
 	/**
 	 * Speichert den Spielertyp des kontrollierenden Spielers.
+	 * 
+	 * @see http://magiccards.info/rule/109-objects.html#rule-109-4
 	 */
 	private final ObjectProperty<PlayerType> playerControlling;
+
+	private MagicPermanent(int id, EventBus eventBus, PlayerType playerControlling) {
+		super(id);
+		this.eventBus = eventBus;
+		this.playerControlling = new SimpleObjectProperty<>(playerControlling);
+		damage = new SimpleIntegerProperty(0);
+		flagAttacking = new SimpleBooleanProperty(false);
+		flagAttackingAlone = new SimpleBooleanProperty(false);
+		flagBlocked = new SimpleBooleanProperty(false);
+		flagBlocking = new SimpleBooleanProperty(false);
+		flagBlockingAlone = new SimpleBooleanProperty(false);
+		flagFaceDown = new SimpleBooleanProperty(false);
+		flagFlipped = new SimpleBooleanProperty(false);
+		flagPhasedOut = new SimpleBooleanProperty(false);
+		flagSummoningSickness = new SimpleBooleanProperty(true);
+		flagTapped = new SimpleBooleanProperty(false);
+	}
 
 	@Inject
 	MagicPermanent(EventBus eventBus, @Assisted MagicCard magicCard) {
@@ -90,23 +109,6 @@ public class MagicPermanent extends MagicCard {
 		setSetSubTypes(magicCard.propertySetSubTypes());
 		setSetSuperTypes(magicCard.propertySetSuperTypes());
 		setToughness(magicCard.getToughness());
-	}
-
-	MagicPermanent(int id, EventBus eventBus, PlayerType playerControlling) {
-		super(id);
-		this.eventBus = eventBus;
-		this.playerControlling = new SimpleObjectProperty<>(playerControlling);
-		damage = new SimpleIntegerProperty(0);
-		flagAttacking = new SimpleBooleanProperty(false);
-		flagAttackingAlone = new SimpleBooleanProperty(false);
-		flagBlocked = new SimpleBooleanProperty(false);
-		flagBlocking = new SimpleBooleanProperty(false);
-		flagBlockingAlone = new SimpleBooleanProperty(false);
-		flagFaceDown = new SimpleBooleanProperty(false);
-		flagFlipped = new SimpleBooleanProperty(false);
-		flagPhasedOut = new SimpleBooleanProperty(false);
-		flagSummoningSickness = new SimpleBooleanProperty(true);
-		flagTapped = new SimpleBooleanProperty(false);
 	}
 
 	/**

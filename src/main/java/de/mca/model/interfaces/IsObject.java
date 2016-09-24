@@ -1,6 +1,6 @@
 package de.mca.model.interfaces;
 
-import de.mca.model.CharacteristicAbility;
+import de.mca.model.Ability;
 import de.mca.model.enums.ColorType;
 import de.mca.model.enums.ObjectType;
 import de.mca.model.enums.SubType;
@@ -13,12 +13,13 @@ import javafx.collections.ObservableSet;
  * offiziellen Regelbuch. Es kapselt alle Charakteristiken, die ein Object
  * definieren. Weiterhin enthält es Mehtoden zur Manipulation des Objekts.
  *
+ * @see http://magiccards.info/rule/109-objects.html#rule-109-3
  * @author Maximilian Werling
  *
  */
 public interface IsObject {
 
-	void add(CharacteristicAbility characteristicAbilities);
+	void add(Ability characteristicAbilities);
 
 	String getDisplayName();
 
@@ -34,7 +35,7 @@ public interface IsObject {
 
 	int getToughness();
 
-	ObservableList<CharacteristicAbility> propertyListCharacteristicAbilities();
+	ObservableList<Ability> propertyListCharacteristicAbilities();
 
 	ObservableSet<ColorType> propertySetColorTypes();
 

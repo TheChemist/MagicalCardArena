@@ -7,7 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import de.mca.model.Attack;
-import de.mca.model.CharacteristicAbility;
+import de.mca.model.Ability;
 import de.mca.model.MagicCard;
 import de.mca.model.MagicPermanent;
 import de.mca.model.enums.PlayerState;
@@ -34,7 +34,7 @@ public class InputComputer implements IsInput {
 	}
 
 	@Override
-	public CharacteristicAbility determineAbility(List<CharacteristicAbility> listLegalAbilities) {
+	public Ability determineAbility(List<Ability> listLegalAbilities) {
 		// TODO: Fertig schreiben. Wird es bisher gebraucht?
 		throw new UnsupportedOperationException("Computer muss Entscheidung treffen, die er nicht treffen kann");
 	}

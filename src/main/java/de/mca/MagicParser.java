@@ -17,7 +17,7 @@ import de.mca.factories.FactoryEffect;
 import de.mca.io.FileManager;
 import de.mca.io.ResourceManager;
 import de.mca.io.ResourceReadingException;
-import de.mca.model.CharacteristicAbility;
+import de.mca.model.Ability;
 import de.mca.model.Deck;
 import de.mca.model.Effect;
 import de.mca.model.EffectProduceMana;
@@ -31,7 +31,6 @@ import de.mca.model.enums.ObjectType;
 import de.mca.model.enums.RarityType;
 import de.mca.model.enums.SubType;
 import de.mca.model.enums.SuperType;
-import de.mca.model.interfaces.IsAbility;
 import de.mca.model.interfaces.IsManaMap;
 import javafx.beans.property.SimpleListProperty;
 import javafx.collections.FXCollections;
@@ -49,12 +48,12 @@ public class MagicParser {
 	private static int ID = 0;
 	private static final Logger LOGGER = LoggerFactory.getLogger("MagicParser");
 	private final FactoryAbility abilityFactory;
-	private final FactoryEffect mEffectFactory;
+	private final FactoryEffect factoryEffect;
 
 	@Inject
 	private MagicParser(FactoryAbility abilityFactory, FactoryEffect mEffectFactory) {
 		this.abilityFactory = abilityFactory;
-		this.mEffectFactory = mEffectFactory;
+		this.factoryEffect = mEffectFactory;
 	}
 
 	public MagicCard parseCardFromPath(Path cardPath) throws ResourceReadingException {
@@ -152,7 +151,7 @@ public class MagicParser {
 
 		// parse Abilities
 		if (elementAbilities != null) {
-			final ObservableList<CharacteristicAbility> listAbilities = FXCollections.observableArrayList();
+			final ObservableList<Ability> listAbilities = FXCollections.observableArrayList();
 			final JsonArray cardAbilities = elementAbilities.getAsJsonArray();
 			for (int i = 0; i < cardAbilities.size(); i++) {
 				listAbilities.add(parseAbility(card, cardAbilities.get(i).getAsJsonObject()));
@@ -184,7 +183,7 @@ public class MagicParser {
 		return deck;
 	}
 
-	public Effect parseEffect(IsAbility source, JsonObject effectObject) {
+	public Effect parseEffect(Ability source, JsonObject effectObject) {
 		switch (EffectType.valueOf(effectObject.get("effecttype").getAsString())) {
 		case PRODUCE_MANA:
 			final JsonArray produceArray = effectObject.get("produce").getAsJsonArray();
@@ -195,16 +194,17 @@ public class MagicParser {
 				final int howMuch = costObject.get("value").getAsInt();
 				tempMap.put(manaColor, howMuch);
 			}
-			final EffectProduceMana result = mEffectFactory.create(source, new ManaMapDefault(tempMap));
+
+			final EffectProduceMana result = factoryEffect.create(source, new ManaMapDefault(tempMap));
 			return result;
 		}
 		return null;
 	}
 
 	// TODO: Karten überprüfen, Abilities haben auch CostMaps
-	private CharacteristicAbility parseAbility(MagicCard card, JsonObject abilityObject) {
+	private Ability parseAbility(MagicCard card, JsonObject abilityObject) {
 		final AbilityType abilityType = AbilityType.valueOf(abilityObject.get("abilitytype").getAsString());
-		final ObservableList<IsManaMap> listCostMaps = new SimpleListProperty<>();
+		final ObservableList<IsManaMap> listCostMaps = new SimpleListProperty<>(FXCollections.emptyObservableList());
 		final JsonElement additionalCostElement = abilityObject.get("additionalcost");
 		AdditionalCostType additionalCostType = AdditionalCostType.NO_ADDITIONAL_COST;
 		if (additionalCostElement != null) {
@@ -212,8 +212,7 @@ public class MagicParser {
 		}
 		final JsonArray effectArray = abilityObject.get("effects").getAsJsonArray();
 
-		final CharacteristicAbility result = abilityFactory.create(card, abilityType, additionalCostType, effectArray,
-				listCostMaps);
+		final Ability result = abilityFactory.create(card, abilityType, additionalCostType, effectArray, listCostMaps);
 		return result;
 	}
 

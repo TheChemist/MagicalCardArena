@@ -1,7 +1,7 @@
 package de.mca.factories;
 
+import de.mca.model.Ability;
 import de.mca.model.EffectProduceMana;
-import de.mca.model.interfaces.IsAbility;
 import de.mca.model.interfaces.IsManaMap;
 
 /**
@@ -11,6 +11,6 @@ import de.mca.model.interfaces.IsManaMap;
  */
 public interface FactoryEffect {
 
-	EffectProduceMana create(IsAbility source, IsManaMap produceMap);
+	EffectProduceMana create(Ability source, IsManaMap produceMap);
 
 }

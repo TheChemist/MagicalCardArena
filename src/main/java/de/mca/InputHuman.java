@@ -8,7 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import de.mca.model.Attack;
-import de.mca.model.CharacteristicAbility;
+import de.mca.model.Ability;
 import de.mca.model.MagicCard;
 import de.mca.model.MagicPermanent;
 import de.mca.model.ManaMapDefault;
@@ -43,7 +43,7 @@ public class InputHuman implements IsInput {
 	}
 
 	@Override
-	public CharacteristicAbility determineAbility(List<CharacteristicAbility> listLegalAbilities) {
+	public Ability determineAbility(List<Ability> listLegalAbilities) {
 		LOGGER.debug("{} determineManaAbility({})", player, listLegalAbilities);
 		if (listLegalAbilities.isEmpty()) {
 			throw new RuntimeException("Keine Fähigkeit zum auswählen!");
@@ -351,7 +351,7 @@ public class InputHuman implements IsInput {
 	private MagicPermanent filterManaSources(List<MagicPermanent> listLegalPermanents) {
 		final List<MagicPermanent> manaSources = new ArrayList<>();
 		for (final MagicPermanent magicPermanent : listLegalPermanents) {
-			for (final CharacteristicAbility ability : magicPermanent.propertyListCharacteristicAbilities()) {
+			for (final Ability ability : magicPermanent.propertyListCharacteristicAbilities()) {
 				if (ability.isManaAbility()) {
 					manaSources.add(magicPermanent);
 					break;

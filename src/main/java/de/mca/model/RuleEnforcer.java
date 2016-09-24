@@ -71,13 +71,11 @@ public class RuleEnforcer {
 	public void examineMagicEffectProduceMana(EffectProduceMana magicEffectProduceMana) {
 		// TODO: Anpassen für Spells, Effekte als EventObjekte?
 		LOGGER.debug("{} examineMagicEffectProduceMana({})", this, magicEffectProduceMana);
-		final CharacteristicAbility ability = (CharacteristicAbility) magicEffectProduceMana.getSource();
-		final MagicPermanent mp = (MagicPermanent) ability.getSource();
 		final IsManaMap manaMap = magicEffectProduceMana.getProduceMap();
-		final IsPlayer player = match.getPlayer(mp.getPlayerControlling());
-		for (final ColorType color : manaMap.getKeySet()) {
-			player.addMana(color, manaMap.get(color));
-		}
+		final IsPlayer player = match.getPlayer(magicEffectProduceMana.getPlayerType());
+
+		manaMap.getKeySet().forEach(key -> player.addMana(key, manaMap.get(key)));
+
 		if (player.isPaying() && checkIsPaid(player)) {
 			// Spieler hat alles bezahlt
 			actionEndPayment(player);
@@ -98,18 +96,9 @@ public class RuleEnforcer {
 	@Subscribe
 	public void examinePACastSpell(PACastSpell playerActionCastSpell) {
 		LOGGER.debug("{} examinePACastSpell({})", this, playerActionCastSpell);
-		final IsPlayer player = playerActionCastSpell.getSource();
-		final MagicCard magicCard = playerActionCastSpell.getCard();
-		final MagicSpell spell = factoryMagicSpell.create(magicCard);
-		if (match.checkCanCast(player, spell)) {
-			actionCastSpell(player, spell);
-			if (spell.getConvertedManaCost() <= 0) {
-				// Karte kostet nichts
-				match.resetFlagsPassedPriority();
-				match.resetPlayerState(player);
-			}
-			match.setFlagNeedPlayerInput(true);
-		}
+
+		// Führe Aktion aus.
+		actionCastSpell(playerActionCastSpell.getSource(), playerActionCastSpell.getCard());
 	}
 
 	@Subscribe
@@ -305,10 +294,8 @@ public class RuleEnforcer {
 				break;
 			}
 
-			match.resetFlagsPassedPriority();
-			match.resetPlayerState(player);
-			match.determinePlayerPrioritised();
-			match.setFlagNeedPlayerInput(true);
+			// Abschließen
+			finishAction(player);
 		} else {
 			// Voraussetzungen sind nicht erfüllt.
 			// TODO: Reagiere mit Hinweis an den Spieler.
@@ -331,7 +318,6 @@ public class RuleEnforcer {
 
 	private void actionBeginPayment(IsPlayer player) {
 		LOGGER.debug("{} beginPayment({})", this, player);
-		player.setPlayerState(PlayerState.PAYING);
 
 		final IsManaMap manaCostAlreadyPaid = player.getManaCostAlreadyPaid();
 		final IsManaMap manaCostGoal = player.getManaCostAlreadyPaid();
@@ -387,22 +373,93 @@ public class RuleEnforcer {
 	}
 
 	/**
-	 * Diese Methode wird vom Spiel aufgerufen, nachdem der Spieler eine Karte
-	 * gewählt hat, die in diesem Moment regelkonform gespielt werden kann.
-	 * Beschwört einen Zauberspruch (rule = 601.).
+	 * Beschwört einen Zauberspruch. Dafür werden alle notwendigen Entscheidunge
+	 * abgefragt und Voraussetzungen überprüft.
+	 * 
+	 * @see http://magiccards.info/rule/601-casting-spells.html
 	 *
+	 * @param player
+	 *            - Der Spieler, der den Zauberspruch spielt.
 	 * @param magicCard
-	 *            Die Karte, die als Zauberspruch auf den Stack gespielt wird.
+	 *            - Die Karte, die als Zauberspruch auf den Stack gespielt wird.
 	 */
 	private void actionCastSpell(IsPlayer player, MagicCard magicCard) {
 		LOGGER.debug("{} actionCastSpell({}, {})", this, player, magicCard);
+		final MagicSpell spell = factoryMagicSpell.create(magicCard, player.getPlayerType());
 
-		// Neuen Spielerstatus setzen.
-		player.setPlayerState(PlayerState.CASTING_SPELL);
+		if (checkCanCast(player, spell)) {
+			// Alle Voraussetzungen sind erfüllt.
 
-		// Karte aus der Hand entfernen und auf den Stack schieben.
-		player.removeCard(magicCard, ZoneType.HAND);
-		match.pushSpell(factoryMagicSpell.create(magicCard));
+			// Neuen Spielerstatus setzen.
+			player.setPlayerState(PlayerState.CASTING_SPELL);
+
+			// Karte aus der Hand entfernen und auf den Stack schieben.
+			player.removeCard(magicCard, ZoneType.HAND);
+			match.pushSpell(spell);
+
+			TotalCostInformation totalCostInformation = new TotalCostInformation();
+
+			if (spell.isModal()) {
+				// TODO: Spieler muss Modus auswählen.
+			}
+
+			if (spell.canSplice()) {
+				// TODO: Spieler wählt aus, ob er splicen möchte.
+				// TODO: Spieler zeigt Karten.
+			}
+
+			if (spell.hasBuyback() || spell.hasKicker()) {
+				// TODO: Spieler wählt aus, ob er Kicker bezahlen möchte.
+			}
+
+			if (spell.hasVariableCost()) {
+				// TODO: Spieler wählt Wert für X aus.
+			}
+
+			if (spell.hasHybridCost()) {
+				// TODO: Spieler wählt passende CostMap aus.
+			} else {
+				// Wähle erste und einzige CostMap aus.
+				totalCostInformation.setInitalCost(spell.propertyListCostMaps().get(0));
+			}
+
+			if (spell.hasPhyrexianCost()) {
+				// TODO: Spieler wählt Zahlweise aus.
+			}
+
+			if (spell.requiresTarget()) {
+				// TODO: Spieler wählt Ziele aus.
+				/**
+				 * Hier stehen noch einige weitere Entscheidungen aus.
+				 */
+			}
+
+			// TODO: Kosten aggregieren und konsolodieren. (in eig Objekt?)
+			if (spell.hasAdditionalCost()) {
+				// TODO: Zusätzliche Kosten dem Objekt hinzufügen.
+			}
+
+			// Kosten bezahlen.
+			if (totalCostInformation.getTotalConvertedCost() == 0 && !totalCostInformation.hasAdditionalCostType()) {
+				// Karte kostet nichts.
+
+				// Abschließen.
+				finishAction(player);
+			} else {
+				// Spieler muss Karte bezahlen
+
+				player.setPlayerState(PlayerState.PAYING);
+				actionBeginPayment(player);
+			}
+		} else {
+			// Voraussetzungen sind nicht erfüllt.
+			// TODO: Reagiere mit Hinweis an den Spieler.
+		}
+	}
+
+	private boolean canPay(TotalCostInformation totalCostInformation) {
+		// TODO: Aussagen über Bezahlbarkeit ab jetzt über dieses Objekt lösen.
+		return false;
 	}
 
 	private void actionConcede() {
@@ -489,7 +546,11 @@ public class RuleEnforcer {
 
 	private void actionEndPayment(IsPlayer player) {
 		LOGGER.debug("{} endPayment()", this);
+
+		// Setze Status zurück.
 		player.setPlayerState(PlayerState.CASTING_SPELL);
+
+		// Setze Kostenziele etc. zurück.
 		player.setManaCostAlreadyPaid(new ManaMapDefault());
 		player.setManaCostGoal(new ManaMapDefault());
 	}
@@ -533,15 +594,7 @@ public class RuleEnforcer {
 		player.removeCard(landCard, ZoneType.HAND);
 		match.addCard(factoryMagicPermanent.create(landCard), ZoneType.BATTLEFIELD);
 
-		/**
-		 * Setze die priority flag beider Spieler zurück, sowie den
-		 * Spielerstatus des handelnden Spielers. Danach muss die Priorität neu
-		 * bestimmt werden. Zuletzt wird wieder Input benötigt.
-		 */
-		match.resetFlagsPassedPriority();
-		match.resetPlayerState(player);
-		match.determinePlayerPrioritised();
-		match.setFlagNeedPlayerInput(true);
+		finishAction(player);
 	}
 
 	private boolean checkCanActivate(IsPlayer p, ActivatedAbility aa) {
@@ -557,6 +610,25 @@ public class RuleEnforcer {
 	}
 
 	/**
+	 * Prüft, ob die grundlegenden Voraussetzungen für das Beschwören eines
+	 * Zauberspruchs erfüllt sind.
+	 * 
+	 * @param player
+	 *            - Der Spieler, für den die Prüfung vorgenommen wird.
+	 * @param magicSpell
+	 *            - Der Zauberspruch, für den die Prüfung vorgenommen wird.
+	 * @return true, wenn alle Voraussetzungen erfüllt sind.
+	 */
+	private boolean checkCanCast(IsPlayer player, MagicSpell magicSpell) {
+		final boolean isActivePlayer = match.isPlayerActive(player);
+		final boolean currentStepIsMain = match.getCurrentPhase().isMain();
+		final boolean stackEmpty = match.getZoneStack().isEmpty();
+		LOGGER.debug("{} checkCanCast({}, {}) = {}", this, player, magicSpell,
+				(isActivePlayer && currentStepIsMain && stackEmpty));
+		return isActivePlayer && currentStepIsMain && stackEmpty;
+	}
+
+	/**
 	 * Prüft, ob noch mindestens n Karten auf der Hand des Spielers sind.
 	 *
 	 * @return true, wenn der Spieler genau n Karte ablegen kann.
@@ -568,18 +640,18 @@ public class RuleEnforcer {
 	/**
 	 * Prüft, ob die zusätzlichen Kosten eines Permanents bezahlt werden können.
 	 *
-	 * @param mp
+	 * @param magicPermanent
 	 *            das Permanent.
 	 * @param act
 	 *            der Typ der zusätzlichen Kosten
 	 * @return true, wenn die zusätzlichen Kosten bezahlt werden können.
 	 */
-	private boolean checkCanPay(MagicPermanent mp, AdditionalCostType act) {
+	private boolean checkCanPay(MagicPermanent magicPermanent, AdditionalCostType act) {
 		switch (act) {
 		case NO_ADDITIONAL_COST:
 			return true;
 		case TAP:
-			return !mp.isFlagTapped();
+			return !magicPermanent.isFlagTapped();
 		default:
 			return false;
 		}
@@ -588,6 +660,21 @@ public class RuleEnforcer {
 	private boolean checkIsPaid(IsPlayer player) {
 		LOGGER.debug("{} checkIsPaid({})", this, player);
 		return player.getManaCostGoal().equals(player.getManaCostAlreadyPaid());
+	}
+
+	/**
+	 * Setze die priority flag beider Spieler zurück, sowie den Spielerstatus
+	 * des handelnden Spielers. Danach muss die Priorität neu bestimmt werden.
+	 * Zuletzt wird wieder Input benötigt.
+	 * 
+	 * @param player
+	 *            - Der Spieler, dessen Aktion beendet wird.
+	 */
+	private void finishAction(IsPlayer player) {
+		match.resetFlagsPassedPriority();
+		match.resetPlayerState(player);
+		match.determinePlayerPrioritised();
+		match.setFlagNeedPlayerInput(true);
 	}
 
 	/**

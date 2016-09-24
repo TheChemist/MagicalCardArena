@@ -62,7 +62,7 @@ public class MagicCard implements IsObject {
 	/**
 	 * Speichert die Abilities der Karte. Bleibende Karten haben Abilities.
 	 */
-	private final ListProperty<CharacteristicAbility> listCharacteristicAbilities;
+	private final ListProperty<Ability> listCharacteristicAbilities;
 	/**
 	 * Speichert die Kosten der Karte. Bei doppelfarbigen Karten werden alle
 	 * Kombinationen gespeichert.
@@ -82,6 +82,8 @@ public class MagicCard implements IsObject {
 	private final IntegerProperty loyalty;
 	/**
 	 * Speichert den Spielertyp des Eigentümers.
+	 * 
+	 * @see http://magiccards.info/rule/108-cards.html#rule-108-3
 	 */
 	private final ObjectProperty<PlayerType> playerOwning;
 	/**
@@ -154,7 +156,7 @@ public class MagicCard implements IsObject {
 	}
 
 	@Override
-	public void add(CharacteristicAbility ability) {
+	public void add(Ability ability) {
 		listCharacteristicAbilities.add(ability);
 	}
 
@@ -395,7 +397,7 @@ public class MagicCard implements IsObject {
 	}
 
 	@Override
-	public ObservableList<CharacteristicAbility> propertyListCharacteristicAbilities() {
+	public ObservableList<Ability> propertyListCharacteristicAbilities() {
 		return listCharacteristicAbilities;
 	}
 
@@ -463,7 +465,7 @@ public class MagicCard implements IsObject {
 		this.fileName.set(fileName);
 	}
 
-	public void setListCharacteristicAbilities(ObservableList<CharacteristicAbility> listAbilities) {
+	public void setListCharacteristicAbilities(ObservableList<Ability> listAbilities) {
 		this.listCharacteristicAbilities.set(listAbilities);
 		this.listCharacteristicAbilities.forEach(element -> {
 			element.setSource(this);
