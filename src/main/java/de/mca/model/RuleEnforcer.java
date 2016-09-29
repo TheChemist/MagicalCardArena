@@ -23,7 +23,6 @@ import de.mca.SAPlayLand;
 import de.mca.SpecialAction;
 import de.mca.factories.FactoryMagicPermanent;
 import de.mca.factories.FactoryMagicSpell;
-import de.mca.model.enums.AdditionalCostType;
 import de.mca.model.enums.ColorType;
 import de.mca.model.enums.PlayerState;
 import de.mca.model.enums.ZoneType;
@@ -79,8 +78,7 @@ public class RuleEnforcer {
 		if (player.isPaying() && checkIsPaid(player)) {
 			// Spieler hat alles bezahlt
 			actionEndPayment(player);
-			match.resetFlagsPassedPriority();
-			match.resetPlayerState(player);
+			finishAction(player);
 		}
 	}
 
@@ -276,8 +274,9 @@ public class RuleEnforcer {
 
 	private void actionActivateCharacteristicAbility(IsPlayer player, ActivatedAbility activatedAbility) {
 		LOGGER.debug("{} actionActivateActivatedAbility({}, {})", this, player, activatedAbility);
-		if (checkCanActivate(player, activatedAbility) && checkCanPay((MagicPermanent) activatedAbility.getSource(),
-				activatedAbility.getAdditionalCostType())) {
+
+		// TODO: Differenzieren zwischen normal und Mana
+		if (checkCanActivate(player, activatedAbility)) {
 			// Alle Voraussetungen sind erfüllt.
 
 			player.setPlayerState(PlayerState.ACTIVATING_ABILITY);
@@ -293,9 +292,6 @@ public class RuleEnforcer {
 				((MagicPermanent) activatedAbility.getSource()).setFlagTapped(true);
 				break;
 			}
-
-			// Abschließen
-			finishAction(player);
 		} else {
 			// Voraussetzungen sind nicht erfüllt.
 			// TODO: Reagiere mit Hinweis an den Spieler.
@@ -318,45 +314,9 @@ public class RuleEnforcer {
 
 	private void actionBeginPayment(IsPlayer player) {
 		LOGGER.debug("{} beginPayment({})", this, player);
+		player.setPlayerState(PlayerState.PAYING);
 
-		final IsManaMap manaCostAlreadyPaid = player.getManaCostAlreadyPaid();
-		final IsManaMap manaCostGoal = player.getManaCostAlreadyPaid();
-		final IsManaMap manaPool = player.getManaPool();
-
-		final ColorType clm = ColorType.NONE;
-		// Bezahle farbloses mit farblosem Mana
-		int need = manaCostGoal.get(clm);
-		int have = manaPool.get(clm);
-		int value = have > need ? need : have;
-		if (have > 0) {
-			manaCostAlreadyPaid.add(clm, value);
-			player.removeMana(clm, value);
-		}
-		// Bezahle farbiges mit farbigem Mana
-		for (final ColorType key : manaCostGoal.getKeySet()) {
-			if (manaPool.containsKey(key)) {
-				need = manaCostGoal.get(key);
-				have = manaPool.get(key);
-				value = have > need ? need : have;
-				manaCostAlreadyPaid.add(key, value);
-				player.removeMana(key, value);
-			}
-		}
-		// Bezahle fabloses mit farbigem Mana
-		need = manaCostGoal.get(clm) - manaCostAlreadyPaid.get(clm);
-		if (need > 0) {
-			final int manaLeft = manaPool.getTotalColoredMana();
-			if (need >= manaLeft) {
-				manaCostAlreadyPaid.add(clm, manaLeft);
-				player.removeManaAll();
-			} else {
-				for (final ColorType key : manaPool.getKeySet()) {
-					value = manaPool.get(key);
-					manaCostAlreadyPaid.add(clm, value);
-					player.removeMana(key, value);
-				}
-			}
-		}
+		match.setFlagIsMatchRunning(true);
 	}
 
 	/**
@@ -447,19 +407,12 @@ public class RuleEnforcer {
 				finishAction(player);
 			} else {
 				// Spieler muss Karte bezahlen
-
-				player.setPlayerState(PlayerState.PAYING);
 				actionBeginPayment(player);
 			}
 		} else {
 			// Voraussetzungen sind nicht erfüllt.
 			// TODO: Reagiere mit Hinweis an den Spieler.
 		}
-	}
-
-	private boolean canPay(TotalCostInformation totalCostInformation) {
-		// TODO: Aussagen über Bezahlbarkeit ab jetzt über dieses Objekt lösen.
-		return false;
 	}
 
 	private void actionConcede() {
@@ -597,6 +550,11 @@ public class RuleEnforcer {
 		finishAction(player);
 	}
 
+	private boolean canPay(TotalCostInformation totalCostInformation) {
+		// TODO: Aussagen über Bezahlbarkeit ab jetzt über dieses Objekt lösen.
+		return false;
+	}
+
 	private boolean checkCanActivate(IsPlayer p, ActivatedAbility aa) {
 		if (aa.isManaAbility()) {
 			final boolean prioritised = p.isPrioritised();
@@ -637,28 +595,75 @@ public class RuleEnforcer {
 		return player.propertyHandSize().get() >= howMany;
 	}
 
-	/**
-	 * Prüft, ob die zusätzlichen Kosten eines Permanents bezahlt werden können.
-	 *
-	 * @param magicPermanent
-	 *            das Permanent.
-	 * @param act
-	 *            der Typ der zusätzlichen Kosten
-	 * @return true, wenn die zusätzlichen Kosten bezahlt werden können.
-	 */
-	private boolean checkCanPay(MagicPermanent magicPermanent, AdditionalCostType act) {
-		switch (act) {
-		case NO_ADDITIONAL_COST:
-			return true;
-		case TAP:
-			return !magicPermanent.isFlagTapped();
-		default:
-			return false;
-		}
-	}
+	// TODO: Prüfung ausweiten und wieder reinnehmen.
+	// /**
+	// * Prüft, ob die Kosten eines Permanents oder einer Fähigkeit bezahlt
+	// werden
+	// * können. Prüft auf Mana- sowie zusätzlich Kosten.
+	// *
+	// * @param magicPermanent
+	// * das Permanent.
+	// * @param act
+	// * der Typ der zusätzlichen Kosten
+	// * @return true, wenn die zusätzlichen Kosten bezahlt werden können.
+	// */
+	// private boolean checkCanPay(TotalCostInformation totalCostInformation) {
+	//
+	// // Prüfe auf zusätzliche Kosten
+	// if (totalCostInformation.hasAdditionalCostType()) {
+	// switch (totalCostInformation.getAdditionalCostType()) {
+	// case NO_ADDITIONAL_COST:
+	// return true;
+	// case TAP:
+	// return !magicPermanent.isFlagTapped();
+	// default:
+	// return false;
+	// }
+	// }
+	// }
 
 	private boolean checkIsPaid(IsPlayer player) {
 		LOGGER.debug("{} checkIsPaid({})", this, player);
+
+		final IsManaMap manaCostAlreadyPaid = player.getManaCostAlreadyPaid();
+		final IsManaMap manaCostGoal = player.getManaCostAlreadyPaid();
+		final IsManaMap manaPool = player.getManaPool();
+
+		final ColorType clm = ColorType.NONE;
+		// Bezahle farbloses mit farblosem Mana
+		int need = manaCostGoal.get(clm);
+		int have = manaPool.get(clm);
+		int value = have > need ? need : have;
+		if (have > 0) {
+			manaCostAlreadyPaid.add(clm, value);
+			player.removeMana(clm, value);
+		}
+		// Bezahle farbiges mit farbigem Mana
+		for (final ColorType key : manaCostGoal.getKeySet()) {
+			if (manaPool.containsKey(key)) {
+				need = manaCostGoal.get(key);
+				have = manaPool.get(key);
+				value = have > need ? need : have;
+				manaCostAlreadyPaid.add(key, value);
+				player.removeMana(key, value);
+			}
+		}
+		// Bezahle fabloses mit farbigem Mana
+		need = manaCostGoal.get(clm) - manaCostAlreadyPaid.get(clm);
+		if (need > 0) {
+			final int manaLeft = manaPool.getTotalColoredMana();
+			if (need >= manaLeft) {
+				manaCostAlreadyPaid.add(clm, manaLeft);
+				player.removeManaAll();
+			} else {
+				for (final ColorType key : manaPool.getKeySet()) {
+					value = manaPool.get(key);
+					manaCostAlreadyPaid.add(clm, value);
+					player.removeMana(key, value);
+				}
+			}
+		}
+
 		return player.getManaCostGoal().equals(player.getManaCostAlreadyPaid());
 	}
 

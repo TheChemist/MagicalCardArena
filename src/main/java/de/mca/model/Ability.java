@@ -88,12 +88,13 @@ public class Ability {
 	}
 
 	public void add(Effect magicEffect) {
-		propertyListEffects.add(magicEffect);
+		magicEffect.setPlayerType(getPlayerControlling());
+		propertyListEffects().add(magicEffect);
 	}
 
 	public void generateEffects() {
-		for (final Effect me : propertyListEffects) {
-			if (me.getPlayerType() != null) {
+		for (final Effect me : propertyListEffects()) {
+			if (me.getPlayerType() == null) {
 				throw new NullPointerException("Effekt hat keinen Spielertyp.");
 			}
 
@@ -118,7 +119,7 @@ public class Ability {
 	}
 
 	public PlayerType getPlayerControlling() {
-		return propertyPlayerControlling.get();
+		return propertyPlayerControlling().get();
 	}
 
 	public IsObject getSource() {
@@ -131,6 +132,10 @@ public class Ability {
 
 	public ObservableList<IsManaMap> propertyListCostMaps() {
 		return propertyListCostMaps;
+	}
+
+	public ListProperty<Effect> propertyListEffects() {
+		return propertyListEffects;
 	}
 
 	public ObservableList<Effect> propertyListMagicEffects() {
@@ -146,13 +151,12 @@ public class Ability {
 	}
 
 	public void remove(Effect magicEffect) {
-		propertyListEffects.remove(magicEffect);
+		propertyListEffects().remove(magicEffect);
 	}
 
 	public void setPlayerControlling(PlayerType playerControlling) {
-		this.propertyPlayerControlling.set(playerControlling);
-
-		propertyListEffects.forEach(effect -> effect.setPlayerType(playerControlling));
+		propertyListEffects().forEach(effect -> effect.setPlayerType(playerControlling));
+		propertyPlayerControlling().set(playerControlling);
 	}
 
 	public void setSource(IsObject magicCard) {

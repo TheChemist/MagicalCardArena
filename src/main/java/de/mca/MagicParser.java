@@ -130,7 +130,7 @@ public class MagicParser {
 		if (elementCost != null) {
 			final ObservableList<IsManaMap> costMaps = FXCollections.observableArrayList();
 			final ObservableSet<ColorType> color = FXCollections.observableSet();
-			final ObservableMap<ColorType, Integer> costMap = FXCollections.observableMap(new HashMap<>());
+			final ObservableMap<ColorType, Integer> costMap = FXCollections.observableHashMap();
 			final JsonArray cardCost = elementCost.getAsJsonArray();
 			for (int i = 0; i < cardCost.size(); i++) {
 				final JsonArray cardCostMap = cardCost.get(i).getAsJsonArray();
@@ -147,6 +147,9 @@ public class MagicParser {
 			}
 			card.setListCostMaps(costMaps);
 			card.setSetColorTypes(color);
+		} else {
+			// Füge leere CostMap hinzu
+			card.setListCostMaps(FXCollections.observableArrayList(new ManaMapDefault()));
 		}
 
 		// parse Abilities

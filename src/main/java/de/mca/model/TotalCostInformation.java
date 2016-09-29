@@ -9,10 +9,10 @@ import de.mca.model.interfaces.IsManaMap;
 
 public class TotalCostInformation {
 
-	private IsManaMap initialCost;
+	private AdditionalCostType additionalCostType;
 	private final List<IsManaMap> costIncreases;
 	private final List<IsManaMap> costReductions;
-	private AdditionalCostType additionalCostType;
+	private IsManaMap initialCost;
 
 	public TotalCostInformation() {
 		costIncreases = new ArrayList<>();
@@ -27,20 +27,16 @@ public class TotalCostInformation {
 		costReductions.add(costReduction);
 	}
 
-	public void setInitalCost(IsManaMap initialCost) {
-		this.initialCost = initialCost;
-	}
-
 	public AdditionalCostType getAdditionalCostType() {
 		return additionalCostType;
 	}
 
-	public void setAdditionalCostType(AdditionalCostType additionalCostType) {
-		this.additionalCostType = additionalCostType;
-	}
-
 	public IsManaMap getInitialCost() {
 		return initialCost;
+	}
+
+	public int getTotalConvertedCost() {
+		return getTotalCost().getTotalMana();
 	}
 
 	public IsManaMap getTotalCost() {
@@ -58,12 +54,23 @@ public class TotalCostInformation {
 		return totalCost;
 	}
 
-	public int getTotalConvertedCost() {
-		return getTotalCost().getTotalMana();
+	public boolean hasAdditionalCostType() {
+		if (getAdditionalCostType() == null) {
+			return true;
+		}
+		if (getAdditionalCostType().equals(AdditionalCostType.NO_ADDITIONAL_COST)) {
+			return true;
+		} else {
+			return false;
+		}
 	}
 
-	public boolean hasAdditionalCostType() {
-		return getAdditionalCostType() != null;
+	public void setAdditionalCostType(AdditionalCostType additionalCostType) {
+		this.additionalCostType = additionalCostType;
+	}
+
+	public void setInitalCost(IsManaMap initialCost) {
+		this.initialCost = initialCost;
 	}
 
 }

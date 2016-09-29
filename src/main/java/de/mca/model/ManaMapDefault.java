@@ -26,14 +26,14 @@ public class ManaMapDefault implements IsManaMap {
 	/**
 	 * Speichert das Mana.
 	 */
-	private final MapProperty<ColorType, Integer> manaMap;
+	private final MapProperty<ColorType, Integer> propertyMapMana;
 
 	public ManaMapDefault() {
-		this.manaMap = new SimpleMapProperty<>(FXCollections.observableHashMap());
+		propertyMapMana = new SimpleMapProperty<>(FXCollections.observableHashMap());
 	}
 
 	public ManaMapDefault(ObservableMap<ColorType, Integer> manaMap) {
-		this.manaMap = new SimpleMapProperty<>(manaMap);
+		propertyMapMana = new SimpleMapProperty<>(manaMap);
 	}
 
 	@Override
@@ -50,7 +50,7 @@ public class ManaMapDefault implements IsManaMap {
 
 	@Override
 	public boolean containsKey(ColorType color) {
-		return manaMap.containsKey(color);
+		return propertyMapMana().containsKey(color);
 	}
 
 	@Override
@@ -60,7 +60,7 @@ public class ManaMapDefault implements IsManaMap {
 
 	@Override
 	public int get(ColorType color) {
-		return containsKey(color) ? manaMap.get(color) : 0;
+		return containsKey(color) ? propertyMapMana().get(color) : 0;
 	}
 
 	@Override
@@ -74,7 +74,7 @@ public class ManaMapDefault implements IsManaMap {
 
 	@Override
 	public Set<ColorType> getKeySet() {
-		return manaMap.keySet();
+		return propertyMapMana().keySet();
 	}
 
 	@Override
@@ -110,22 +110,22 @@ public class ManaMapDefault implements IsManaMap {
 
 	@Override
 	public void manaAdd(ColorType color) {
-		manaMap.put(color, get(color) + 1);
+		propertyMapMana().put(color, get(color) + 1);
 	}
 
 	@Override
 	public void manaRemove(ColorType color) {
 		final int oldValue = get(color);
 		if (oldValue <= 1) {
-			manaMap.remove(color);
+			propertyMapMana().remove(color);
 		} else {
-			manaMap.put(color, oldValue - 1);
+			propertyMapMana().put(color, oldValue - 1);
 		}
 	}
 
 	@Override
 	public MapProperty<ColorType, Integer> propertyManaMap() {
-		return manaMap;
+		return propertyMapMana;
 	}
 
 	@Override
@@ -137,12 +137,12 @@ public class ManaMapDefault implements IsManaMap {
 
 	@Override
 	public void removeAll() {
-		manaMap.clear();
+		propertyMapMana().clear();
 	}
 
 	@Override
 	public void setManaMap(ObservableMap<ColorType, Integer> manaMap) {
-		this.manaMap.set(manaMap);
+		propertyMapMana().set(manaMap);
 	}
 
 	@Override
@@ -157,5 +157,9 @@ public class ManaMapDefault implements IsManaMap {
 			index++;
 		}
 		return bldr.append("]").toString();
+	}
+
+	private MapProperty<ColorType, Integer> propertyMapMana() {
+		return propertyMapMana;
 	}
 }

@@ -20,8 +20,6 @@ import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleListProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleSetProperty;
-import javafx.beans.property.SimpleStringProperty;
-import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.ObservableSet;
@@ -48,11 +46,11 @@ public class MagicCard implements IsObject {
 	/**
 	 * Speichert den Namen, so wie er auf der Karte zu lesen ist.
 	 */
-	private final StringProperty displayName;
+	private String displayName;
 	/**
 	 * Speichert den Filenamen der Karte (inklusive der Dateiendung).
 	 */
-	private final StringProperty fileName;
+	private String fileName;
 	/**
 	 * Speichert die eindeutige Identifikationsnummer des Objekts. Wird beim
 	 * erstellen der Karten vergeben. Üblicherweise von 0 bis
@@ -62,79 +60,80 @@ public class MagicCard implements IsObject {
 	/**
 	 * Speichert die Abilities der Karte. Bleibende Karten haben Abilities.
 	 */
-	private final ListProperty<Ability> listCharacteristicAbilities;
+	private final ListProperty<Ability> propertyListCharacteristicAbilities;
 	/**
 	 * Speichert die Kosten der Karte. Bei doppelfarbigen Karten werden alle
 	 * Kombinationen gespeichert.
 	 */
-	private final ListProperty<IsManaMap> listCostMaps;
+	private final ListProperty<IsManaMap> propertyListCostMaps;
 	/**
 	 * Speichert die Liste der Effekte. Zaubersprüche haben Effekte.
 	 */
-	private final ListProperty<Effect> listEffects;
+	private final ListProperty<Effect> propertyListEffects;
 	/**
 	 * Speichert die besuchten Zonen. Die Aktuelle ist jeweils die letzte.
 	 */
-	private final ListProperty<ZoneType> listZonesVisited;
+	private final ListProperty<ZoneType> propertyListZonesVisited;
 	/**
 	 * Speichert die Anzahl der Loyalitätspunkte.
 	 */
-	private final IntegerProperty loyalty;
+	private final IntegerProperty propertyLoyalty;
 	/**
 	 * Speichert den Spielertyp des Eigentümers.
 	 * 
 	 * @see http://magiccards.info/rule/108-cards.html#rule-108-3
 	 */
-	private final ObjectProperty<PlayerType> playerOwning;
+	private final ObjectProperty<PlayerType> propertyPlayerOwning;
 	/**
 	 * Speichert die Angriffstärke des Objekts.
 	 */
-	private final IntegerProperty power;
-	/**
-	 * Speichert die Seltenheit der Karte.
-	 */
-	private final ObjectProperty<RarityType> rarity;
+	private final IntegerProperty propertyPower;
 	/**
 	 * Speichert die Farbe der Karte. Es wird auch farblos gespeichert,
 	 * allerdings handelt es sich dabei um keine echte Farbe im Sinne der
 	 * Magic-Regeln. Dient auch als Color Indicator im Sinne von Regel 204. im
 	 * Magic Rulebook.
 	 */
-	private final SetProperty<ColorType> setColorType;
+	private final SetProperty<ColorType> propertySetColorType;
 	/**
 	 * Speichert die Objekttyen.
 	 */
-	private final SetProperty<ObjectType> setObjectTypes;
+	private final SetProperty<ObjectType> propertySetObjectTypes;
 	/**
 	 * Speichert die Subtypen.
 	 */
-	private final SetProperty<SubType> setSubTypes;
+	private final SetProperty<SubType> propertySetSubTypes;
 	/**
 	 * Speichert die Supertypen.
 	 */
-	private final SetProperty<SuperType> setSuperTypes;
+	private final SetProperty<SuperType> propertySetSuperTypes;
 	/**
 	 * Speichert die Widerstandskraft des Objekts.
 	 */
-	private final IntegerProperty toughness;
+	private final IntegerProperty propertyToughness;
+	/**
+	 * Speichert die Seltenheit der Karte.
+	 */
+	private RarityType rarity;
 
 	public MagicCard(int id) {
 		this.id = id;
-		displayName = new SimpleStringProperty();
-		fileName = new SimpleStringProperty();
-		listCharacteristicAbilities = new SimpleListProperty<>(FXCollections.observableArrayList(new ArrayList<>()));
-		listCostMaps = new SimpleListProperty<>(FXCollections.observableArrayList(new ArrayList<>()));
-		listEffects = new SimpleListProperty<>(FXCollections.observableArrayList(new ArrayList<>()));
-		listZonesVisited = new SimpleListProperty<>(FXCollections.observableArrayList(new ArrayList<>()));
-		loyalty = new SimpleIntegerProperty();
-		playerOwning = new SimpleObjectProperty<>();
-		power = new SimpleIntegerProperty();
-		rarity = new SimpleObjectProperty<>();
-		setColorType = new SimpleSetProperty<>();
-		setObjectTypes = new SimpleSetProperty<>();
-		setSubTypes = new SimpleSetProperty<>();
-		setSuperTypes = new SimpleSetProperty<>();
-		toughness = new SimpleIntegerProperty();
+		displayName = "";
+		fileName = "";
+		propertyListCharacteristicAbilities = new SimpleListProperty<>(
+				FXCollections.observableArrayList(new ArrayList<>()));
+		propertyListCostMaps = new SimpleListProperty<>(FXCollections.observableArrayList(new ArrayList<>()));
+		propertyListEffects = new SimpleListProperty<>(FXCollections.observableArrayList(new ArrayList<>()));
+		propertyListZonesVisited = new SimpleListProperty<>(FXCollections.observableArrayList(new ArrayList<>()));
+		propertyLoyalty = new SimpleIntegerProperty();
+		propertyPlayerOwning = new SimpleObjectProperty<>();
+		propertyPower = new SimpleIntegerProperty();
+		propertySetColorType = new SimpleSetProperty<>();
+		propertySetObjectTypes = new SimpleSetProperty<>();
+		propertySetSubTypes = new SimpleSetProperty<>();
+		propertySetSuperTypes = new SimpleSetProperty<>();
+		propertyToughness = new SimpleIntegerProperty();
+		rarity = RarityType.BASIC;
 	}
 
 	public MagicCard(MagicPermanent magicPermanent) {
@@ -157,47 +156,48 @@ public class MagicCard implements IsObject {
 
 	@Override
 	public void add(Ability ability) {
-		listCharacteristicAbilities.add(ability);
+		ability.setPlayerControlling(getPlayerOwning());
+		propertyListCharacteristicAbilities().add(ability);
 	}
 
 	public void add(ColorType color) {
-		setColorType.add(color);
+		propertySetColorType().add(color);
 	}
 
 	public void add(Effect magicEffect) {
-		listEffects.add(magicEffect);
+		propertyListEffects().add(magicEffect);
 	}
 
 	public void add(ObjectType objectType) {
-		setObjectTypes.add(objectType);
+		propertySetObjectTypes().add(objectType);
 	}
 
 	public void add(SubType subType) {
-		setSubTypes.add(subType);
+		propertySetSubTypes().add(subType);
 	}
 
 	public void add(SuperType superType) {
-		setSuperTypes.add(superType);
+		propertySetSuperTypes().add(superType);
 	}
 
 	public void addZone(ZoneType currentZone) {
-		listZonesVisited.add(currentZone);
+		propertyListZonesVisited().add(currentZone);
 	}
 
 	public boolean contains(ColorType color) {
-		return setColorType.contains(color);
+		return propertySetColorType().contains(color);
 	}
 
 	public boolean contains(ObjectType coreType) {
-		return setObjectTypes.contains(coreType);
+		return propertySetObjectTypes().contains(coreType);
 	}
 
 	public boolean contains(SubType subType) {
-		return setSubTypes.contains(subType);
+		return propertySetSubTypes().contains(subType);
 	}
 
 	public boolean contains(SuperType superType) {
-		return setSuperTypes.contains(superType);
+		return propertySetSuperTypes().contains(superType);
 	}
 
 	@Override
@@ -243,28 +243,28 @@ public class MagicCard implements IsObject {
 	}
 
 	public int getConvertedManaCost() {
-		if (listCostMaps.isEmpty()) {
+		if (propertyListCostMaps().isEmpty()) {
 			return 0;
 		} else {
-			return listCostMaps.get(0).getTotalMana();
+			return propertyListCostMaps().get(0).getTotalMana();
 		}
 	}
 
 	public ZoneType getCurrentZone() {
-		if (listZonesVisited.size() == 0) {
+		if (propertyListZonesVisited().size() == 0) {
 			return null;
 		} else {
-			return listZonesVisited.get(listZonesVisited.size() - 1);
+			return propertyListZonesVisited().get(propertyListZonesVisited().size() - 1);
 		}
 	}
 
 	@Override
 	public String getDisplayName() {
-		return displayName.get();
+		return displayName;
 	}
 
 	public String getFileName() {
-		return fileName.get();
+		return fileName;
 	}
 
 	@Override
@@ -286,25 +286,25 @@ public class MagicCard implements IsObject {
 
 	@Override
 	public int getLoyalty() {
-		return loyalty.get();
+		return propertyLoyalty().get();
 	}
 
 	public PlayerType getPlayerOwning() {
-		return playerOwning.get();
+		return propertyPlayerOwning().get();
 	}
 
 	@Override
 	public int getPower() {
-		return power.get();
+		return propertyPower().get();
 	}
 
 	public RarityType getRarity() {
-		return rarity.get();
+		return rarity;
 	}
 
 	@Override
 	public int getToughness() {
-		return toughness.get();
+		return propertyToughness().get();
 	}
 
 	@Override
@@ -316,27 +316,27 @@ public class MagicCard implements IsObject {
 	}
 
 	public boolean isArtifact() {
-		return setObjectTypes.contains(ObjectType.ARTIFACT);
+		return propertySetObjectTypes().contains(ObjectType.ARTIFACT);
 	}
 
 	public boolean isBlack() {
-		return setColorType.contains(ColorType.BLACK);
+		return propertySetColorType().contains(ColorType.BLACK);
 	}
 
 	public boolean isBlue() {
-		return setColorType.contains(ColorType.BLUE);
+		return propertySetColorType().contains(ColorType.BLUE);
 	}
 
 	public boolean isColorless() {
-		return setColorType.size() == 0;
+		return propertySetColorType().size() == 0;
 	}
 
 	public boolean isCreature() {
-		return setObjectTypes.contains(ObjectType.CREATURE);
+		return propertySetObjectTypes().contains(ObjectType.CREATURE);
 	}
 
 	public boolean isEnchantment() {
-		return setObjectTypes.contains(ObjectType.ENCHANTMENT);
+		return propertySetObjectTypes().contains(ObjectType.ENCHANTMENT);
 	}
 
 	public boolean isEveryColor() {
@@ -344,23 +344,23 @@ public class MagicCard implements IsObject {
 	}
 
 	public boolean isGreen() {
-		return setColorType.contains(ColorType.GREEN);
+		return propertySetColorType().contains(ColorType.GREEN);
 	}
 
 	public boolean isInstant() {
-		return setObjectTypes.contains(ObjectType.INSTANT);
+		return propertySetObjectTypes().contains(ObjectType.INSTANT);
 	}
 
 	public boolean isLand() {
-		return setObjectTypes.contains(ObjectType.LAND);
+		return propertySetObjectTypes().contains(ObjectType.LAND);
 	}
 
 	public boolean isMonocolored() {
-		return setColorType.size() == 1;
+		return propertySetColorType().size() == 1;
 	}
 
 	public boolean isMulticolored() {
-		return setColorType.size() > 1;
+		return propertySetColorType().size() > 1;
 	}
 
 	public boolean isPermanent() {
@@ -368,7 +368,7 @@ public class MagicCard implements IsObject {
 	}
 
 	public boolean isPermanentSpell() {
-		for (final ObjectType ot : setObjectTypes) {
+		for (final ObjectType ot : propertySetObjectTypes) {
 			if (ot.isPermanentSpell()) {
 				return true;
 			}
@@ -377,15 +377,15 @@ public class MagicCard implements IsObject {
 	}
 
 	public boolean isPlaneswalker() {
-		return setObjectTypes.contains(ObjectType.PLANESWALKER);
+		return propertySetObjectTypes().contains(ObjectType.PLANESWALKER);
 	}
 
 	public boolean isRed() {
-		return contains(ColorType.RED);
+		return propertySetColorType().contains(ColorType.RED);
 	}
 
 	public boolean isSorcery() {
-		return setObjectTypes.contains(ObjectType.SORCERY);
+		return propertySetObjectTypes().contains(ObjectType.SORCERY);
 	}
 
 	public boolean isSpell() {
@@ -393,127 +393,140 @@ public class MagicCard implements IsObject {
 	}
 
 	public boolean isWhite() {
-		return contains(ColorType.WHITE);
+		return propertySetColorType.contains(ColorType.WHITE);
 	}
 
 	@Override
 	public ObservableList<Ability> propertyListCharacteristicAbilities() {
-		return listCharacteristicAbilities;
+		return propertyListCharacteristicAbilities;
 	}
 
 	public ListProperty<IsManaMap> propertyListCostMaps() {
-		return listCostMaps;
+		return propertyListCostMaps;
 	}
 
 	public ListProperty<Effect> propertyListEffects() {
-		return listEffects;
+		return propertyListEffects;
 	}
 
 	public ListProperty<ZoneType> propertyListZonesVisited() {
-		return listZonesVisited;
+		return propertyListZonesVisited;
+	}
+
+	public IntegerProperty propertyLoyalty() {
+		return propertyLoyalty;
 	}
 
 	public ObjectProperty<PlayerType> propertyPlayerOwning() {
-		return playerOwning;
+		return propertyPlayerOwning;
 	}
 
-	public ObjectProperty<RarityType> propertyRarityType() {
-		return rarity;
+	public IntegerProperty propertyPower() {
+		return propertyPower;
+	}
+
+	public SetProperty<ColorType> propertySetColorType() {
+		return propertySetColorType;
 	}
 
 	@Override
 	public SetProperty<ColorType> propertySetColorTypes() {
-		return setColorType;
+		return propertySetColorType;
 	}
 
 	@Override
 	public SetProperty<ObjectType> propertySetObjectTypes() {
-		return setObjectTypes;
+		return propertySetObjectTypes;
 	}
 
 	@Override
 	public SetProperty<SubType> propertySetSubTypes() {
-		return setSubTypes;
+		return propertySetSubTypes;
 	}
 
 	@Override
 	public SetProperty<SuperType> propertySetSuperTypes() {
-		return setSuperTypes;
+		return propertySetSuperTypes;
+	}
+
+	public IntegerProperty propertyToughness() {
+		return propertyToughness;
 	}
 
 	public void remove(ColorType color) {
-		this.setColorType.remove(color);
+		propertySetColorType.remove(color);
 	}
 
 	public void remove(ObjectType objectType) {
-		this.setObjectTypes.remove(objectType);
+		propertySetObjectTypes.remove(objectType);
 	}
 
 	public void remove(SubType subType) {
-		this.setSubTypes.remove(subType);
+		propertySetSubTypes.remove(subType);
 	}
 
 	public void remove(SuperType superType) {
-		this.setSuperTypes.remove(superType);
+		propertySetSuperTypes.remove(superType);
 	}
 
 	public void setDisplayName(String displayName) {
-		this.displayName.set(displayName);
+		this.displayName = displayName;
 	}
 
 	public void setFileName(String fileName) {
-		this.fileName.set(fileName);
+		this.fileName = fileName;
 	}
 
 	public void setListCharacteristicAbilities(ObservableList<Ability> listAbilities) {
-		this.listCharacteristicAbilities.set(listAbilities);
-		this.listCharacteristicAbilities.forEach(element -> {
+		propertyListCharacteristicAbilities.set(listAbilities);
+		propertyListCharacteristicAbilities().forEach(element -> {
 			element.setSource(this);
 		});
 	}
 
 	public void setListCostMaps(ObservableList<IsManaMap> listCostMaps) {
-		this.listCostMaps.set(listCostMaps);
+		propertyListCostMaps().set(listCostMaps);
 	}
 
 	public void setListEffects(ObservableList<Effect> listEffects) {
-		this.listEffects.set(listEffects);
+		propertyListEffects().set(listEffects);
 	}
 
 	public void setListZonesVisited(ObservableList<ZoneType> listZonesVisited) {
-		this.listZonesVisited.set(listZonesVisited);
+		propertyListZonesVisited().set(listZonesVisited);
 	}
 
 	public void setLoyalty(int loyalty) {
-		this.loyalty.set(loyalty);
+		propertyLoyalty().set(loyalty);
 	}
 
 	public void setPlayerOwning(PlayerType playerOwning) {
-		this.playerOwning.set(playerOwning);
+		propertyPlayerOwning().set(playerOwning);
+		propertyListCharacteristicAbilities().forEach(element -> element.setPlayerControlling(playerOwning));
 	}
 
 	public void setPower(int power) {
-		this.power.set(power);
+		propertyPower().set(power);
 	}
 
 	public void setRarity(RarityType rarity) {
-		this.rarity.set(rarity);
+		this.rarity = rarity;
 	}
 
 	public void setSetColorTypes(ObservableSet<ColorType> setColorTypes) {
-		this.setColorType.set(setColorTypes);
+		propertySetColorType().set(setColorTypes);
 	}
 
 	public void setSetObjectTypes(ObservableSet<ObjectType> setObjectTypes) {
-		this.setObjectTypes.set(setObjectTypes);
+		propertySetObjectTypes().set(setObjectTypes);
 	}
 
 	public void setSetSubTypes(ObservableSet<SubType> setSubTypes) {
-		this.setSubTypes.set(setSubTypes);
+		propertySetSubTypes().set(setSubTypes);
 	}
 
 	public void setSetSuperTypes(ObservableSet<SuperType> setSuperTypes) {
-		this.setSuperTypes.set(setSuperTypes);
+		propertySetSuperTypes().set(setSuperTypes);
 	}
 
 	public void setStrength(int power, int toughness) {
@@ -522,13 +535,13 @@ public class MagicCard implements IsObject {
 	}
 
 	public void setToughness(int toughness) {
-		this.toughness.set(toughness);
+		propertyToughness().set(toughness);
 	}
 
 	@Override
 	public String toString() {
 		return new StringBuilder("[").append(displayName).append(" id=[").append(id).append("] z=[")
-				.append(getCurrentZone()).append("] cm=[").append(listCostMaps.size()).append("]]").toString();
+				.append(getCurrentZone()).append("] cm=[").append(propertyListCostMaps.size()).append("]]").toString();
 	}
 
 }
