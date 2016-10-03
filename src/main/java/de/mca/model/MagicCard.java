@@ -60,7 +60,7 @@ public class MagicCard implements IsObject {
 	/**
 	 * Speichert die Abilities der Karte. Bleibende Karten haben Abilities.
 	 */
-	private final ListProperty<Ability> propertyListCharacteristicAbilities;
+	private final ListProperty<ActivatedAbility> propertyListAbilities;
 	/**
 	 * Speichert die Kosten der Karte. Bei doppelfarbigen Karten werden alle
 	 * Kombinationen gespeichert.
@@ -80,7 +80,7 @@ public class MagicCard implements IsObject {
 	private final IntegerProperty propertyLoyalty;
 	/**
 	 * Speichert den Spielertyp des Eigentümers.
-	 * 
+	 *
 	 * @see http://magiccards.info/rule/108-cards.html#rule-108-3
 	 */
 	private final ObjectProperty<PlayerType> propertyPlayerOwning;
@@ -120,11 +120,10 @@ public class MagicCard implements IsObject {
 		this.id = id;
 		displayName = "";
 		fileName = "";
-		propertyListCharacteristicAbilities = new SimpleListProperty<>(
-				FXCollections.observableArrayList(new ArrayList<>()));
-		propertyListCostMaps = new SimpleListProperty<>(FXCollections.observableArrayList(new ArrayList<>()));
-		propertyListEffects = new SimpleListProperty<>(FXCollections.observableArrayList(new ArrayList<>()));
-		propertyListZonesVisited = new SimpleListProperty<>(FXCollections.observableArrayList(new ArrayList<>()));
+		propertyListAbilities = new SimpleListProperty<>(FXCollections.observableArrayList());
+		propertyListCostMaps = new SimpleListProperty<>(FXCollections.observableArrayList());
+		propertyListEffects = new SimpleListProperty<>(FXCollections.observableArrayList());
+		propertyListZonesVisited = new SimpleListProperty<>(FXCollections.observableArrayList());
 		propertyLoyalty = new SimpleIntegerProperty();
 		propertyPlayerOwning = new SimpleObjectProperty<>();
 		propertyPower = new SimpleIntegerProperty();
@@ -140,7 +139,7 @@ public class MagicCard implements IsObject {
 		this(magicPermanent.getId());
 		setDisplayName(magicPermanent.getDisplayName());
 		setFileName(magicPermanent.getFileName());
-		setListCharacteristicAbilities(magicPermanent.propertyListCharacteristicAbilities());
+		setListCharacteristicAbilities(magicPermanent.propertyListAbilities());
 		setListCostMaps(magicPermanent.propertyListCostMaps());
 		setListEffects(magicPermanent.propertyListEffects());
 		setListZonesVisited(magicPermanent.propertyListZonesVisited());
@@ -155,9 +154,9 @@ public class MagicCard implements IsObject {
 	}
 
 	@Override
-	public void add(Ability ability) {
+	public void add(ActivatedAbility ability) {
 		ability.setPlayerControlling(getPlayerOwning());
-		propertyListCharacteristicAbilities().add(ability);
+		propertyListAbilities().add(ability);
 	}
 
 	public void add(ColorType color) {
@@ -367,15 +366,6 @@ public class MagicCard implements IsObject {
 		return isArtifact() || isCreature() || isEnchantment() || isLand() || isPlaneswalker();
 	}
 
-	public boolean isPermanentSpell() {
-		for (final ObjectType ot : propertySetObjectTypes) {
-			if (ot.isPermanentSpell()) {
-				return true;
-			}
-		}
-		return false;
-	}
-
 	public boolean isPlaneswalker() {
 		return propertySetObjectTypes().contains(ObjectType.PLANESWALKER);
 	}
@@ -397,8 +387,8 @@ public class MagicCard implements IsObject {
 	}
 
 	@Override
-	public ObservableList<Ability> propertyListCharacteristicAbilities() {
-		return propertyListCharacteristicAbilities;
+	public ObservableList<ActivatedAbility> propertyListAbilities() {
+		return propertyListAbilities;
 	}
 
 	public ListProperty<IsManaMap> propertyListCostMaps() {
@@ -477,9 +467,9 @@ public class MagicCard implements IsObject {
 		this.fileName = fileName;
 	}
 
-	public void setListCharacteristicAbilities(ObservableList<Ability> listAbilities) {
-		propertyListCharacteristicAbilities.set(listAbilities);
-		propertyListCharacteristicAbilities().forEach(element -> {
+	public void setListCharacteristicAbilities(ObservableList<ActivatedAbility> listAbilities) {
+		propertyListAbilities.set(listAbilities);
+		propertyListAbilities().forEach(element -> {
 			element.setSource(this);
 		});
 	}
@@ -501,8 +491,8 @@ public class MagicCard implements IsObject {
 	}
 
 	public void setPlayerOwning(PlayerType playerOwning) {
+		propertyListAbilities().forEach(ability -> ability.setPlayerControlling(playerOwning));
 		propertyPlayerOwning().set(playerOwning);
-		propertyListCharacteristicAbilities().forEach(element -> element.setPlayerControlling(playerOwning));
 	}
 
 	public void setPower(int power) {

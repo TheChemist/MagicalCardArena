@@ -4,6 +4,7 @@ import com.google.common.eventbus.EventBus;
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
 
+import de.mca.model.enums.ObjectType;
 import de.mca.model.enums.PlayerType;
 import de.mca.model.interfaces.IsStackable;
 import javafx.beans.property.ObjectProperty;
@@ -24,7 +25,7 @@ public class MagicSpell extends MagicCard implements IsStackable {
 	private final EventBus eventBus;
 	/**
 	 * Speichert den Spielertyp des kontrollierenden Spielers.
-	 * 
+	 *
 	 * @see http://magiccards.info/rule/109-objects.html#rule-109-4
 	 */
 	private final ObjectProperty<PlayerType> playerControlling;
@@ -36,7 +37,7 @@ public class MagicSpell extends MagicCard implements IsStackable {
 		this.playerControlling = new SimpleObjectProperty<>(playerControlling);
 		setDisplayName(magicCard.getDisplayName());
 		setFileName(magicCard.getFileName());
-		setListCharacteristicAbilities(magicCard.propertyListCharacteristicAbilities());
+		setListCharacteristicAbilities(magicCard.propertyListAbilities());
 		setListCostMaps(magicCard.propertyListCostMaps());
 		setListEffects(magicCard.propertyListEffects());
 		setListZonesVisited(magicCard.propertyListZonesVisited());
@@ -52,7 +53,7 @@ public class MagicSpell extends MagicCard implements IsStackable {
 	}
 
 	public boolean canSplice() {
-		// TODO: Unterstützung für "Splice"-Fähigkeit.
+		// TODO: Feature "Splice"-Fähigkeit.
 		return false;
 	}
 
@@ -62,19 +63,19 @@ public class MagicSpell extends MagicCard implements IsStackable {
 	}
 
 	public boolean hasAdditionalCost() {
-		// TODO: Unterstützung für zusätzliche Kosten.
+		// TODO: Feature zusätzliche Kosten.
 		return false;
 	}
 
 	public boolean hasBuyback() {
-		// TODO: Unterstützung für "Kicker"-Fähigkeit.
+		// TODO: Feature "Kicker"-Fähigkeit.
 		return false;
 	}
 
 	/**
 	 * Prüft, ob der Zauberspruch hybride Kosten enthält. Ein Zauberspruch mit
 	 * hybriden Kosten hat mehr als eine CostMap.
-	 * 
+	 *
 	 * @return true, wenn die Anzahl der CostMaps größer 1 ist.
 	 */
 	public boolean hasHybridCost() {
@@ -82,22 +83,32 @@ public class MagicSpell extends MagicCard implements IsStackable {
 	}
 
 	public boolean hasKicker() {
-		// TODO: Unterstützung für "Buyback"-Fähigkeit.
+		// TODO: Feature "Buyback"-Fähigkeit.
 		return false;
 	}
 
 	public boolean hasPhyrexianCost() {
-		// TODO: Unterstützung für Phyrexanische Kosten.
+		// TODO: Feature Phyrexanische Kosten.
 		return false;
 	}
 
 	public boolean hasVariableCost() {
-		// TODO: Unterstützung für variable Kosten.
+		// TODO: Feature variable Kosten.
 		return false;
 	}
 
 	public boolean isModal() {
-		// TODO: Unterstützung für modale Zaubersprüche.
+		// TODO: Feature modale Zaubersprüche.
+		return false;
+	}
+
+	@Override
+	public boolean isPermanentSpell() {
+		for (final ObjectType ot : propertySetObjectTypes()) {
+			if (ot.isPermanentSpell()) {
+				return true;
+			}
+		}
 		return false;
 	}
 
@@ -119,5 +130,4 @@ public class MagicSpell extends MagicCard implements IsStackable {
 	private EventBus getEventBus() {
 		return eventBus;
 	}
-
 }

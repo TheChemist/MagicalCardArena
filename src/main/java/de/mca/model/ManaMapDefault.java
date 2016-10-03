@@ -137,7 +137,7 @@ public class ManaMapDefault implements IsManaMap {
 
 	@Override
 	public void removeAll() {
-		propertyMapMana().clear();
+		propertyManaMap().keySet().forEach(color -> remove(color, get(color)));
 	}
 
 	@Override

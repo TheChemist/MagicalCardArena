@@ -1,6 +1,5 @@
 package de.mca.model;
 
-import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
 
@@ -29,6 +28,7 @@ import de.mca.model.enums.ZoneType;
 import de.mca.model.interfaces.IsAttackTarget;
 import de.mca.model.interfaces.IsManaMap;
 import de.mca.model.interfaces.IsPlayer;
+import de.mca.model.interfaces.IsStackable;
 import javafx.beans.property.SetProperty;
 import javafx.beans.property.SimpleSetProperty;
 import javafx.collections.FXCollections;
@@ -63,22 +63,22 @@ public class RuleEnforcer {
 		this.factoryMagicPermanent = factoryMagicPermanent;
 		this.factoryMagicSpell = factoryMagicSpell;
 
-		setStateBasedActions = new SimpleSetProperty<>(FXCollections.observableSet(new HashSet<>()));
+		setStateBasedActions = new SimpleSetProperty<>(FXCollections.observableSet());
 	}
 
 	@Subscribe
-	public void examineMagicEffectProduceMana(EffectProduceMana magicEffectProduceMana) {
-		// TODO: Anpassen für Spells, Effekte als EventObjekte?
-		LOGGER.debug("{} examineMagicEffectProduceMana({})", this, magicEffectProduceMana);
-		final IsManaMap manaMap = magicEffectProduceMana.getProduceMap();
-		final IsPlayer player = match.getPlayer(magicEffectProduceMana.getPlayerType());
+	public void examineEffectProduceMana(EffectProduceMana effectProduceMana) {
+		LOGGER.debug("{} examineEffectProduceMana({})", this, effectProduceMana);
+		final IsManaMap manaMap = effectProduceMana.getProduceMap();
+		final IsPlayer player = match.getPlayer(effectProduceMana.getPlayerType());
 
 		manaMap.getKeySet().forEach(key -> player.addMana(key, manaMap.get(key)));
 
-		if (player.isPaying() && checkIsPaid(player)) {
+		final boolean paying = player.isPaying();
+		final boolean isPaid = checkIsPaid(player);
+		if (paying && isPaid) {
 			// Spieler hat alles bezahlt
 			actionEndPayment(player);
-			finishAction(player);
 		}
 	}
 
@@ -87,8 +87,7 @@ public class RuleEnforcer {
 		LOGGER.debug("{} examinePAActivateAbility({})", this, playerActionActivatedAbility);
 
 		// Führe Aktion aus.
-		actionActivateCharacteristicAbility(playerActionActivatedAbility.getSource(),
-				playerActionActivatedAbility.getAbility());
+		actionActivateAbility(playerActionActivatedAbility.getSource(), playerActionActivatedAbility.getAbility());
 	}
 
 	@Subscribe
@@ -96,7 +95,7 @@ public class RuleEnforcer {
 		LOGGER.debug("{} examinePACastSpell({})", this, playerActionCastSpell);
 
 		// Führe Aktion aus.
-		actionCastSpell(playerActionCastSpell.getSource(), playerActionCastSpell.getCard());
+		actionCBeginCastSpell(playerActionCastSpell.getSource(), playerActionCastSpell.getCard());
 	}
 
 	@Subscribe
@@ -128,8 +127,13 @@ public class RuleEnforcer {
 	public void examinePASelectCostMap(PASelectCostMap playerActionSelectCostMap) {
 		LOGGER.debug("{} examinePASelectCostMap({})", this, playerActionSelectCostMap);
 		final IsPlayer player = playerActionSelectCostMap.getSource();
-		player.setManaCostGoal(playerActionSelectCostMap.getCostMap());
-		actionBeginPayment(player);
+
+		// TODO: Braucht Anpassung
+		TotalCostInformation totalCostInformation = new TotalCostInformation();
+		totalCostInformation.setInitalCost(playerActionSelectCostMap.getCostMap());
+
+		actionBeginPayment(player, totalCostInformation);
+
 		match.setFlagNeedPlayerInput(true);
 	}
 
@@ -272,26 +276,35 @@ public class RuleEnforcer {
 		return match.toString();
 	}
 
-	private void actionActivateCharacteristicAbility(IsPlayer player, ActivatedAbility activatedAbility) {
+	private void actionActivateAbility(IsPlayer player, ActivatedAbility activatedAbility) {
 		LOGGER.debug("{} actionActivateActivatedAbility({}, {})", this, player, activatedAbility);
 
-		// TODO: Differenzieren zwischen normal und Mana
 		if (checkCanActivate(player, activatedAbility)) {
 			// Alle Voraussetungen sind erfüllt.
 
-			player.setPlayerState(PlayerState.ACTIVATING_ABILITY);
+			if (activatedAbility.isManaAbility()) {
+				// Manafertigkeit
 
-			// Alle Effekte werden genertiert.
-			activatedAbility.generateEffects();
+				/**
+				 * Verkürzung für Manafertigkeiten. Effekte werden sofort
+				 * generiert, ohne den Umweg über den Stack.
+				 **/
+				activatedAbility.generateEffects();
 
-			// Zusätzliche Kosten werden bezahlt.
-			switch (activatedAbility.getAdditionalCostType()) {
-			case NO_ADDITIONAL_COST:
-				return;
-			case TAP:
-				((MagicPermanent) activatedAbility.getSource()).setFlagTapped(true);
-				break;
+				// Zusätzliche Kosten werden bezahlt.
+				switch (activatedAbility.getAdditionalCostType()) {
+				case NO_ADDITIONAL_COST:
+					return;
+				case TAP:
+					((MagicPermanent) activatedAbility.getSource()).setFlagTapped(true);
+					break;
+				}
+
+			} else {
+				// Andere aktivierbare Fähigkeit
+
 			}
+
 		} else {
 			// Voraussetzungen sind nicht erfüllt.
 			// TODO: Reagiere mit Hinweis an den Spieler.
@@ -312,9 +325,11 @@ public class RuleEnforcer {
 		match.setFlagNeedPlayerInput(true);
 	}
 
-	private void actionBeginPayment(IsPlayer player) {
+	private void actionBeginPayment(IsPlayer player, TotalCostInformation totalCostInformation) {
 		LOGGER.debug("{} beginPayment({})", this, player);
 		player.setPlayerState(PlayerState.PAYING);
+
+		player.setManaCostGoal(totalCostInformation.getTotalCost());
 
 		match.setFlagIsMatchRunning(true);
 	}
@@ -335,7 +350,7 @@ public class RuleEnforcer {
 	/**
 	 * Beschwört einen Zauberspruch. Dafür werden alle notwendigen Entscheidunge
 	 * abgefragt und Voraussetzungen überprüft.
-	 * 
+	 *
 	 * @see http://magiccards.info/rule/601-casting-spells.html
 	 *
 	 * @param player
@@ -343,10 +358,11 @@ public class RuleEnforcer {
 	 * @param magicCard
 	 *            - Die Karte, die als Zauberspruch auf den Stack gespielt wird.
 	 */
-	private void actionCastSpell(IsPlayer player, MagicCard magicCard) {
+	private void actionCBeginCastSpell(IsPlayer player, MagicCard magicCard) {
 		LOGGER.debug("{} actionCastSpell({}, {})", this, player, magicCard);
 		final MagicSpell spell = factoryMagicSpell.create(magicCard, player.getPlayerType());
 
+		// TODO: Gleiche Prüfung für Soells, Abilites
 		if (checkCanCast(player, spell)) {
 			// Alle Voraussetzungen sind erfüllt.
 
@@ -360,35 +376,35 @@ public class RuleEnforcer {
 			TotalCostInformation totalCostInformation = new TotalCostInformation();
 
 			if (spell.isModal()) {
-				// TODO: Spieler muss Modus auswählen.
+				// TODO: Entscheidung Modus
 			}
 
 			if (spell.canSplice()) {
-				// TODO: Spieler wählt aus, ob er splicen möchte.
-				// TODO: Spieler zeigt Karten.
+				// TODO: Entscheidung, ob er splicen möchte.
+				// TODO: Entscheidung: Handkarten zeigen
 			}
 
 			if (spell.hasBuyback() || spell.hasKicker()) {
-				// TODO: Spieler wählt aus, ob er Kicker bezahlen möchte.
+				// TODO: Entscheidung, ob er Kicker bezahlen möchte.
 			}
 
 			if (spell.hasVariableCost()) {
-				// TODO: Spieler wählt Wert für X aus.
+				// TODO: Entscheidung Wert für X aus.
 			}
 
 			if (spell.hasHybridCost()) {
-				// TODO: Spieler wählt passende CostMap aus.
+				// TODO: Entscheidung passende CostMap aus.
 			} else {
 				// Wähle erste und einzige CostMap aus.
 				totalCostInformation.setInitalCost(spell.propertyListCostMaps().get(0));
 			}
 
 			if (spell.hasPhyrexianCost()) {
-				// TODO: Spieler wählt Zahlweise aus.
+				// TODO: Entscheidung Zahlweise aus.
 			}
 
 			if (spell.requiresTarget()) {
-				// TODO: Spieler wählt Ziele aus.
+				// TODO: Entscheidung Ziele aus.
 				/**
 				 * Hier stehen noch einige weitere Entscheidungen aus.
 				 */
@@ -407,8 +423,10 @@ public class RuleEnforcer {
 				finishAction(player);
 			} else {
 				// Spieler muss Karte bezahlen
-				actionBeginPayment(player);
+
+				actionBeginPayment(player, totalCostInformation);
 			}
+
 		} else {
 			// Voraussetzungen sind nicht erfüllt.
 			// TODO: Reagiere mit Hinweis an den Spieler.
@@ -506,6 +524,8 @@ public class RuleEnforcer {
 		// Setze Kostenziele etc. zurück.
 		player.setManaCostAlreadyPaid(new ManaMapDefault());
 		player.setManaCostGoal(new ManaMapDefault());
+
+		finishAction(player);
 	}
 
 	/**
@@ -550,27 +570,27 @@ public class RuleEnforcer {
 		finishAction(player);
 	}
 
-	private boolean canPay(TotalCostInformation totalCostInformation) {
-		// TODO: Aussagen über Bezahlbarkeit ab jetzt über dieses Objekt lösen.
-		return false;
-	}
+	private boolean checkCanActivate(IsPlayer player, ActivatedAbility activatedAbility) {
+		if (activatedAbility.isManaAbility()) {
+			// Prüfe Mana-Fähigkeit
 
-	private boolean checkCanActivate(IsPlayer p, ActivatedAbility aa) {
-		if (aa.isManaAbility()) {
-			final boolean prioritised = p.isPrioritised();
-			final boolean castingSpell = p.isCastingSpell() || p.isPaying();
-			final boolean activatingAbility = p.isActivatingAbility();
-			LOGGER.debug("{} checkCanActivate({}, {}) = {}", this, p, aa,
-					prioritised || castingSpell || activatingAbility);
-			return prioritised || castingSpell || activatingAbility;
+			final boolean prioritized = player.isPrioritised();
+			final boolean castingSpell = player.isCastingSpell() || player.isPaying();
+			final boolean activatingAbility = player.isActivatingAbility();
+			LOGGER.debug("{} checkCanActivate({}, {}) = {}", this, player, activatedAbility,
+					prioritized || castingSpell || activatingAbility);
+			return prioritized || castingSpell || activatingAbility;
+		} else {
+			// Prüfe andere Fähigkeiten
+
+			return false;
 		}
-		return false;
 	}
 
 	/**
 	 * Prüft, ob die grundlegenden Voraussetzungen für das Beschwören eines
 	 * Zauberspruchs erfüllt sind.
-	 * 
+	 *
 	 * @param player
 	 *            - Der Spieler, für den die Prüfung vorgenommen wird.
 	 * @param magicSpell
@@ -580,10 +600,34 @@ public class RuleEnforcer {
 	private boolean checkCanCast(IsPlayer player, MagicSpell magicSpell) {
 		final boolean isActivePlayer = match.isPlayerActive(player);
 		final boolean currentStepIsMain = match.getCurrentPhase().isMain();
-		final boolean stackEmpty = match.getZoneStack().isEmpty();
-		LOGGER.debug("{} checkCanCast({}, {}) = {}", this, player, magicSpell,
-				(isActivePlayer && currentStepIsMain && stackEmpty));
-		return isActivePlayer && currentStepIsMain && stackEmpty;
+		LOGGER.debug("{} checkCanCast({}, {}) = {}", this, player, magicSpell, (isActivePlayer && currentStepIsMain));
+		return isActivePlayer && currentStepIsMain;
+	}
+
+	/**
+	 * Durchläuft den Stack und ruft für jedes Element resolve(stackable) auf.
+	 * Der Stack wird durchlaufen, jedes mal wenn beide Spieler die Priorität
+	 * abgegeben haben (rule=405.5.)
+	 */
+	void processStack() {
+		LOGGER.debug("{} processStack()", this);
+		final int sizeMagicStack = match.getZoneStack().getSize();
+
+		for (int i = 0; i < sizeMagicStack; i++) {
+			final IsStackable stackable = match.getZoneStack().peek();
+			if (stackable.isPermanentSpell()) {
+				match.addCard(factoryMagicPermanent.create((MagicSpell) stackable), ZoneType.BATTLEFIELD);
+			} else {
+				stackable.resolve();
+			}
+
+			// TODO: Mehre Kreaturen auf dem Stack werden gleichzeitig gelegt.
+			match.popSpell();
+
+			match.resetFlagsPassedPriority();
+			match.determinePlayerPrioritised();
+			match.setFlagNeedPlayerInput(true);
+		}
 	}
 
 	/**
@@ -623,10 +667,8 @@ public class RuleEnforcer {
 	// }
 
 	private boolean checkIsPaid(IsPlayer player) {
-		LOGGER.debug("{} checkIsPaid({})", this, player);
-
 		final IsManaMap manaCostAlreadyPaid = player.getManaCostAlreadyPaid();
-		final IsManaMap manaCostGoal = player.getManaCostAlreadyPaid();
+		final IsManaMap manaCostGoal = player.getManaCostGoal();
 		final IsManaMap manaPool = player.getManaPool();
 
 		final ColorType clm = ColorType.NONE;
@@ -664,14 +706,16 @@ public class RuleEnforcer {
 			}
 		}
 
-		return player.getManaCostGoal().equals(player.getManaCostAlreadyPaid());
+		final boolean isPaid = manaCostGoal.equals(manaCostAlreadyPaid);
+		LOGGER.debug("{} checkIsPaid({}) = {}", this, player, isPaid);
+		return isPaid;
 	}
 
 	/**
 	 * Setze die priority flag beider Spieler zurück, sowie den Spielerstatus
 	 * des handelnden Spielers. Danach muss die Priorität neu bestimmt werden.
 	 * Zuletzt wird wieder Input benötigt.
-	 * 
+	 *
 	 * @param player
 	 *            - Der Spieler, dessen Aktion beendet wird.
 	 */

@@ -17,7 +17,7 @@ import de.mca.factories.FactoryEffect;
 import de.mca.io.FileManager;
 import de.mca.io.ResourceManager;
 import de.mca.io.ResourceReadingException;
-import de.mca.model.Ability;
+import de.mca.model.ActivatedAbility;
 import de.mca.model.Deck;
 import de.mca.model.Effect;
 import de.mca.model.EffectProduceMana;
@@ -154,7 +154,7 @@ public class MagicParser {
 
 		// parse Abilities
 		if (elementAbilities != null) {
-			final ObservableList<Ability> listAbilities = FXCollections.observableArrayList();
+			final ObservableList<ActivatedAbility> listAbilities = FXCollections.observableArrayList();
 			final JsonArray cardAbilities = elementAbilities.getAsJsonArray();
 			for (int i = 0; i < cardAbilities.size(); i++) {
 				listAbilities.add(parseAbility(card, cardAbilities.get(i).getAsJsonObject()));
@@ -186,7 +186,7 @@ public class MagicParser {
 		return deck;
 	}
 
-	public Effect parseEffect(Ability source, JsonObject effectObject) {
+	public Effect parseEffect(ActivatedAbility source, JsonObject effectObject) {
 		switch (EffectType.valueOf(effectObject.get("effecttype").getAsString())) {
 		case PRODUCE_MANA:
 			final JsonArray produceArray = effectObject.get("produce").getAsJsonArray();
@@ -205,7 +205,7 @@ public class MagicParser {
 	}
 
 	// TODO: Karten überprüfen, Abilities haben auch CostMaps
-	private Ability parseAbility(MagicCard card, JsonObject abilityObject) {
+	private ActivatedAbility parseAbility(MagicCard card, JsonObject abilityObject) {
 		final AbilityType abilityType = AbilityType.valueOf(abilityObject.get("abilitytype").getAsString());
 		final ObservableList<IsManaMap> listCostMaps = new SimpleListProperty<>(FXCollections.emptyObservableList());
 		final JsonElement additionalCostElement = abilityObject.get("additionalcost");
@@ -215,7 +215,7 @@ public class MagicParser {
 		}
 		final JsonArray effectArray = abilityObject.get("effects").getAsJsonArray();
 
-		final Ability result = abilityFactory.create(card, abilityType, additionalCostType, effectArray, listCostMaps);
+		final ActivatedAbility result = abilityFactory.create(card, abilityType, additionalCostType, effectArray, listCostMaps);
 		return result;
 	}
 

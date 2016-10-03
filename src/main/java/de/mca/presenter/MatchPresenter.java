@@ -44,7 +44,7 @@ import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.GridPane;
 
 /**
- * 
+ *
  * @author Maximilian Werling
  *
  */
@@ -427,41 +427,44 @@ public class MatchPresenter extends AnimationTimer implements Initializable, IsS
 			@Override
 			public void onChanged(
 					javafx.collections.MapChangeListener.Change<? extends ColorType, ? extends Integer> change) {
-				if (change.getKey().equals(ColorType.BLACK)) {
+				ColorType colorType = change.getKey();
+				String stringValue = change.getValueAdded() == null ? "0" : change.getValueAdded().toString();
+
+				if (colorType.equals(ColorType.BLACK)) {
 					if (player.equals(PlayerType.COMPUTER)) {
-						labelComputerBlackMana.setText(change.getMap().get(ColorType.BLACK).toString());
+						labelComputerBlackMana.setText(stringValue);
 					} else {
-						labelHumanBlackMana.setText(change.getMap().get(ColorType.BLACK).toString());
+						labelHumanBlackMana.setText(stringValue);
 					}
 				} else if (change.getKey().equals(ColorType.BLUE)) {
 					if (player.equals(PlayerType.COMPUTER)) {
-						labelComputerBlueMana.setText(change.getMap().get(ColorType.BLUE).toString());
+						labelComputerBlueMana.setText(stringValue);
 					} else {
-						labelHumanBlueMana.setText(change.getMap().get(ColorType.BLUE).toString());
+						labelHumanBlueMana.setText(stringValue);
 					}
 				} else if (change.getKey().equals(ColorType.GREEN)) {
 					if (player.equals(PlayerType.COMPUTER)) {
-						labelComputerGreenMana.setText(change.getMap().get(ColorType.GREEN).toString());
+						labelComputerGreenMana.setText(stringValue);
 					} else {
-						labelHumanGreenMana.setText(change.getMap().get(ColorType.GREEN).toString());
+						labelHumanGreenMana.setText(stringValue);
 					}
 				} else if (change.getKey().equals(ColorType.NONE)) {
 					if (player.equals(PlayerType.COMPUTER)) {
-						labelComputerColorlessMana.setText(change.getMap().get(ColorType.NONE).toString());
+						labelComputerColorlessMana.setText(stringValue);
 					} else {
-						labelHumanColorlessMana.setText(change.getMap().get(ColorType.NONE).toString());
+						labelHumanColorlessMana.setText(stringValue);
 					}
 				} else if (change.getKey().equals(ColorType.RED)) {
 					if (player.equals(PlayerType.COMPUTER)) {
-						labelComputerRedMana.setText(change.getMap().get(ColorType.RED).toString());
+						labelComputerRedMana.setText(stringValue);
 					} else {
-						labelHumanRedMana.setText(change.getMap().get(ColorType.RED).toString());
+						labelHumanRedMana.setText(stringValue);
 					}
 				} else if (change.getKey().equals(ColorType.WHITE)) {
 					if (player.equals(PlayerType.COMPUTER)) {
-						labelComputerWhiteMana.setText(change.getMap().get(ColorType.WHITE).toString());
+						labelComputerWhiteMana.setText(stringValue);
 					} else {
-						labelHumanWhiteMana.setText(change.getMap().get(ColorType.WHITE).toString());
+						labelHumanWhiteMana.setText(stringValue);
 					}
 				}
 			}

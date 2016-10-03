@@ -24,7 +24,7 @@ import javafx.beans.property.SimpleListProperty;
 import javafx.collections.FXCollections;
 
 /**
- * 
+ *
  * @author Maximilian Werling
  *
  */
@@ -167,6 +167,11 @@ public class Turn {
 	 * @return des Spieler mit dem übergebenen Spielertyp.
 	 */
 	IsPlayer getPlayer(PlayerType playerType) {
+		if (playerType.equals(PlayerType.NONE)) {
+			// Sollte nicht vorkommen
+
+			throw new IllegalArgumentException("Kein Spieler mit Typ " + playerType.toString());
+		}
 		return playerType.equals(PlayerType.HUMAN) ? getPlayerHuman() : getPlayerComputer();
 	}
 
@@ -177,8 +182,13 @@ public class Turn {
 	 *            der Spieler, dessen Gegener zurückgegeben werden soll.
 	 * @return Gegener des übergeben Spielers.
 	 */
-	IsPlayer getPlayerOpponent(IsPlayer player) {
-		return player.equals(PlayerType.HUMAN) ? getPlayerComputer() : getPlayerHuman();
+	IsPlayer getPlayerOpponent(PlayerType playerType) {
+		if (playerType.equals(PlayerType.NONE)) {
+			// Sollte nicht vorkommen
+
+			throw new IllegalArgumentException("Kein Spieler mit Typ " + playerType.toString());
+		}
+		return playerType.equals(PlayerType.HUMAN) ? getPlayerComputer() : getPlayerHuman();
 	}
 
 	boolean hasNextPhase() {
@@ -194,7 +204,7 @@ public class Turn {
 	 *         den Spielerstatus "nichtaktiv" besitzt.
 	 */
 	boolean isPlayerActive(IsPlayer player) {
-		return (player.isActive() || getPlayerOpponent(player).isNonactive());
+		return (player.isActive() || getPlayerOpponent(player.getPlayerType()).isNonactive());
 	}
 
 	void phaseBegin() {

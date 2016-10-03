@@ -8,7 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import de.mca.model.Attack;
-import de.mca.model.Ability;
+import de.mca.model.ActivatedAbility;
 import de.mca.model.MagicCard;
 import de.mca.model.MagicPermanent;
 import de.mca.model.ManaMapDefault;
@@ -43,7 +43,7 @@ public class InputHuman implements IsInput {
 	}
 
 	@Override
-	public Ability determineAbility(List<Ability> listLegalAbilities) {
+	public ActivatedAbility determineAbility(List<ActivatedAbility> listLegalAbilities) {
 		LOGGER.debug("{} determineManaAbility({})", player, listLegalAbilities);
 		if (listLegalAbilities.isEmpty()) {
 			throw new RuntimeException("Keine Fähigkeit zum auswählen!");
@@ -177,87 +177,12 @@ public class InputHuman implements IsInput {
 	public List<MagicPermanent> determineDamageAssignmentOrderAttacker(List<MagicPermanent> blockers) {
 		LOGGER.debug("{} determineDamageAssignmentOrderAttacker({})", player, blockers);
 		LOGGER.debug("{} -> Actions: [Angriffsreihenfolge bestimmen]", player);
-		// TODO: Liefere eine sortierte Liste zurück.
 		return blockers;
 	}
 
 	@Override
 	public void determineInput(PlayerState ps) {
-		// String input = "";
-		// switch (ps) {
-		// case ACTIVATING_ABILITY:
-		// // TODO: Spieler muss Bezahlziel auswählen
-		// case ACTIVE:
-		// break;
-		// case ATTACKING:
-		// LOGGER.debug("{} determineInput() -> Actions: attack, end", player);
-		// input = sc.nextLine();
-		// if (input.equals("attack")) {
-		// final List<MagicPermanent> listLegalAttackers =
-		// match.getListLegalAttackers(getPlayer());
-		// final List<IsAttackTarget> listAttackTargets =
-		// match.getListAttackTargets();
-		// final MagicPermanent attacker =
-		// filterLegalAttackers(listLegalAttackers);
-		// final Attack attack = buildAttack(attacker, listAttackTargets);
-		// inputDeclareAttacker(attack);
-		// } else if (input.equals("end") || input.equals("pass")) {
-		// inputEndDeclareAttackers();
-		// return;
-		// }
-		// break;
-		// case CASTING_SPELL:
-		// // TODO: Spieler muss Bezahlziel auswählen
-		// break;
-		// case DEFENDING:
-		// LOGGER.debug("{} determineInput() -> Actions: block, end", player);
-		// input = sc.nextLine();
-		// if (input.equals("block")) {
-		// final List<MagicPermanent> listBlockers =
-		// match.getListLegalBlockers(getPlayer());
-		// final MagicPermanent blocker = filterLegalBlockers(listBlockers);
-		// final int attackerIndex = 0; // TODO: Angreifer auswählen
-		// inputDeclareBlocker(attackerIndex, blocker);
-		// } else if (input.equals("end")) {
-		// inputEndDeclareBlockers();
-		// return;
-		// }
-		// break;
-		// case NONACTIVE:
-		// break;
-		// case PRIORITIZED:
-		// LOGGER.trace("{} determineInput() -> Actions: pass, play, concede",
-		// player);
-		// input = sc.nextLine();
-		// if (input.equals("pass")) {
-		// inputPassPriority();
-		// } else if (input.equals("play")) {
-		// final List<MagicCard> listHandCards =
-		// getPlayer().getZoneHand().getAll();
-		// final MagicCard magicCard = determineCardToCast(listHandCards);
-		// inputCastSpell(magicCard);
-		// } else if (input.equals("concede")) {
-		// inputConcede();
-		// }
-		// break;
-		// case TAKING_SPECIAL_ACTION:
-		// break;
-		// case PAYING:
-		// LOGGER.debug("{} determineInput() -> Actions: pay", player);
-		// input = sc.nextLine();
-		// if (input.equals("pay")) {
-		// final List<MagicPermanent> listLegalPermanents =
-		// match.getListControlledCards(getPlayer());
-		// final MagicPermanent magicPermanent =
-		// filterManaSources(listLegalPermanents);
-		// final List<CharacteristicAbility> listLegalAbilities = magicPermanent
-		// .propertyListCharacteristicAbilities();
-		// final CharacteristicAbility activatedManaAbility =
-		// filterAbilities(listLegalAbilities);
-		// inputActivatedAbility(activatedManaAbility);
-		// }
-		// break;
-		// }
+
 	}
 
 	@Override
@@ -289,8 +214,7 @@ public class InputHuman implements IsInput {
 
 			MagicPermanent magicPermanent = (MagicPermanent) object;
 
-			getPlayer().fireActivateActivatedAbility(
-					determineAbility(magicPermanent.propertyListCharacteristicAbilities()));
+			getPlayer().fireActivateActivatedAbility(determineAbility(magicPermanent.propertyListAbilities()));
 		}
 	}
 
@@ -351,7 +275,7 @@ public class InputHuman implements IsInput {
 	private MagicPermanent filterManaSources(List<MagicPermanent> listLegalPermanents) {
 		final List<MagicPermanent> manaSources = new ArrayList<>();
 		for (final MagicPermanent magicPermanent : listLegalPermanents) {
-			for (final Ability ability : magicPermanent.propertyListCharacteristicAbilities()) {
+			for (final ActivatedAbility ability : magicPermanent.propertyListAbilities()) {
 				if (ability.isManaAbility()) {
 					manaSources.add(magicPermanent);
 					break;

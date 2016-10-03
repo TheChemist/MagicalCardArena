@@ -56,12 +56,12 @@ public class TotalCostInformation {
 
 	public boolean hasAdditionalCostType() {
 		if (getAdditionalCostType() == null) {
-			return true;
+			return false;
 		}
 		if (getAdditionalCostType().equals(AdditionalCostType.NO_ADDITIONAL_COST)) {
-			return true;
-		} else {
 			return false;
+		} else {
+			return true;
 		}
 	}
 

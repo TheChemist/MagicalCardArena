@@ -1,7 +1,7 @@
 package de.mca.model.interfaces;
 
 import de.mca.model.enums.PlayerType;
-import javafx.beans.property.ListProperty;
+import javafx.collections.ObservableList;
 
 /**
  * Taggerinterface zur Markierung von Objekten, die auf dem Stack verarbeitet
@@ -43,10 +43,10 @@ public interface IsStackable {
 
 	/**
 	 * Liefert eine Liste der unterschiedlichen Darstellungen der Kosten.
-	 * 
+	 *
 	 * @return die CostMap.
 	 */
-	public ListProperty<IsManaMap> propertyListCostMaps();
+	public ObservableList<IsManaMap> propertyListCostMaps();
 
 	/**
 	 * Wird aufgerufen, wenn das Stackable aufgelöst wird.

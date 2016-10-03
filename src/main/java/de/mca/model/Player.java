@@ -222,7 +222,6 @@ public final class Player implements IsPlayer {
 
 	@Override
 	public void attackedBy(MagicPermanent attacker) {
-		// TODO: Aus Player verschieben
 		final int attackerPower = attacker.getPower();
 		if (attackerPower > 0) {
 			setCombatDamage(attackerPower);
@@ -300,7 +299,7 @@ public final class Player implements IsPlayer {
 
 	@Override
 	public PlayerState getPlayerState() {
-		return propertyPlayerState.get();
+		return propertyPlayerState().get();
 	}
 
 	@Override
@@ -457,9 +456,11 @@ public final class Player implements IsPlayer {
 	public void setDeck(Deck deck) {
 		LOGGER.trace("{} setDeck({})", this, deck);
 		addAllCards(deck.getCardsList(), ZoneType.LIBRARY);
-		for (final MagicCard card : zoneLibrary.getAll()) {
-			card.setPlayerOwning(playerType);
-		}
+
+		// Setze den Eigentümer jeder Karte
+		getZoneLibrary().propertyListZoneCards().forEach(card -> card.setPlayerOwning(getPlayerType()));
+
+		// Mische
 		getZoneLibrary().shuffle();
 	}
 
@@ -516,13 +517,16 @@ public final class Player implements IsPlayer {
 	@Override
 	public void setPlayerState(PlayerState playerState) {
 		LOGGER.debug("{} setPlayerState({})", this, playerState);
-		this.propertyPlayerState.set(playerState);
+		propertyPlayerState.set(playerState);
 	}
 
 	@Override
 	public String toString() {
-		return new StringBuilder("[pt=[").append(getPlayerType()).append("] ps=[").append(getPlayerState())
-				.append("] l=[").append(getLife()).append("]]").toString();
+		return getDisplayName();
+		// TODO: Detaillierte Status-Ausgabe;
+		// new StringBuilder("[pt=[").append(getPlayerType()).append("]
+		// ps=[").append(getPlayerState())
+		// .append("] l=[").append(getLife()).append("]]").toString();
 	}
 
 	/**
@@ -541,7 +545,7 @@ public final class Player implements IsPlayer {
 	}
 
 	private void setCombatDamage(int combatDamage) {
-		this.propertyCombatDamage.set(combatDamage);
+		propertyCombatDamage.set(combatDamage);
 	}
 
 	private void setDeckSize(int deckSize) {

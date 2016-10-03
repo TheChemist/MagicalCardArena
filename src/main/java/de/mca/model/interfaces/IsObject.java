@@ -1,6 +1,6 @@
 package de.mca.model.interfaces;
 
-import de.mca.model.Ability;
+import de.mca.model.ActivatedAbility;
 import de.mca.model.enums.ColorType;
 import de.mca.model.enums.ObjectType;
 import de.mca.model.enums.SubType;
@@ -19,7 +19,7 @@ import javafx.collections.ObservableSet;
  */
 public interface IsObject {
 
-	void add(Ability characteristicAbilities);
+	void add(ActivatedAbility characteristicAbilities);
 
 	String getDisplayName();
 
@@ -35,7 +35,7 @@ public interface IsObject {
 
 	int getToughness();
 
-	ObservableList<Ability> propertyListCharacteristicAbilities();
+	ObservableList<ActivatedAbility> propertyListAbilities();
 
 	ObservableSet<ColorType> propertySetColorTypes();
 

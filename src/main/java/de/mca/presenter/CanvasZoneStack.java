@@ -6,7 +6,7 @@ import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.layout.Pane;
 
 /**
- * 
+ *
  * @author Maximilian Werling
  *
  */
@@ -32,7 +32,7 @@ final class CanvasZoneStack extends AdaptableCanvas {
 			sprite.propertyWidth().bind(widthProperty());
 
 			double positionX = 0;
-			double positionY = getHeight() - sprite.getHeight();
+			double positionY = getHeight() - sprite.getHeight() * (i + 1);
 
 			sprite.setPosition(positionX, positionY);
 

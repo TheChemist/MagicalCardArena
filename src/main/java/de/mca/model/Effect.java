@@ -19,7 +19,7 @@ public abstract class Effect extends EventObject {
 	private final EffectType magicEffectType;
 	private PlayerType playerType;
 
-	Effect(Ability source, EffectType magicEffectType) {
+	Effect(ActivatedAbility source, EffectType magicEffectType) {
 		super(source);
 		this.magicEffectType = magicEffectType;
 	}

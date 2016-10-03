@@ -263,7 +263,7 @@ public final class Match {
 					&& !getZoneStack().isEmpty()) {
 				// Spieler haben gepasst, aber es liegt etwas auf dem Stack.
 
-				processStack();
+				ruleEnforcer.processStack();
 			} else if (!getPlayerActive().getFlagPassedPriority() || !getPlayerNonactive().getFlagPassedPriority()) {
 				// Ein Spieler hat nicht noch gepasst.
 
@@ -318,7 +318,7 @@ public final class Match {
 						&& !getZoneStack().isEmpty()) {
 					// Spieler haben gepasst, aber es liegt etwas auf dem Stack.
 
-					processStack();
+					ruleEnforcer.processStack();
 				} else if (!getPlayerActive().getFlagPassedPriority()
 						|| !getPlayerNonactive().getFlagPassedPriority()) {
 					// Ein Spieler hat nicht noch gepasst.
@@ -544,29 +544,9 @@ public final class Match {
 		}
 	}
 
-	private void popSpell() {
+	void popSpell() {
 		getZoneStack().pop();
 		propertyStackSize().set(getZoneStack().getSize());
-	}
-
-	/**
-	 * Durchläuft den Stack und ruft für jedes Element resolve(stackable) auf.
-	 * Der Stack wird durchlaufen, jedes mal wenn beide Spieler die Priorität
-	 * abgegeben haben (rule=405.5.)
-	 */
-	private void processStack() {
-		LOGGER.debug("{} processStack()", this);
-		final int sizeMagicStack = getZoneStack().getSize();
-
-		for (int i = 0; i < sizeMagicStack; i++) {
-			final IsStackable stackable = getZoneStack().peek();
-			if (stackable.isPermanentSpell()) {
-				addCard(factoryMagicPermanent.create((MagicSpell) stackable), ZoneType.BATTLEFIELD);
-			} else {
-				stackable.resolve();
-			}
-			popSpell();
-		}
 	}
 
 	private ObjectProperty<Turn> propertyCurrentTurn() {
@@ -601,8 +581,8 @@ public final class Match {
 	private void setPlayerActive(IsPlayer playerActive) {
 		LOGGER.trace("{} setPlayerActive({})", this, playerActive);
 		propertyPlayerActive().set(playerActive);
-		playerActive.setPlayerState(PlayerState.ACTIVE);
-		getCurrentTurn().getPlayerOpponent(playerActive).setPlayerState(PlayerState.NONACTIVE);
+		getPlayerActive().setPlayerState(PlayerState.ACTIVE);
+		getPlayerNonactive().setPlayerState(PlayerState.NONACTIVE);
 	}
 
 	private void setPlayerPrioritized(IsPlayer playerPrioritized) {
@@ -796,7 +776,7 @@ public final class Match {
 	 * @return den nichtaktiven Spieler.
 	 */
 	IsPlayer getPlayerNonactive() {
-		return getCurrentTurn().getPlayerOpponent(getPlayerActive());
+		return getCurrentTurn().getPlayerOpponent(getPlayerActive().getPlayerType());
 	}
 
 	int getTotalAttackers() {
@@ -815,11 +795,21 @@ public final class Match {
 
 	void removeCard(MagicCard magicCard, ZoneType zoneType) {
 		if (zoneType.equals(ZoneType.BATTLEFIELD)) {
+			// Karte vom Spielfeld entfernen.
+
 			getZoneBattlefield().remove(factoryMagicPermanent.create(magicCard));
 			propertyBattlefieldSize().set(getZoneBattlefield().getSize());
+
 		} else if (zoneType.equals(ZoneType.EXILE)) {
+			// Karte aus dem Exil entfernen
+
 			getZoneExile().remove(magicCard);
 			propertyExileSize().set(getZoneExile().getSize());
+
+		} else {
+			// Sollte nicht vorkommen
+
+			throw new IllegalArgumentException("Kann Karte nicht aus " + zoneType.toString() + " entfernen!");
 		}
 	}
 

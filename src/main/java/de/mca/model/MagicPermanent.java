@@ -96,7 +96,7 @@ public class MagicPermanent extends MagicCard {
 		this(magicCard.getId(), eventBus, magicCard.getPlayerOwning());
 		setDisplayName(magicCard.getDisplayName());
 		setFileName(magicCard.getFileName());
-		setListCharacteristicAbilities(magicCard.propertyListCharacteristicAbilities());
+		setListCharacteristicAbilities(magicCard.propertyListAbilities());
 		setListCostMaps(magicCard.propertyListCostMaps());
 		setListEffects(magicCard.propertyListEffects());
 		setListZonesVisited(magicCard.propertyListZonesVisited());

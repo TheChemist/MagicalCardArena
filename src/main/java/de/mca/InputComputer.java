@@ -7,7 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import de.mca.model.Attack;
-import de.mca.model.Ability;
+import de.mca.model.ActivatedAbility;
 import de.mca.model.MagicCard;
 import de.mca.model.MagicPermanent;
 import de.mca.model.enums.PlayerState;
@@ -34,46 +34,46 @@ public class InputComputer implements IsInput {
 	}
 
 	@Override
-	public Ability determineAbility(List<Ability> listLegalAbilities) {
-		// TODO: Fertig schreiben. Wird es bisher gebraucht?
+	public ActivatedAbility determineAbility(List<ActivatedAbility> listLegalAbilities) {
+		// TODO: KI-Entscheidung
 		throw new UnsupportedOperationException("Computer muss Entscheidung treffen, die er nicht treffen kann");
 	}
 
 	@Override
 	public MagicPermanent determineAttacker(List<MagicPermanent> legalAttackers) throws UnsupportedOperationException {
-		// TODO: Fertig schreiben. Wird es bisher gebraucht?
+		// TODO: KI-Entscheidung
 		throw new UnsupportedOperationException("Computer muss Entscheidung treffen, die er nicht treffen kann");
 	}
 
 	@Override
 	public IsAttackTarget determineAttackTarget(List<IsAttackTarget> legalAttackTargets)
 			throws UnsupportedOperationException {
-		// TODO: Fertig schreiben. Wird es bisher gebraucht?
+		// TODO: KI-Entscheidung
 		throw new UnsupportedOperationException("Computer muss Entscheidung treffen, die er nicht treffen kann");
 	}
 
 	@Override
 	public MagicPermanent determineBlocker(List<MagicPermanent> legalBlockers) throws UnsupportedOperationException {
-		// TODO: Fertig schreiben. Wird es bisher gebraucht?
+		// TODO: KI-Entscheidung
 		throw new UnsupportedOperationException("Computer muss Entscheidung treffen, die er nicht treffen kann");
 	}
 
 	@Override
 	public int determineBlockTarget(List<Attack> listAttacks) throws UnsupportedOperationException {
-		// TODO: Fertig schreiben. Wird es bisher gebraucht?
+		// TODO: KI-Entscheidung
 		throw new UnsupportedOperationException("Computer muss Entscheidung treffen, die er nicht treffen kann");
 	}
 
 	@Override
 	public MagicPermanent determineCardToActivate(List<MagicPermanent> legalPermanents)
 			throws UnsupportedOperationException {
-		// TODO: Fertig schreiben. Wird es bisher gebraucht?
+		// TODO: KI-Entscheidung
 		throw new UnsupportedOperationException("Computer muss Entscheidung treffen, die er nicht treffen kann");
 	}
 
 	@Override
 	public MagicCard determineCardToCast(List<MagicCard> legalCards) throws UnsupportedOperationException {
-		// TODO: Fertig schreiben. Wird es bisher gebraucht?
+		// TODO: KI-Entscheidung
 		throw new UnsupportedOperationException("Computer muss Entscheidung treffen, die er nicht treffen kann");
 	}
 
@@ -84,14 +84,14 @@ public class InputComputer implements IsInput {
 
 	@Override
 	public IsManaMap determineCostGoal(List<IsManaMap> costMaps) throws UnsupportedOperationException {
-		// TODO: Fertig schreiben. Wird es bisher gebraucht?
+		// TODO: KI-Entscheidung
 		throw new UnsupportedOperationException("Computer muss Entscheidung treffen, die er nicht treffen kann");
 	}
 
 	@Override
 	public List<MagicPermanent> determineDamageAssignmentOrderAttacker(List<MagicPermanent> blockers)
 			throws UnsupportedOperationException {
-		// TODO: Fertig schreiben. Wird es bisher gebraucht?
+		// TODO: KI-Entscheidung
 		throw new UnsupportedOperationException("Computer muss Entscheidung treffen, die er nicht treffen kann");
 	}
 

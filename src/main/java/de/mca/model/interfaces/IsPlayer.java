@@ -13,7 +13,7 @@ import de.mca.PlayerAction;
 import de.mca.PlayerActionType;
 import de.mca.SAPlayLand;
 import de.mca.model.Attack;
-import de.mca.model.Ability;
+import de.mca.model.ActivatedAbility;
 import de.mca.model.Deck;
 import de.mca.model.MagicCard;
 import de.mca.model.MagicPermanent;
@@ -67,7 +67,7 @@ public interface IsPlayer extends IsAttackTarget {
 	 */
 	public boolean equals(PlayerType playerType);
 
-	public default void fireActivateActivatedAbility(Ability characteristicAbility) {
+	public default void fireActivateActivatedAbility(ActivatedAbility characteristicAbility) {
 		getEventBus().post(new PAActivateAbility(this, characteristicAbility));
 	}
 

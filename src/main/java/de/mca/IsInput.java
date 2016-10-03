@@ -3,7 +3,7 @@ package de.mca;
 import java.util.List;
 
 import de.mca.model.Attack;
-import de.mca.model.Ability;
+import de.mca.model.ActivatedAbility;
 import de.mca.model.MagicCard;
 import de.mca.model.MagicPermanent;
 import de.mca.model.enums.PlayerState;
@@ -18,7 +18,7 @@ import de.mca.model.interfaces.IsPlayer;
  */
 public interface IsInput {
 
-	public Ability determineAbility(List<Ability> listLegalAbilities);
+	public ActivatedAbility determineAbility(List<ActivatedAbility> listLegalAbilities);
 
 	public MagicPermanent determineAttacker(List<MagicPermanent> legalAttackers);
 
@@ -42,7 +42,7 @@ public interface IsInput {
 
 	public IsPlayer getPlayer();
 
-	public default void inputActivatedAbility(Ability characteristicAbility) {
+	public default void inputActivatedAbility(ActivatedAbility characteristicAbility) {
 		getPlayer().fireActivateActivatedAbility(characteristicAbility);
 	}
 
@@ -59,7 +59,6 @@ public interface IsInput {
 	}
 
 	public default void inputDeclareBlocker(int attackerIndex, MagicPermanent blocker) {
-		// TODO: Vllt lieber Permanent anstatt Index übergeben
 		getPlayer().fireDeclareBlocker(attackerIndex, blocker);
 	}
 

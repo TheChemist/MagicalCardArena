@@ -15,7 +15,7 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Pane;
 
 /**
- * 
+ *
  * @author Maximilian Werling
  *
  */
@@ -50,8 +50,7 @@ final class CanvasZoneDefault extends AdaptableCanvas {
 			DoubleBinding heightBoundSpriteWidth = heightBoundSpriteHeight.multiply(Constants.CARD_RATIO);
 
 			DoubleBinding widthBoundSpriteWidth = widthProperty().divide(spriteList.size()).divide(X_OFFSET);
-			DoubleBinding widthBoundSpriteHeight = widthBoundSpriteWidth.divide(Constants.CARD_RATIO)
-					.subtract(Y_OFFSET);
+			DoubleBinding widthBoundSpriteHeight = widthBoundSpriteWidth.divide(Constants.CARD_RATIO);
 
 			if (heightBoundSpriteWidth.multiply(X_OFFSET).greaterThan(widthBoundSpriteWidth).get()) {
 				sprite.propertyHeight().bind(widthBoundSpriteHeight);

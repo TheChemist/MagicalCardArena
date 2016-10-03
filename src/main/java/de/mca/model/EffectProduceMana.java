@@ -22,7 +22,7 @@ final public class EffectProduceMana extends Effect {
 	private ObjectProperty<IsManaMap> produceMap;
 
 	@Inject
-	EffectProduceMana(@Assisted Ability source, @Assisted IsManaMap produceMap) {
+	EffectProduceMana(@Assisted ActivatedAbility source, @Assisted IsManaMap produceMap) {
 		super(source, EffectType.PRODUCE_MANA);
 		this.produceMap = new SimpleObjectProperty<>(produceMap);
 	}
