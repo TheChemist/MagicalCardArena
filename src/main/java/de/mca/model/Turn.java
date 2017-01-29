@@ -89,11 +89,9 @@ public class Turn {
 		final Step declareAttackers = stepFactory.create(StepType.DECLARE_ATTACKERS,
 				EnumSet.of(TurnBasedActionType.DECLARE_ATTACKER));
 		final Step declareBlockers = stepFactory.create(StepType.DECLARE_BLOCKERS,
-				EnumSet.of(TurnBasedActionType.DECLARE_BLOCKER,
-						TurnBasedActionType.DECLARE_DAMAGE_ASSIGNMENT_ORDER_ATTACKER,
-						TurnBasedActionType.DECLARE_DAMAGE_ASSIGNMENT_ORDER_BLOCKER));
+				EnumSet.of(TurnBasedActionType.DECLARE_BLOCKER));
 		final Step combatDamage = stepFactory.create(StepType.COMBAT_DAMAGE_STEP,
-				EnumSet.of(TurnBasedActionType.COMBAT_DAMAGE_ASSIGNMENT, TurnBasedActionType.COMBAT_DAMAGE_DEALING));
+				EnumSet.of(TurnBasedActionType.DECLARE_DAMAGE_ASSIGNMENT_ORDER_ATTACKER));
 		final Step endOfCombat = stepFactory.create(StepType.END_OF_COMBAT, EnumSet.noneOf(TurnBasedActionType.class));
 		final Phase combat = phaseFactory.create(PhaseType.COMBAT_PHASE,
 				ImmutableList.of(beginningOfCombat, declareAttackers, declareBlockers, combatDamage, endOfCombat),

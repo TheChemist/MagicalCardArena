@@ -4,7 +4,7 @@ import java.util.List;
 
 import com.google.common.eventbus.EventBus;
 
-import de.mca.PAActivateAbility;
+import de.mca.PAActivatePermanent;
 import de.mca.PACastSpell;
 import de.mca.PADeclareAttacker;
 import de.mca.PADeclareBlocker;
@@ -12,8 +12,6 @@ import de.mca.PADiscard;
 import de.mca.PlayerAction;
 import de.mca.PlayerActionType;
 import de.mca.SAPlayLand;
-import de.mca.model.Attack;
-import de.mca.model.ActivatedAbility;
 import de.mca.model.Deck;
 import de.mca.model.MagicCard;
 import de.mca.model.MagicPermanent;
@@ -67,8 +65,8 @@ public interface IsPlayer extends IsAttackTarget {
 	 */
 	public boolean equals(PlayerType playerType);
 
-	public default void fireActivateActivatedAbility(ActivatedAbility characteristicAbility) {
-		getEventBus().post(new PAActivateAbility(this, characteristicAbility));
+	public default void fireActivatePermanent(MagicPermanent magicPermanent) {
+		getEventBus().post(new PAActivatePermanent(this, magicPermanent));
 	}
 
 	public default void fireCastSpell(MagicCard magicCard) {
@@ -83,8 +81,8 @@ public interface IsPlayer extends IsAttackTarget {
 		getEventBus().post(new PlayerAction(this, PlayerActionType.CONCEDE));
 	}
 
-	public default void fireDeclareAttacker(Attack attack) {
-		getEventBus().post(new PADeclareAttacker(this, attack));
+	public default void fireDeclareAttacker(MagicPermanent magicPermanent) {
+		getEventBus().post(new PADeclareAttacker(this, magicPermanent, null));
 	}
 
 	public default void fireDeclareBlocker(int attackerIndex, MagicPermanent blocker) {
@@ -288,5 +286,9 @@ public interface IsPlayer extends IsAttackTarget {
 	public void setManaCostGoal(IsManaMap manaCostGoal);
 
 	public void setPlayerState(PlayerState ps);
+
+	int getLife();
+
+	void setLife(int life);
 
 }

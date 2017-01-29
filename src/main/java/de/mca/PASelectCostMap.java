@@ -3,6 +3,11 @@ package de.mca;
 import de.mca.model.interfaces.IsManaMap;
 import de.mca.model.interfaces.IsPlayer;
 
+/**
+ *
+ * @author Maximilian Werling
+ *
+ */
 @SuppressWarnings("serial")
 public class PASelectCostMap extends PlayerAction {
 

@@ -20,6 +20,11 @@ import javafx.beans.property.SimpleObjectProperty;
 public class MagicPermanent extends MagicCard {
 
 	/**
+	 * Speichert die Grundverteidigung der Kreatur, so wie sie auf der Karte
+	 * steht.
+	 */
+	private final int baseToughness;
+	/**
 	 * Speichert den Schaden der der Kreatur zugefügt wurden.
 	 */
 	private final IntegerProperty damage;
@@ -69,7 +74,7 @@ public class MagicPermanent extends MagicCard {
 	private final BooleanProperty flagTapped;
 	/**
 	 * Speichert den Spielertyp des kontrollierenden Spielers.
-	 * 
+	 *
 	 * @see http://magiccards.info/rule/109-objects.html#rule-109-4
 	 */
 	private final ObjectProperty<PlayerType> playerControlling;
@@ -78,6 +83,7 @@ public class MagicPermanent extends MagicCard {
 		super(id);
 		this.eventBus = eventBus;
 		this.playerControlling = new SimpleObjectProperty<>(playerControlling);
+		baseToughness = getToughness();
 		damage = new SimpleIntegerProperty(0);
 		flagAttacking = new SimpleBooleanProperty(false);
 		flagAttackingAlone = new SimpleBooleanProperty(false);
@@ -111,6 +117,10 @@ public class MagicPermanent extends MagicCard {
 		setToughness(magicCard.getToughness());
 	}
 
+	public void applyCombatDamage() {
+		setToughness(getToughness() - getDamage());
+	}
+
 	/**
 	 * Prüft, ob die Kreatur angreifen kann. Die Kreatur kann angreifen, wenn
 	 * sie ungetappt ist und nicht der SummoningSickness unterliegt. (rule =
@@ -119,7 +129,7 @@ public class MagicPermanent extends MagicCard {
 	 * @return true, wenn die Kreatur angreifen kann.
 	 */
 	public boolean checkCanAttack() {
-		return !isFlagTapped() && !isFlagSummoningSickness();
+		return !getFlagIsTapped() && !getFlagHasSummoningSickness();
 	}
 
 	/**
@@ -129,11 +139,19 @@ public class MagicPermanent extends MagicCard {
 	 * @return true, wenn die Kreatur verteidigen kann.
 	 */
 	public boolean checkCanBlock() {
-		return !isFlagTapped();
+		return !getFlagIsTapped();
 	}
 
 	public int getDamage() {
 		return damage.get();
+	}
+
+	public boolean getFlagHasSummoningSickness() {
+		return flagSummoningSickness.get();
+	}
+
+	public boolean getFlagIsTapped() {
+		return flagTapped.get();
 	}
 
 	public PlayerType getPlayerControlling() {
@@ -170,14 +188,6 @@ public class MagicPermanent extends MagicCard {
 
 	public boolean isFlagPhasedOut() {
 		return flagPhasedOut.get();
-	}
-
-	public boolean isFlagSummoningSickness() {
-		return flagSummoningSickness.get();
-	}
-
-	public boolean isFlagTapped() {
-		return flagTapped.get();
 	}
 
 	public void setDamage(int damage) {
@@ -237,7 +247,7 @@ public class MagicPermanent extends MagicCard {
 	 *         Zähigkeit der Kreatur.
 	 */
 	private boolean checkLethalDamage() {
-		return getDamage() >= getToughness();
+		return getToughness() <= 0;
 	}
 
 	/**

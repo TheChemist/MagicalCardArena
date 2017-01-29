@@ -6,10 +6,11 @@ import java.util.Random;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import de.mca.model.Attack;
 import de.mca.model.ActivatedAbility;
+import de.mca.model.Attack;
 import de.mca.model.MagicCard;
 import de.mca.model.MagicPermanent;
+import de.mca.model.Match;
 import de.mca.model.enums.PlayerState;
 import de.mca.model.interfaces.IsAttackTarget;
 import de.mca.model.interfaces.IsManaMap;
@@ -28,67 +29,92 @@ public class InputComputer implements IsInput {
 	 * Speichert den Logger.
 	 */
 	private final static Logger LOGGER = LoggerFactory.getLogger("Input");
+	private Match match;
 	private IsPlayer player;
 
 	InputComputer() {
 	}
 
 	@Override
+	public void buttonProgressClicked(boolean flagNeedPlayerInput) {
+		final PlayerState playerState = getPlayer().getPlayerState();
+
+		switch (playerState) {
+		case ACTIVE:
+		case NONACTIVE:
+			LOGGER.debug("{} buttonProgressClicked({}) -> Nothing to do!", this, flagNeedPlayerInput);
+			break;
+		case SELECTING_ATTACKER:
+			if (getPlayer().getFlagDeclaringAttackers()) {
+				// Spieler befindet sich im Auswahlmodus für Angreifer.
+
+				inputEndDeclareAttackers();
+			}
+			break;
+		case DEFENDING:
+			if (getPlayer().getFlagDeclaringBlockers()) {
+				// Spieler befindet sich im Auswahlmodus für Verteidiger.
+
+				inputEndDeclareBlockers();
+			}
+			break;
+		case DISCARDING:
+			LOGGER.debug("{} buttonProgressClicked({}) -> Discard!", this, flagNeedPlayerInput);
+			inputDiscard(determineCardToDiscard(getPlayer().getCardsHand()));
+			break;
+		default:
+			LOGGER.debug("{} buttonProgressClicked({}) -> Pass priority!", this, flagNeedPlayerInput);
+			inputPassPriority();
+			break;
+		}
+	}
+
 	public ActivatedAbility determineAbility(List<ActivatedAbility> listLegalAbilities) {
 		// TODO: KI-Entscheidung
 		throw new UnsupportedOperationException("Computer muss Entscheidung treffen, die er nicht treffen kann");
 	}
 
-	@Override
 	public MagicPermanent determineAttacker(List<MagicPermanent> legalAttackers) throws UnsupportedOperationException {
 		// TODO: KI-Entscheidung
 		throw new UnsupportedOperationException("Computer muss Entscheidung treffen, die er nicht treffen kann");
 	}
 
-	@Override
 	public IsAttackTarget determineAttackTarget(List<IsAttackTarget> legalAttackTargets)
 			throws UnsupportedOperationException {
 		// TODO: KI-Entscheidung
 		throw new UnsupportedOperationException("Computer muss Entscheidung treffen, die er nicht treffen kann");
 	}
 
-	@Override
 	public MagicPermanent determineBlocker(List<MagicPermanent> legalBlockers) throws UnsupportedOperationException {
 		// TODO: KI-Entscheidung
 		throw new UnsupportedOperationException("Computer muss Entscheidung treffen, die er nicht treffen kann");
 	}
 
-	@Override
 	public int determineBlockTarget(List<Attack> listAttacks) throws UnsupportedOperationException {
 		// TODO: KI-Entscheidung
 		throw new UnsupportedOperationException("Computer muss Entscheidung treffen, die er nicht treffen kann");
 	}
 
-	@Override
 	public MagicPermanent determineCardToActivate(List<MagicPermanent> legalPermanents)
 			throws UnsupportedOperationException {
 		// TODO: KI-Entscheidung
 		throw new UnsupportedOperationException("Computer muss Entscheidung treffen, die er nicht treffen kann");
 	}
 
-	@Override
 	public MagicCard determineCardToCast(List<MagicCard> legalCards) throws UnsupportedOperationException {
 		// TODO: KI-Entscheidung
 		throw new UnsupportedOperationException("Computer muss Entscheidung treffen, die er nicht treffen kann");
 	}
 
-	@Override
 	public MagicCard determineCardToDiscard(List<MagicCard> handCards) {
 		return handCards.get(new Random().nextInt(handCards.size()));
 	}
 
-	@Override
 	public IsManaMap determineCostGoal(List<IsManaMap> costMaps) throws UnsupportedOperationException {
 		// TODO: KI-Entscheidung
 		throw new UnsupportedOperationException("Computer muss Entscheidung treffen, die er nicht treffen kann");
 	}
 
-	@Override
 	public List<MagicPermanent> determineDamageAssignmentOrderAttacker(List<MagicPermanent> blockers)
 			throws UnsupportedOperationException {
 		// TODO: KI-Entscheidung
@@ -96,45 +122,42 @@ public class InputComputer implements IsInput {
 	}
 
 	@Override
-	public void determineInput(PlayerState playerState) {
-		if (getPlayer().isAttacking()) {
-			LOGGER.debug("{} determineInput({})", this, playerState);
-			inputEndDeclareAttackers();
-		} else if (getPlayer().isDefending()) {
-			LOGGER.debug("{} determineInput({})", this, playerState);
-			inputEndDeclareBlockers();
-		} else if (getPlayer().isPrioritised()) {
-			LOGGER.debug("{} determineInput({})", this, playerState);
-			inputPassPriority();
-		} else if (getPlayer().isDiscarding()) {
-			LOGGER.debug("{} determineInput({})", this, playerState);
-			// Computer wirft zufällige Karte ab.
-			inputDiscard(determineCardToDiscard(getPlayer().getCardsHand()));
-		}
-	}
-
-	@Override
 	public IsPlayer getPlayer() {
 		return player;
 	}
 
-	@Override
-	public void setPlayer(IsPlayer player) {
-		this.player = player;
-
-		player.propertyPlayerState().addListener(new ChangeListener<PlayerState>() {
+	public void setMatch(Match match) {
+		this.match = match;
+		/**
+		 * Stattdessen sollte der Spieler immer dann zu einer Handlung bewogen
+		 * werden, wenn das Match einen Input benötigt (flagNeedPlayerInput).
+		 *
+		 * Eine Kombination des PS und verschiedener Flags sollten ausreichen,
+		 * um zu bestimmen, ob und welche Art von Input vom Spieler benötigt
+		 * werden.
+		 */
+		this.match.propertyFlagNeedPlayerInput().addListener(new ChangeListener<Boolean>() {
 
 			@Override
-			public void changed(ObservableValue<? extends PlayerState> observable, PlayerState oldValue,
-					PlayerState newValue) {
-				determineInput(newValue);
+			public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
+				if (newValue) {
+					buttonProgressClicked(newValue);
+				}
 			}
 
 		});
 	}
 
 	@Override
+	public void setPlayer(IsPlayer player) {
+		this.player = player;
+	}
+
+	@Override
 	public String toString() {
-		return "Computer";
+		if (getPlayer() == null) {
+			return "Noch kein Spieler gesetzt.";
+		}
+		return getPlayer().toString();
 	}
 }

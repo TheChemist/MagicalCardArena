@@ -51,7 +51,7 @@ import javafx.scene.layout.GridPane;
 public class MatchPresenter extends AnimationTimer implements Initializable, IsStackableScreen {
 
 	@FXML
-	private Button buttonPassPriority;
+	private Button buttonProgress;
 	private CanvasZoneBattlefield canvasBattlefield;
 	private CanvasZoneDefault canvasComputerGraveyard;
 	private CanvasZoneDefault canvasComputerHand;
@@ -264,8 +264,8 @@ public class MatchPresenter extends AnimationTimer implements Initializable, IsS
 		paneCardZoom.getChildren().add(imageViewCardZoom);
 		tabCardZoom.setContent(paneCardZoom);
 
-		buttonPassPriority.setOnAction((actionEvent) -> {
-			inputHuman.inputPassPriority();
+		buttonProgress.setOnAction((actionEvent) -> {
+			inputHuman.buttonProgressClicked(getMatchActive().propertyFlagNeedPlayerInput().get());
 		});
 
 		// Center Pane
@@ -322,6 +322,7 @@ public class MatchPresenter extends AnimationTimer implements Initializable, IsS
 		IsPlayer playerComputer = matchActive.getPlayer(PlayerType.COMPUTER);
 		IsPlayer playerHuman = matchActive.getPlayer(PlayerType.HUMAN);
 		setMatchActive(matchActive);
+		inputComputer.setMatch(matchActive);
 
 		// Game Loop
 		matchUpdater = () -> matchActive.update();

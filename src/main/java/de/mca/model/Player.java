@@ -221,10 +221,15 @@ public final class Player implements IsPlayer {
 	}
 
 	@Override
-	public void attackedBy(MagicPermanent attacker) {
-		final int attackerPower = attacker.getPower();
-		if (attackerPower > 0) {
-			setCombatDamage(attackerPower);
+	public void applyCombatDamage() {
+		LOGGER.debug("{} applyCombatDamage()", this);
+		setLife(getLife() - getCombatDamage());
+	}
+
+	@Override
+	public void assignCombatDamage(int combatDamage) {
+		if (combatDamage > 0) {
+			setCombatDamage(getCombatDamage() + combatDamage);
 		}
 	}
 
@@ -278,6 +283,7 @@ public final class Player implements IsPlayer {
 		return getZoneLibrary().getAll();
 	}
 
+	@Override
 	public int getLife() {
 		return propertyLife.get();
 	}
@@ -329,7 +335,8 @@ public final class Player implements IsPlayer {
 
 	@Override
 	public boolean isAttacking() {
-		return getPlayerState().equals(PlayerState.ATTACKING);
+		return getPlayerState().equals(PlayerState.SELECTING_ATTACKER)
+				|| getPlayerState().equals(PlayerState.SELECTING_ATTACK_TARGET);
 	}
 
 	@Override
@@ -365,6 +372,11 @@ public final class Player implements IsPlayer {
 	@Override
 	public boolean isTakingSpecialAction() {
 		return getPlayerState().equals(PlayerState.TAKING_SPECIAL_ACTION);
+	}
+
+	@Override
+	public IntegerProperty propertyCombatDamage() {
+		return propertyCombatDamage;
 	}
 
 	@Override
@@ -453,6 +465,11 @@ public final class Player implements IsPlayer {
 	}
 
 	@Override
+	public void resetCombatDamage() {
+		setCombatDamage(0);
+	}
+
+	@Override
 	public void setDeck(Deck deck) {
 		LOGGER.trace("{} setDeck({})", this, deck);
 		addAllCards(deck.getCardsList(), ZoneType.LIBRARY);
@@ -494,8 +511,9 @@ public final class Player implements IsPlayer {
 		this.propertyFlagPlayedLand.set(flagPlayedLand);
 	}
 
+	@Override
 	public void setLife(int life) {
-		LOGGER.trace("{} setLife({})", this, life);
+		LOGGER.debug("{} setLife({})", this, life);
 		this.propertyLife.set(life);
 		if (getLife() < 1) {
 			fireStateBasedAction(new StateBasedAction(this, StateBasedActionType.PLAYER_LIFE_ZERO));
@@ -516,14 +534,14 @@ public final class Player implements IsPlayer {
 
 	@Override
 	public void setPlayerState(PlayerState playerState) {
-		LOGGER.debug("{} setPlayerState({})", this, playerState);
-		propertyPlayerState.set(playerState);
+		LOGGER.trace("{} setPlayerState({})", this, playerState);
+		propertyPlayerState().set(playerState);
 	}
 
 	@Override
 	public String toString() {
 		return getDisplayName();
-		// TODO: Detaillierte Status-Ausgabe;
+		// TODO: Detaillierte Status-Ausgabe
 		// new StringBuilder("[pt=[").append(getPlayerType()).append("]
 		// ps=[").append(getPlayerState())
 		// .append("] l=[").append(getLife()).append("]]").toString();
@@ -540,23 +558,29 @@ public final class Player implements IsPlayer {
 		return getZoneLibrary().getSize() >= 1;
 	}
 
+	private int getCombatDamage() {
+		return propertyCombatDamage().get();
+	}
+
 	private ZoneDefault<MagicCard> getZoneLibrary() {
 		return zoneLibrary;
 	}
 
 	private void setCombatDamage(int combatDamage) {
-		propertyCombatDamage.set(combatDamage);
+		LOGGER.debug("{} setCombatDamage({})", this, combatDamage);
+		propertyCombatDamage().set(combatDamage);
 	}
 
 	private void setDeckSize(int deckSize) {
-		propertyDeckSize.set(deckSize);
+		propertyDeckSize().set(deckSize);
 	}
 
 	private void setGraveSize(int graveSize) {
-		propertyGraveSize.set(graveSize);
+		propertyGraveSize().set(graveSize);
 	}
 
 	private void setHandSize(int handSize) {
-		propertyHandSize.set(handSize);
+		propertyHandSize().set(handSize);
 	}
+
 }

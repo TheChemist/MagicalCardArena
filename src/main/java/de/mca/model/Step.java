@@ -60,6 +60,25 @@ public class Step {
 		propertyFlagStepRunning = new SimpleBooleanProperty(false);
 	}
 
+	public void fireCombatDamageAssignment() {
+		eventBus.post(new TurnBasedAction(this, TurnBasedActionType.COMBAT_DAMAGE_ASSIGNMENT));
+	}
+
+	public void fireCombatDamageDealing() {
+		eventBus.post(new TurnBasedAction(this, TurnBasedActionType.COMBAT_DAMAGE_DEALING));
+	}
+
+	public void fireDeclareDamageAssignmentBlocker() {
+		/**
+		 * Hierbei handelt es sich um einen Sonderfall. Mehrere TurnBasedActions
+		 * werden nacheinander abgefeuert, jedoch sind die späteren abhängig von
+		 * Spielerinput der in den ersten TBAs eingeholt wird. Um eine
+		 * sequenzielle Abarbeitung zu gewährleisten muss der Aufruf in diesem
+		 * Fall an einen Ort verlegt werden.
+		 */
+		eventBus.post(new TurnBasedAction(this, TurnBasedActionType.DECLARE_DAMAGE_ASSIGNMENT_ORDER_BLOCKER));
+	}
+
 	@Override
 	public String toString() {
 		return stepType.toString();

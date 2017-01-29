@@ -1,6 +1,5 @@
 package de.mca.model;
 
-import java.util.ArrayList;
 import java.util.Set;
 
 import de.mca.model.enums.ColorType;

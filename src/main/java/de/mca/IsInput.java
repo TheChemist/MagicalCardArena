@@ -1,14 +1,7 @@
 package de.mca;
 
-import java.util.List;
-
-import de.mca.model.Attack;
-import de.mca.model.ActivatedAbility;
 import de.mca.model.MagicCard;
 import de.mca.model.MagicPermanent;
-import de.mca.model.enums.PlayerState;
-import de.mca.model.interfaces.IsAttackTarget;
-import de.mca.model.interfaces.IsManaMap;
 import de.mca.model.interfaces.IsPlayer;
 
 /**
@@ -18,32 +11,12 @@ import de.mca.model.interfaces.IsPlayer;
  */
 public interface IsInput {
 
-	public ActivatedAbility determineAbility(List<ActivatedAbility> listLegalAbilities);
-
-	public MagicPermanent determineAttacker(List<MagicPermanent> legalAttackers);
-
-	public IsAttackTarget determineAttackTarget(List<IsAttackTarget> legalAttackTargets);
-
-	public MagicPermanent determineBlocker(List<MagicPermanent> legalBlockers);
-
-	public int determineBlockTarget(List<Attack> listAttacks);
-
-	public MagicPermanent determineCardToActivate(List<MagicPermanent> legalPermanents);
-
-	public MagicCard determineCardToCast(List<MagicCard> legalCards);
-
-	public MagicCard determineCardToDiscard(List<MagicCard> handCards);
-
-	public IsManaMap determineCostGoal(List<IsManaMap> costMaps);
-
-	public List<MagicPermanent> determineDamageAssignmentOrderAttacker(List<MagicPermanent> blockers);
-
-	public void determineInput(PlayerState ps);
+	public void buttonProgressClicked(boolean flagNeedPlayerInput);
 
 	public IsPlayer getPlayer();
 
-	public default void inputActivatedAbility(ActivatedAbility characteristicAbility) {
-		getPlayer().fireActivateActivatedAbility(characteristicAbility);
+	public default void inputActivatedPermanent(MagicPermanent magicPermanent) {
+		getPlayer().fireActivatePermanent(magicPermanent);
 	}
 
 	public default void inputCastSpell(MagicCard magicCard) {
@@ -54,8 +27,8 @@ public interface IsInput {
 		getPlayer().fireConcede();
 	}
 
-	public default void inputDeclareAttacker(Attack attack) {
-		getPlayer().fireDeclareAttacker(attack);
+	public default void inputDeclareAttacker(MagicPermanent attacker) {
+		getPlayer().fireDeclareAttacker(attacker);
 	}
 
 	public default void inputDeclareBlocker(int attackerIndex, MagicPermanent blocker) {

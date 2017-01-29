@@ -20,7 +20,6 @@ import de.mca.model.enums.PlayerType;
 import de.mca.model.enums.ZoneType;
 import de.mca.model.interfaces.IsAttackTarget;
 import de.mca.model.interfaces.IsPlayer;
-import de.mca.model.interfaces.IsStackable;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.ListProperty;
@@ -191,6 +190,10 @@ public final class Match {
 		return propertyExileSize;
 	}
 
+	public BooleanProperty propertyFlagNeedPlayerInput() {
+		return propertyNeedPlayerInput;
+	}
+
 	public ObjectProperty<IsPlayer> propertyPlayerActive() {
 		return propertyPlayerActive;
 	}
@@ -258,7 +261,6 @@ public final class Match {
 
 			// Spiele Hauptphasen
 			ruleEnforcer.processStateBasedActions();
-			determinePlayerPrioritised();
 			if (getPlayerActive().getFlagPassedPriority() && getPlayerNonactive().getFlagPassedPriority()
 					&& !getZoneStack().isEmpty()) {
 				// Spieler haben gepasst, aber es liegt etwas auf dem Stack.
@@ -292,6 +294,7 @@ public final class Match {
 					setCurrentStep();
 					if (checkSkipStep()) {
 						skipCurrentStep();
+						return;
 					} else {
 						stepBegin(isStepRunning());
 					}
@@ -308,12 +311,11 @@ public final class Match {
 				}
 			}
 
-			if (checkPlayersGetPriority()) {
+			if (checkPlayersGetPriority() && !getFlagNeedPlayerInput()) {
 				// Spieler erhalten in diesem Schritt Priorität.
 
 				// Spiele Schritt
 				ruleEnforcer.processStateBasedActions();
-				determinePlayerPrioritised();
 				if (getPlayerActive().getFlagPassedPriority() && getPlayerNonactive().getFlagPassedPriority()
 						&& !getZoneStack().isEmpty()) {
 					// Spieler haben gepasst, aber es liegt etwas auf dem Stack.
@@ -330,6 +332,9 @@ public final class Match {
 
 					// Beende Schritt
 					stepEnd(getFlagNeedPlayerInput());
+
+					// Beende Phase
+					phaseEnd(getCurrentPhase().hasNextStep(), isPhaseRunning(), getFlagNeedPlayerInput());
 				}
 			} else {
 				// Spieler erhalten keine Priorität.
@@ -341,14 +346,6 @@ public final class Match {
 				phaseEnd(getCurrentPhase().hasNextStep(), isPhaseRunning(), getFlagNeedPlayerInput());
 			}
 		}
-
-		// Beende Durchlauf, falls auf Spielereingabe gewartet wird.
-		if (getFlagNeedPlayerInput()) {
-			return;
-		}
-
-		// Beende Phase
-		phaseEnd(getCurrentPhase().hasNextStep(), isPhaseRunning(), getFlagNeedPlayerInput());
 
 		// Beende Runde
 		turnEnd(getCurrentTurn().hasNextPhase(), getCurrentPhase().hasNextStep());
@@ -447,10 +444,6 @@ public final class Match {
 		return propertyMatchRunning.get();
 	}
 
-	private List<IsAttackTarget> getListAttackTargets() {
-		return propertyListAttackTargets.get();
-	}
-
 	private List<MagicPermanent> getListLegalAttackers(IsPlayer player) {
 		final List<MagicPermanent> result = new ArrayList<>();
 		getControlledCreatures(player).forEach(magicPermanent -> {
@@ -517,6 +510,7 @@ public final class Match {
 	 * Beendet das Spiel (rule = 104.).
 	 */
 	private void matchEnd(boolean needPlayerInput) {
+		// TODO: Was passiert, wenn ein Match aus ist?
 		if (!needPlayerInput) {
 			LOGGER.debug("{} matchEnd()", this);
 			setFlagIsMatchRunning(false);
@@ -544,17 +538,8 @@ public final class Match {
 		}
 	}
 
-	void popSpell() {
-		getZoneStack().pop();
-		propertyStackSize().set(getZoneStack().getSize());
-	}
-
 	private ObjectProperty<Turn> propertyCurrentTurn() {
 		return propertyCurrentTurn;
-	}
-
-	private BooleanProperty propertyFlagNeedPlayerInput() {
-		return propertyNeedPlayerInput;
 	}
 
 	/**
@@ -668,6 +653,19 @@ public final class Match {
 
 	}
 
+	/**
+	 * Fügt dem Match einen neuen Angriff hinzu, der zu gegebener Zeit
+	 * durchgeführt wird. TODO: Ziele sind derzeit nur Spieler.
+	 *
+	 * @param attack
+	 *            ein Hilfsobjekt, das alle relevanten Informationen zu einen
+	 *            Angriff kapselt.
+	 */
+	void addAttack(Attack attack) {
+		LOGGER.debug("{} addAttack({})", this, attack);
+		propertyListAttacks.add(attack);
+	}
+
 	void addCard(MagicCard magicCard, ZoneType zoneType) {
 		if (zoneType.equals(ZoneType.BATTLEFIELD)) {
 			getZoneBattlefield().add(factoryMagicPermanent.create(magicCard));
@@ -679,6 +677,7 @@ public final class Match {
 	}
 
 	boolean checkCanPlayLandCard(IsPlayer p) {
+		// TODO: In den RuleEnforcer verlegen.
 		final boolean isActivePlayer = isPlayerActive(p);
 		final boolean currentStepIsMain = getCurrentPhase().isMain();
 		final boolean stackEmpty = magicStack.isEmpty();
@@ -686,17 +685,6 @@ public final class Match {
 		LOGGER.debug("{} checkCanPlayLandCard({}) = {}", this, p,
 				(isActivePlayer && currentStepIsMain && landFlag && stackEmpty));
 		return isActivePlayer && currentStepIsMain && landFlag && stackEmpty;
-	}
-
-	/**
-	 * Fügt dem Spieler einen neuen Angriff auf ihn oder einen von ihm
-	 * kontrollierten Planeswalker hinzu.
-	 *
-	 * @param attack
-	 *            ein Angriff kapselt den Angreifer und das Angriffziel.
-	 */
-	void declareAttacker(Attack attack) {
-		propertyListAttacks.add(attack);
 	}
 
 	void declareBlocker(int attackIndex, MagicPermanent blocker) {
@@ -751,6 +739,10 @@ public final class Match {
 		return propertyListAttacks.get();
 	}
 
+	List<IsAttackTarget> getListAttackTargets() {
+		return propertyListAttackTargets.get();
+	}
+
 	/**
 	 * Liefert eine Liste aller kontrollierten Karten auf dem Spielfeld.
 	 *
@@ -787,6 +779,11 @@ public final class Match {
 		return getCurrentTurn().isPlayerActive(player);
 	}
 
+	void popSpell() {
+		getZoneStack().pop();
+		propertyStackSize().set(getZoneStack().getSize());
+	}
+
 	void pushSpell(MagicSpell magicSpell) {
 		magicSpell.addZone(ZoneType.STACK);
 		getZoneStack().push(magicSpell);
@@ -818,6 +815,10 @@ public final class Match {
 		getPlayerNonactive().setFlagPassedPriority(false);
 	}
 
+	void resetListAttacks() {
+		propertyListAttacks.clear();
+	}
+
 	/**
 	 * Setzt den Spielerstatus nach dem Beschwören eines Zaubers, dem Aktivieren
 	 * einer Fähigkeit, dem Ausführen einer Spezialhandlung oder dem Abgeben der
@@ -829,7 +830,7 @@ public final class Match {
 	void resetPlayerState(IsPlayer player) {
 		final boolean isCombatPhase = getCurrentPhase().isCombatPhase();
 		if (isPlayerActive(player)) {
-			player.setPlayerState(isCombatPhase ? PlayerState.ATTACKING : PlayerState.ACTIVE);
+			player.setPlayerState(isCombatPhase ? PlayerState.SELECTING_ATTACKER : PlayerState.ACTIVE);
 		} else {
 			player.setPlayerState(isCombatPhase ? PlayerState.DEFENDING : PlayerState.NONACTIVE);
 		}

@@ -82,7 +82,7 @@ class SpriteMagicPermanent extends Sprite {
 
 	@Override
 	void render(GraphicsContext gc) {
-		if (getMagicPermanent().isFlagTapped()) {
+		if (getMagicPermanent().getFlagIsTapped()) {
 			gc.save();
 			rotate(gc, 90, getX() + getWidth() / 2, getY() + getHeight() / 2);
 			gc.drawImage(getImage(), getX(), getY(), getWidth(), getHeight());

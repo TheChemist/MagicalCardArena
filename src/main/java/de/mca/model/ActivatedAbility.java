@@ -131,6 +131,7 @@ public class ActivatedAbility implements IsStackable {
 		return magicParser;
 	}
 
+	@Override
 	public PlayerType getPlayerControlling() {
 		return propertyPlayerControlling().get();
 	}
@@ -149,6 +150,7 @@ public class ActivatedAbility implements IsStackable {
 		return false;
 	}
 
+	@Override
 	public ObservableList<IsManaMap> propertyListCostMaps() {
 		return propertyListCostMaps;
 	}
@@ -178,6 +180,7 @@ public class ActivatedAbility implements IsStackable {
 		// TODO: Was passiert hier?
 	}
 
+	@Override
 	public void setPlayerControlling(PlayerType playerControlling) {
 		propertyListEffects().forEach(effect -> effect.setPlayerType(playerControlling));
 		propertyPlayerControlling().set(playerControlling);

@@ -1,5 +1,6 @@
 package de.mca.model;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
@@ -11,7 +12,7 @@ import com.google.common.eventbus.Subscribe;
 import com.google.inject.Inject;
 
 import de.mca.Constants;
-import de.mca.PAActivateAbility;
+import de.mca.PAActivatePermanent;
 import de.mca.PACastSpell;
 import de.mca.PADeclareAttacker;
 import de.mca.PADeclareBlocker;
@@ -78,16 +79,17 @@ public class RuleEnforcer {
 		final boolean isPaid = checkIsPaid(player);
 		if (paying && isPaid) {
 			// Spieler hat alles bezahlt
-			actionEndPayment(player);
+			structureEndPayment(player);
 		}
 	}
 
 	@Subscribe
-	public void examinePAActivateAbility(PAActivateAbility playerActionActivatedAbility) {
+	public void examinePAActivateAbility(PAActivatePermanent playerActionActivatedAbility) {
 		LOGGER.debug("{} examinePAActivateAbility({})", this, playerActionActivatedAbility);
 
 		// Führe Aktion aus.
-		actionActivateAbility(playerActionActivatedAbility.getSource(), playerActionActivatedAbility.getAbility());
+		structureBeginActivatePermanent(playerActionActivatedAbility.getSource(),
+				playerActionActivatedAbility.getAbility());
 	}
 
 	@Subscribe
@@ -95,13 +97,15 @@ public class RuleEnforcer {
 		LOGGER.debug("{} examinePACastSpell({})", this, playerActionCastSpell);
 
 		// Führe Aktion aus.
-		actionCBeginCastSpell(playerActionCastSpell.getSource(), playerActionCastSpell.getCard());
+		structureBeginCastSpell(playerActionCastSpell.getSource(), playerActionCastSpell.getCard());
 	}
 
 	@Subscribe
-	public void examinePADeclareAttacker(PADeclareAttacker playerActionDeclareAttackers) {
-		LOGGER.debug("{} examinePADeclareAttacker({})", this, playerActionDeclareAttackers);
-		match.declareAttacker(playerActionDeclareAttackers.getAttack());
+	public void examinePADeclareAttacker(PADeclareAttacker playerActionDeclareAttacker) {
+		LOGGER.debug("{} examinePADeclareAttacker({})", this, playerActionDeclareAttacker);
+
+		// Führe Aktion aus.
+		actionDeclareAttacker(playerActionDeclareAttacker.getSource(), playerActionDeclareAttacker.getAttacker());
 	}
 
 	@Subscribe
@@ -132,7 +136,7 @@ public class RuleEnforcer {
 		TotalCostInformation totalCostInformation = new TotalCostInformation();
 		totalCostInformation.setInitalCost(playerActionSelectCostMap.getCostMap());
 
-		actionBeginPayment(player, totalCostInformation);
+		structureBeginPayment(player, totalCostInformation);
 
 		match.setFlagNeedPlayerInput(true);
 	}
@@ -147,16 +151,17 @@ public class RuleEnforcer {
 			break;
 		case PASS_PRIORITY:
 			actionPassPriority(player);
+			// TODO: Hier evtl. nächsten Spieler bestimmen?
 			break;
 		case END_DECLARE_ATTACKERS:
-			actionEndDeclareAttackers(player);
+			structureEndDeclareAttackers(player);
 			if (match.getTotalAttackers() == 0) {
 				match.skipStepDeclareBlockers();
 				match.skipStepCombatDamage();
 			}
 			break;
 		case END_DECLARE_BLOCKERS:
-			actionEndDeclareBlockers(player);
+			structureEndDeclareBlockers(player);
 			break;
 		default:
 			break;
@@ -191,48 +196,26 @@ public class RuleEnforcer {
 		final IsPlayer playerNonactive = match.getPlayerNonactive();
 		switch (tba.getTurnBasedActionType()) {
 		case BEGINNING_OF_COMBAT_STEP:
-			playerActive.setPlayerState(PlayerState.ATTACKING);
+			playerActive.setPlayerState(PlayerState.SELECTING_ATTACKER);
 			playerNonactive.setPlayerState(PlayerState.DEFENDING);
 			break;
 		case CLEANUP:
-			for (final MagicPermanent mp : match.getCardsBattlefield()) {
-				mp.setDamage(0);
-			}
+			turnBasedCleanup();
 			break;
 		case COMBAT_DAMAGE_ASSIGNMENT:
-			for (final Attack attack : match.getListAttacks()) {
-				final MagicPermanent attacker = attack.getSource();
-				final IsAttackTarget attackTarget = attack.getTarget();
-				if (attacker.isFlagBlocked()) {
-					for (final MagicPermanent blocker : attack.propertyListBlockersSorted()) {
-						final int blockerPower = blocker.getPower();
-						final int attackerPower = attacker.getPower();
-						if (blockerPower > 0) {
-							attacker.setDamage(blockerPower);
-						}
-						if (attackerPower > 0) {
-							blocker.setDamage(attackerPower);
-						}
-					}
-				} else {
-					attackTarget.attackedBy(attacker);
-				}
-			}
+			turnBasedCombatDamageAssignment();
+
+			// Hier wird die nächste TBA abgefeuert.
+			((Step) tba.getSource()).fireCombatDamageDealing();
 			break;
 		case COMBAT_DAMAGE_DEALING:
-			// TODO: Schaden korrekt verteilen
-			// for (final Attack attack : match.propertyListAttacks()) {
-			// for (final MagicPermanent creature : attack.getCombatants())
-			// {
-			//
-			// }
-			// }
+			turnBasedCombatDamageDealing();
 			break;
 		case DECLARE_ATTACKER:
-			actionBeginDeclareAttackers(playerActive);
+			structureBeginDeclareAttackers(playerActive);
 			break;
 		case DECLARE_BLOCKER:
-			actionBeginDeclareBlockers(playerNonactive);
+			structureBeginDeclareBlockers(playerNonactive);
 			break;
 		case DISCARD:
 			final int originalHandSize = playerActive.propertyHandSize().get();
@@ -255,16 +238,18 @@ public class RuleEnforcer {
 			}
 			break;
 		case DECLARE_DAMAGE_ASSIGNMENT_ORDER_ATTACKER:
-			for (final Attack attack : match.getListAttacks()) {
-				final List<MagicPermanent> blockers = attack.propertyListBlockers();
-				if (attack.getSource().isFlagBlocked() && blockers.size() > 1) {
-					match.setFlagNeedPlayerInput(true);
-					// attack.setBlockers(playerActive.announceDamageAssignmentOrderAttacker(blockers));
-				}
-			}
+			structureBeginDamageAssignmentAttacker(playerActive);
+			structureEndDamageAssignmentAttacker(playerActive);
+
+			// Hier wird die nächste TBA abgefeuert.
+			((Step) tba.getSource()).fireDeclareDamageAssignmentBlocker();
 			break;
 		case DECLARE_DAMAGE_ASSIGNMENT_ORDER_BLOCKER:
-			// TODO: Wird erst bei mehreren Blockzielen relevant.
+			structureBeginDamageAssignmentBlocker(playerNonactive);
+			structureEndDamageAssignmentBlocker(playerNonactive);
+
+			// Hier wird die nächste TBA abgefeuert.
+			((Step) tba.getSource()).fireCombatDamageAssignment();
 			break;
 		case PHASING:
 			break;
@@ -277,61 +262,30 @@ public class RuleEnforcer {
 	}
 
 	private void actionActivateAbility(IsPlayer player, ActivatedAbility activatedAbility) {
-		LOGGER.debug("{} actionActivateActivatedAbility({}, {})", this, player, activatedAbility);
+		LOGGER.debug("{} actionActivateAbility({}, {})", this, player, activatedAbility);
 
-		if (checkCanActivate(player, activatedAbility)) {
-			// Alle Voraussetungen sind erfüllt.
+		if (activatedAbility.isManaAbility()) {
+			// Manafertigkeit
 
-			if (activatedAbility.isManaAbility()) {
-				// Manafertigkeit
+			/**
+			 * Verkürzung für Manafertigkeiten. Effekte werden sofort generiert,
+			 * ohne den Umweg über den Stack.
+			 **/
+			activatedAbility.generateEffects();
 
-				/**
-				 * Verkürzung für Manafertigkeiten. Effekte werden sofort
-				 * generiert, ohne den Umweg über den Stack.
-				 **/
-				activatedAbility.generateEffects();
-
-				// Zusätzliche Kosten werden bezahlt.
-				switch (activatedAbility.getAdditionalCostType()) {
-				case NO_ADDITIONAL_COST:
-					return;
-				case TAP:
-					((MagicPermanent) activatedAbility.getSource()).setFlagTapped(true);
-					break;
-				}
-
-			} else {
-				// Andere aktivierbare Fähigkeit
-
+			// Zusätzliche Kosten werden bezahlt.
+			switch (activatedAbility.getAdditionalCostType()) {
+			case NO_ADDITIONAL_COST:
+				return;
+			case TAP:
+				((MagicPermanent) activatedAbility.getSource()).setFlagTapped(true);
+				break;
 			}
 
 		} else {
-			// Voraussetzungen sind nicht erfüllt.
-			// TODO: Reagiere mit Hinweis an den Spieler.
+			// Andere aktivierbare Fähigkeit
+
 		}
-	}
-
-	private void actionBeginDeclareAttackers(IsPlayer player) {
-		LOGGER.debug("{} actionBeginDeclareAttackers({})", this, player);
-		player.setFlagDeclareAttackers(true);
-
-		match.setFlagNeedPlayerInput(true);
-	}
-
-	private void actionBeginDeclareBlockers(IsPlayer player) {
-		LOGGER.debug("{} actionBeginDeclareAttackers({})", this, player);
-		player.setFlagDeclareBlockers(true);
-
-		match.setFlagNeedPlayerInput(true);
-	}
-
-	private void actionBeginPayment(IsPlayer player, TotalCostInformation totalCostInformation) {
-		LOGGER.debug("{} beginPayment({})", this, player);
-		player.setPlayerState(PlayerState.PAYING);
-
-		player.setManaCostGoal(totalCostInformation.getTotalCost());
-
-		match.setFlagIsMatchRunning(true);
 	}
 
 	/**
@@ -347,95 +301,49 @@ public class RuleEnforcer {
 		player.addCard(new MagicCard(magicPermanent), ZoneType.GRAVEYARD);
 	}
 
-	/**
-	 * Beschwört einen Zauberspruch. Dafür werden alle notwendigen Entscheidunge
-	 * abgefragt und Voraussetzungen überprüft.
-	 *
-	 * @see http://magiccards.info/rule/601-casting-spells.html
-	 *
-	 * @param player
-	 *            - Der Spieler, der den Zauberspruch spielt.
-	 * @param magicCard
-	 *            - Die Karte, die als Zauberspruch auf den Stack gespielt wird.
-	 */
-	private void actionCBeginCastSpell(IsPlayer player, MagicCard magicCard) {
-		LOGGER.debug("{} actionCastSpell({}, {})", this, player, magicCard);
-		final MagicSpell spell = factoryMagicSpell.create(magicCard, player.getPlayerType());
+	private void actionConcede() {
+		match.setFlagNeedPlayerInput(false);
+		match.setFlagIsMatchRunning(false);
+	}
 
-		// TODO: Gleiche Prüfung für Soells, Abilites
-		if (checkCanCast(player, spell)) {
+	/**
+	 * Wird aufgerufen, wenn der Spieler einen Angreifer auswählt. Zuerst wird
+	 * überprüft, ob die Kreatur grundsätzlich angreifen kann. Sind alle
+	 * Voraussetzungen erfüllt, wird ein gültiges Angriffsziel ermittelt und der
+	 * Angriff zur späteren Durchführung hinterlegt.
+	 *
+	 * @param playerActive
+	 *            Der aktive Spieler.
+	 * @param attacker
+	 *            Die angreifende Kreatur.
+	 */
+	private void actionDeclareAttacker(IsPlayer playerActive, MagicPermanent attacker) {
+		LOGGER.debug("{} actionDeclareAttacker({}, {})", this, playerActive, attacker);
+
+		if (checkCanAttack(playerActive, attacker)) {
 			// Alle Voraussetzungen sind erfüllt.
 
-			// Neuen Spielerstatus setzen.
-			player.setPlayerState(PlayerState.CASTING_SPELL);
-
-			// Karte aus der Hand entfernen und auf den Stack schieben.
-			player.removeCard(magicCard, ZoneType.HAND);
-			match.pushSpell(spell);
-
-			TotalCostInformation totalCostInformation = new TotalCostInformation();
-
-			if (spell.isModal()) {
-				// TODO: Entscheidung Modus
+			List<IsAttackTarget> validAttackTargets = new ArrayList<>();
+			for (IsAttackTarget attackTarget : match.getListAttackTargets()) {
+				if (attackTarget.chechIsValidAttackTarget(attacker)) {
+					validAttackTargets.add(attackTarget);
+				}
 			}
 
-			if (spell.canSplice()) {
-				// TODO: Entscheidung, ob er splicen möchte.
-				// TODO: Entscheidung: Handkarten zeigen
-			}
+			if (validAttackTargets.size() <= 0) {
+				// Keine gültigen Ziele vorhanden.
+			} else if (validAttackTargets.size() == 1) {
+				// Wähle einzig gültiges Ziel automatisch.
 
-			if (spell.hasBuyback() || spell.hasKicker()) {
-				// TODO: Entscheidung, ob er Kicker bezahlen möchte.
-			}
-
-			if (spell.hasVariableCost()) {
-				// TODO: Entscheidung Wert für X aus.
-			}
-
-			if (spell.hasHybridCost()) {
-				// TODO: Entscheidung passende CostMap aus.
+				match.addAttack(new Attack(attacker, validAttackTargets.get(0)));
 			} else {
-				// Wähle erste und einzige CostMap aus.
-				totalCostInformation.setInitalCost(spell.propertyListCostMaps().get(0));
+				// TODO: Entscheidung: Ziel auswählen
+
 			}
-
-			if (spell.hasPhyrexianCost()) {
-				// TODO: Entscheidung Zahlweise aus.
-			}
-
-			if (spell.requiresTarget()) {
-				// TODO: Entscheidung Ziele aus.
-				/**
-				 * Hier stehen noch einige weitere Entscheidungen aus.
-				 */
-			}
-
-			// TODO: Kosten aggregieren und konsolodieren. (in eig Objekt?)
-			if (spell.hasAdditionalCost()) {
-				// TODO: Zusätzliche Kosten dem Objekt hinzufügen.
-			}
-
-			// Kosten bezahlen.
-			if (totalCostInformation.getTotalConvertedCost() == 0 && !totalCostInformation.hasAdditionalCostType()) {
-				// Karte kostet nichts.
-
-				// Abschließen.
-				finishAction(player);
-			} else {
-				// Spieler muss Karte bezahlen
-
-				actionBeginPayment(player, totalCostInformation);
-			}
-
 		} else {
 			// Voraussetzungen sind nicht erfüllt.
 			// TODO: Reagiere mit Hinweis an den Spieler.
 		}
-	}
-
-	private void actionConcede() {
-		match.setFlagNeedPlayerInput(false);
-		match.setFlagIsMatchRunning(false);
 	}
 
 	/**
@@ -505,29 +413,6 @@ public class RuleEnforcer {
 		player.addAllCards(cardList, ZoneType.HAND);
 	}
 
-	private void actionEndDeclareAttackers(IsPlayer player) {
-		LOGGER.debug("{} actionEndDeclareAttackers({})", this, player);
-		player.setFlagDeclareAttackers(false);
-	}
-
-	private void actionEndDeclareBlockers(IsPlayer player) {
-		LOGGER.debug("{} actionEndDeclareBlockers({})", this, player);
-		player.setFlagDeclareBlockers(false);
-	}
-
-	private void actionEndPayment(IsPlayer player) {
-		LOGGER.debug("{} endPayment()", this);
-
-		// Setze Status zurück.
-		player.setPlayerState(PlayerState.CASTING_SPELL);
-
-		// Setze Kostenziele etc. zurück.
-		player.setManaCostAlreadyPaid(new ManaMapDefault());
-		player.setManaCostGoal(new ManaMapDefault());
-
-		finishAction(player);
-	}
-
 	/**
 	 * Verbannt eine Karte aus der Hand ins Exil.
 	 *
@@ -567,24 +452,36 @@ public class RuleEnforcer {
 		player.removeCard(landCard, ZoneType.HAND);
 		match.addCard(factoryMagicPermanent.create(landCard), ZoneType.BATTLEFIELD);
 
-		finishAction(player);
+		structureFinishAction(player);
 	}
 
-	private boolean checkCanActivate(IsPlayer player, ActivatedAbility activatedAbility) {
-		if (activatedAbility.isManaAbility()) {
-			// Prüfe Mana-Fähigkeit
+	private boolean checkCanActivatePermanent(IsPlayer player, MagicPermanent magicPermanent) {
+		final boolean isUntapped = !magicPermanent.getFlagIsTapped();
+		final boolean prioritized = player.isPrioritised();
+		final boolean castingSpell = player.isCastingSpell() || player.isPaying();
+		final boolean activatingAbility = player.isActivatingAbility();
+		LOGGER.debug("{} checkCanActivatePermanent({}, {}) = {}", this, player, magicPermanent,
+				prioritized || castingSpell || activatingAbility);
+		return prioritized || castingSpell || activatingAbility || isUntapped;
+	}
 
-			final boolean prioritized = player.isPrioritised();
-			final boolean castingSpell = player.isCastingSpell() || player.isPaying();
-			final boolean activatingAbility = player.isActivatingAbility();
-			LOGGER.debug("{} checkCanActivate({}, {}) = {}", this, player, activatedAbility,
-					prioritized || castingSpell || activatingAbility);
-			return prioritized || castingSpell || activatingAbility;
-		} else {
-			// Prüfe andere Fähigkeiten
-
-			return false;
-		}
+	/**
+	 * Prüft, ob die grundlegenden Voraussetzungen für einen Angriff erfüllt
+	 * sind.
+	 *
+	 * @see http://magiccards.info/rule/508-declare-attackers-step.html
+	 * @param playerActive
+	 *            Der aktive Spieler.
+	 * @param attacker
+	 *            Der Angreifer.
+	 * @return true, wenn der Angreifer grundsätzlich angreifen kann.
+	 */
+	private boolean checkCanAttack(IsPlayer playerActive, MagicPermanent attacker) {
+		final boolean isTapped = attacker.getFlagIsTapped();
+		final boolean hasSummoningSickness = attacker.getFlagHasSummoningSickness();
+		LOGGER.trace("{} checkCanAttack({}, {}) = {}", this, playerActive, attacker,
+				(!isTapped && !hasSummoningSickness));
+		return !isTapped && !hasSummoningSickness;
 	}
 
 	/**
@@ -592,42 +489,16 @@ public class RuleEnforcer {
 	 * Zauberspruchs erfüllt sind.
 	 *
 	 * @param player
-	 *            - Der Spieler, für den die Prüfung vorgenommen wird.
+	 *            Der priorisierte Spieler.
 	 * @param magicSpell
-	 *            - Der Zauberspruch, für den die Prüfung vorgenommen wird.
+	 *            Der Zauberspruch, für den die Prüfung vorgenommen wird.
 	 * @return true, wenn alle Voraussetzungen erfüllt sind.
 	 */
 	private boolean checkCanCast(IsPlayer player, MagicSpell magicSpell) {
 		final boolean isActivePlayer = match.isPlayerActive(player);
 		final boolean currentStepIsMain = match.getCurrentPhase().isMain();
-		LOGGER.debug("{} checkCanCast({}, {}) = {}", this, player, magicSpell, (isActivePlayer && currentStepIsMain));
+		LOGGER.trace("{} checkCanCast({}, {}) = {}", this, player, magicSpell, (isActivePlayer && currentStepIsMain));
 		return isActivePlayer && currentStepIsMain;
-	}
-
-	/**
-	 * Durchläuft den Stack und ruft für jedes Element resolve(stackable) auf.
-	 * Der Stack wird durchlaufen, jedes mal wenn beide Spieler die Priorität
-	 * abgegeben haben (rule=405.5.)
-	 */
-	void processStack() {
-		LOGGER.debug("{} processStack()", this);
-		final int sizeMagicStack = match.getZoneStack().getSize();
-
-		for (int i = 0; i < sizeMagicStack; i++) {
-			final IsStackable stackable = match.getZoneStack().peek();
-			if (stackable.isPermanentSpell()) {
-				match.addCard(factoryMagicPermanent.create((MagicSpell) stackable), ZoneType.BATTLEFIELD);
-			} else {
-				stackable.resolve();
-			}
-
-			// TODO: Mehre Kreaturen auf dem Stack werden gleichzeitig gelegt.
-			match.popSpell();
-
-			match.resetFlagsPassedPriority();
-			match.determinePlayerPrioritised();
-			match.setFlagNeedPlayerInput(true);
-		}
 	}
 
 	/**
@@ -638,33 +509,6 @@ public class RuleEnforcer {
 	private boolean checkCanDiscard(IsPlayer player, int howMany) {
 		return player.propertyHandSize().get() >= howMany;
 	}
-
-	// TODO: Prüfung ausweiten und wieder reinnehmen.
-	// /**
-	// * Prüft, ob die Kosten eines Permanents oder einer Fähigkeit bezahlt
-	// werden
-	// * können. Prüft auf Mana- sowie zusätzlich Kosten.
-	// *
-	// * @param magicPermanent
-	// * das Permanent.
-	// * @param act
-	// * der Typ der zusätzlichen Kosten
-	// * @return true, wenn die zusätzlichen Kosten bezahlt werden können.
-	// */
-	// private boolean checkCanPay(TotalCostInformation totalCostInformation) {
-	//
-	// // Prüfe auf zusätzliche Kosten
-	// if (totalCostInformation.hasAdditionalCostType()) {
-	// switch (totalCostInformation.getAdditionalCostType()) {
-	// case NO_ADDITIONAL_COST:
-	// return true;
-	// case TAP:
-	// return !magicPermanent.isFlagTapped();
-	// default:
-	// return false;
-	// }
-	// }
-	// }
 
 	private boolean checkIsPaid(IsPlayer player) {
 		final IsManaMap manaCostAlreadyPaid = player.getManaCostAlreadyPaid();
@@ -712,18 +556,368 @@ public class RuleEnforcer {
 	}
 
 	/**
-	 * Setze die priority flag beider Spieler zurück, sowie den Spielerstatus
-	 * des handelnden Spielers. Danach muss die Priorität neu bestimmt werden.
-	 * Zuletzt wird wieder Input benötigt.
+	 * Wird aufgerufen, wenn der Spieler ein Permanent anklickt. Es wird
+	 * geprüft, ob das Permanent grundsätzlich aktiviert werden kann. Sind alle
+	 * Voraussetzungen erfüllt, wird die zu aktivierende Fähigkeit bestimmt und
+	 * fpr die Aktivierung übergeben.
 	 *
 	 * @param player
-	 *            - Der Spieler, dessen Aktion beendet wird.
+	 *            der priorisierte Spieler.
+	 * @param magicPermanent
+	 *            das aktivierte Permanent.
 	 */
-	private void finishAction(IsPlayer player) {
+	private void structureBeginActivatePermanent(IsPlayer player, MagicPermanent magicPermanent) {
+		LOGGER.debug("{} structureBeginActivatePermanent({}, {})", this, player, magicPermanent);
+
+		if (checkCanActivatePermanent(player, magicPermanent)) {
+			// Alle Voraussetungen sind erfüllt.
+
+			List<ActivatedAbility> listActivatedAbities = magicPermanent.propertyListAbilities();
+
+			if (listActivatedAbities.size() <= 0) {
+				// Keine Fähigkeiten vorhanden
+			} else if (listActivatedAbities.size() == 1) {
+				// Wähle einzige Fähigkeit automatisch
+
+				actionActivateAbility(player, listActivatedAbities.get(0));
+			} else {
+				// TODO: Entscheidung: Fähigkeit auswählen
+
+			}
+		} else {
+			// Voraussetzungen sind nicht erfüllt.
+			// TODO: Reagiere mit Hinweis an den Spieler.
+		}
+	}
+
+	/**
+	 * Beschwört einen Zauberspruch. Dafür werden alle notwendigen Entscheidunge
+	 * abgefragt und Voraussetzungen überprüft.
+	 *
+	 * @see http://magiccards.info/rule/601-casting-spells.html
+	 *
+	 * @param player
+	 *            - Der Spieler, der den Zauberspruch spielt.
+	 * @param magicCard
+	 *            - Die Karte, die als Zauberspruch auf den Stack gespielt wird.
+	 */
+	private void structureBeginCastSpell(IsPlayer player, MagicCard magicCard) {
+		LOGGER.debug("{} actionCastSpell({}, {})", this, player, magicCard);
+		final MagicSpell spell = factoryMagicSpell.create(magicCard, player.getPlayerType());
+
+		// TODO: Gleiche Prüfung für Spells, Abilites
+		if (checkCanCast(player, spell)) {
+			// Alle Voraussetzungen sind erfüllt.
+
+			// Neuen Spielerstatus setzen.
+			player.setPlayerState(PlayerState.CASTING_SPELL);
+
+			// Karte aus der Hand entfernen und auf den Stack schieben.
+			player.removeCard(magicCard, ZoneType.HAND);
+			match.pushSpell(spell);
+
+			TotalCostInformation totalCostInformation = new TotalCostInformation();
+
+			if (spell.isModal()) {
+				// TODO: Entscheidung: Modus wählen.
+			}
+
+			if (spell.canSplice()) {
+				// TODO: Entscheidung: Splicen.
+				// TODO: Entscheidung: Handkarten zeigen.
+			}
+
+			if (spell.hasBuyback() || spell.hasKicker()) {
+				// TODO: Entscheidung: Kicker.
+			}
+
+			if (spell.hasVariableCost()) {
+				// TODO: Entscheidung: Wähle Wert für X aus.
+			}
+
+			if (spell.hasHybridCost()) {
+				// TODO: Entscheidung: CostMap auswählen.
+			} else {
+				// Wähle erste und einzige CostMap aus.
+				totalCostInformation.setInitalCost(spell.propertyListCostMaps().get(0));
+			}
+
+			if (spell.hasPhyrexianCost()) {
+				// TODO: Entscheidung: Wähle Zahlweise aus.
+			}
+
+			if (spell.requiresTarget()) {
+				// TODO: Entscheidung: Wähle Ziele aus.
+				/**
+				 * Hier stehen noch einige weitere Entscheidungen aus.
+				 */
+			}
+
+			// TODO: Kosten aggregieren und konsolodieren. (in eig Objekt?)
+			if (spell.hasAdditionalCost()) {
+				// TODO: Zusätzliche Kosten dem Objekt hinzufügen.
+			}
+
+			// Kosten bezahlen.
+			if (totalCostInformation.getTotalConvertedCost() == 0 && !totalCostInformation.hasAdditionalCostType()) {
+				// Karte kostet nichts.
+
+				// Abschließen.
+				structureFinishAction(player);
+			} else {
+				// Spieler muss Karte bezahlen
+
+				structureBeginPayment(player, totalCostInformation);
+			}
+
+		} else {
+			// Voraussetzungen sind nicht erfüllt.
+			// TODO: Reagiere mit Hinweis an den Spieler.
+		}
+	}
+
+	private void structureBeginDamageAssignmentAttacker(IsPlayer playerActive) {
+		LOGGER.debug("{} actionBeginDamageAssingmentAttacker({})", this, playerActive);
+		playerActive.setPlayerState(PlayerState.ASSINGING_DAMAGE_ORDER_ATTACKER);
+
+		for (final Attack attack : match.getListAttacks()) {
+			final List<MagicPermanent> blockers = attack.propertyListBlockers();
+			if (attack.getSource().isFlagBlocked() && blockers.size() > 1) {
+				// TODO: Hier muss eigentlich eine Auswahl des Spielers erfolgen
+				attack.setBlockers(attack.propertyListBlockers());
+			} else {
+				LOGGER.debug("{} actionBeginDamageAssingmentAttacker({}) -> Schadensverteilung nicht notwendig!", this,
+						playerActive);
+			}
+		}
+	}
+
+	private void structureBeginDamageAssignmentBlocker(IsPlayer playerNonactive) {
+		// TODO: Wird erst bei mehreren Blockzielen relevant.
+		LOGGER.debug("{} actionBeginDamageAssignmentBlocker({})", this, playerNonactive);
+		playerNonactive.setPlayerState(PlayerState.ASSIGNING_DAMAGE_ORDER_BLOCKERS);
+	}
+
+	/**
+	 * Setzt die flagDeclareAttackers auf true und verlangt vom Spieler eine
+	 * Reaktion (flagNeedPlayerInput = true).
+	 *
+	 * @param playerActive
+	 *            der aktive Spieler.
+	 */
+	private void structureBeginDeclareAttackers(IsPlayer playerActive) {
+		LOGGER.debug("{} actionBeginDeclareAttackers({})", this, playerActive);
+		playerActive.setPlayerState(PlayerState.SELECTING_ATTACKER);
+		playerActive.setFlagDeclareAttackers(true);
+
+		match.setFlagNeedPlayerInput(true);
+	}
+
+	/**
+	 * Setzt die flagDeclareBlockers auf true und verlangt vom Spieler eine
+	 * Reaktion (flagNeedPlayerInput = true).
+	 *
+	 * @param playerNonactive
+	 *            der nichtaktive Spieler.
+	 */
+	private void structureBeginDeclareBlockers(IsPlayer playerNonactive) {
+		LOGGER.debug("{} actionBeginDeclareBlockers({})", this, playerNonactive);
+		playerNonactive.setPlayerState(PlayerState.DEFENDING);
+		playerNonactive.setFlagDeclareBlockers(true);
+
+		match.setFlagNeedPlayerInput(true);
+	}
+
+	/**
+	 * Setzt den Spielerstatus eines Spielers auf PAYING. Zudem wird dem Spieler
+	 * ein Objekt übergeben, in dem alle Informationen über den aktuellen
+	 * Bezahlvorgang gespeichert sind. Zuletzt wird dem bezahlenden Spieler eine
+	 * Reaktion abverlangt.
+	 *
+	 * @param player
+	 *            der bezahlende Spieler.
+	 * @param totalCostInformation
+	 *            Hilfsobjekt zur Kapselung aller Informationen zu einem
+	 *            Bezahlvorgang.
+	 */
+	private void structureBeginPayment(IsPlayer player, TotalCostInformation totalCostInformation) {
+		LOGGER.debug("{} beginPayment({})", this, player);
+		player.setPlayerState(PlayerState.PAYING);
+		player.setManaCostGoal(totalCostInformation.getTotalCost());
+
+		match.setFlagNeedPlayerInput(true);
+	}
+
+	/**
+	 * Setzt den Spielerstatus des aktiven Spielers zurück auf
+	 * SELECTING_ATTACKER.
+	 *
+	 * @param playerActive
+	 *            der aktive Spieler.
+	 */
+	private void structureEndDamageAssignmentAttacker(IsPlayer playerActive) {
+		LOGGER.debug("{} actionEndDamageAssignmentAttacker({})", this, playerActive);
+		playerActive.setPlayerState(PlayerState.SELECTING_ATTACKER);
+	}
+
+	/**
+	 * Setzt den Spielerstatus des nichtaktiven Spielers zurück auf DEFENDING.
+	 *
+	 * @param playerNonactive
+	 *            der nichtaktive Spieler.
+	 */
+	private void structureEndDamageAssignmentBlocker(IsPlayer playerNonactive) {
+		// TODO: Wird erst bei mehreren Blockzielen relevant.
+		LOGGER.debug("{} actionEndDamageAssignmentAttacker({})", this, playerNonactive);
+		playerNonactive.setPlayerState(PlayerState.DEFENDING);
+	}
+
+	/**
+	 * Setzt die flagDeclareAttackers auf false. Danach wird die Priorität neu
+	 * bestimmt und eine Eingabe vom priorisierten Spieler erwartet.
+	 *
+	 * @param player
+	 *            der aktive Spieler.
+	 */
+	private void structureEndDeclareAttackers(IsPlayer player) {
+		LOGGER.debug("{} actionEndDeclareAttackers({})", this, player);
+		player.setFlagDeclareAttackers(false);
+
+		// Setze flagNeedPlayerInput zurück.
+		match.setFlagNeedPlayerInput(false);
+
+		// Bestimme Priorität neu, setze flagNeedPlayerInput auf true.
+		match.determinePlayerPrioritised();
+		match.setFlagNeedPlayerInput(true);
+	}
+
+	/**
+	 * Setzt die flagDeclareBlockers auf false. Danach wird die Priorität neu
+	 * bestimmt und eine Eingabe vom priorisierten Spieler erwartet.
+	 *
+	 * @param playerNonactive
+	 *            der nichtaktive Spieler.
+	 */
+	private void structureEndDeclareBlockers(IsPlayer playerNonactive) {
+		LOGGER.debug("{} actionEndDeclareBlockers({})", this, playerNonactive);
+		playerNonactive.setFlagDeclareBlockers(false);
+
+		// Setze flagNeedPlayerInput zurück.
+		match.setFlagNeedPlayerInput(false);
+
+		// Bestimme Priorität neu, setze flagNeedPlayerInput auf true.
+		match.determinePlayerPrioritised();
+		match.setFlagNeedPlayerInput(true);
+	}
+
+	/**
+	 * Setzt den Spielerstatus zurück auf CASTING_SPELL. Setzt die Werte zum
+	 * Bezahlvorgang im Spieler zurück. Schließt zuletzt die Spielerhandlung ab.
+	 *
+	 * @param player
+	 *            der bezahlende Spieler.
+	 */
+	private void structureEndPayment(IsPlayer player) {
+		LOGGER.debug("{} endPayment()", this);
+
+		// Setze Status zurück.
+		player.setPlayerState(PlayerState.CASTING_SPELL);
+
+		// Setze Kostenziele etc. zurück.
+		player.setManaCostAlreadyPaid(new ManaMapDefault());
+		player.setManaCostGoal(new ManaMapDefault());
+
+		structureFinishAction(player);
+	}
+
+	/**
+	 * Setze die flagPassedPriority beider Spieler auf false, sowie den
+	 * Spielerstatus des betreffenden Spielers. Danach wird die Priorität neu
+	 * bestimmt und dem priorisierten Spieler eine Reaktion abverlangt.
+	 *
+	 * @param player
+	 *            Der Spieler, dessen Aktion beendet wird.
+	 */
+	private void structureFinishAction(IsPlayer player) {
 		match.resetFlagsPassedPriority();
 		match.resetPlayerState(player);
 		match.determinePlayerPrioritised();
 		match.setFlagNeedPlayerInput(true);
+	}
+
+	private void turnBasedCleanup() {
+		// Setze Kampfschaden aller Permanents auf 0.
+		for (final MagicPermanent magicPermanent : match.getCardsBattlefield()) {
+			magicPermanent.setDamage(0);
+		}
+
+		// Setze Kampfschaden aller Angriffziele auf 0.
+		for(final IsAttackTarget attackTarget: match.getListAttackTargets()) {
+			attackTarget.resetCombatDamage();
+		}
+
+		// Leere Liste mit Angriffen.
+		match.resetListAttacks();
+	}
+
+	private void turnBasedCombatDamageAssignment() {
+		for (final Attack attack : match.getListAttacks()) {
+			final MagicPermanent attacker = attack.getSource();
+			final IsAttackTarget attackTarget = attack.getTarget();
+			if (attacker.isFlagBlocked()) {
+				for (final MagicPermanent blocker : attack.propertyListBlockersSorted()) {
+					final int blockerPower = blocker.getPower();
+					final int attackerPower = attacker.getPower();
+					if (blockerPower > 0) {
+						attacker.setDamage(blockerPower);
+					}
+					if (attackerPower > 0) {
+						blocker.setDamage(attackerPower);
+					}
+				}
+			} else {
+				attackTarget.assignCombatDamage(attacker.getPower());
+			}
+		}
+	}
+
+	// TODO: Prüfung ausweiten und wieder reinnehmen.
+	// /**
+	// * Prüft, ob die Kosten eines Permanents oder einer Fähigkeit bezahlt
+	// werden
+	// * können. Prüft auf Mana- sowie zusätzlich Kosten.
+	// *
+	// * @param magicPermanent
+	// * das Permanent.
+	// * @param act
+	// * der Typ der zusätzlichen Kosten
+	// * @return true, wenn die zusätzlichen Kosten bezahlt werden können.
+	// */
+	// private boolean checkCanPay(TotalCostInformation totalCostInformation) {
+	//
+	// // Prüfe auf zusätzliche Kosten
+	// if (totalCostInformation.hasAdditionalCostType()) {
+	// switch (totalCostInformation.getAdditionalCostType()) {
+	// case NO_ADDITIONAL_COST:
+	// return true;
+	// case TAP:
+	// return !magicPermanent.isFlagTapped();
+	// default:
+	// return false;
+	// }
+	// }
+	// }
+
+	private void turnBasedCombatDamageDealing() {
+		for (final Attack attack : match.getListAttacks()) {
+			for (final MagicPermanent creature : attack.getCombatants()) {
+				creature.applyCombatDamage();
+			}
+		}
+
+		for (final IsAttackTarget attackTarget : match.getListAttackTargets()) {
+			attackTarget.applyCombatDamage();
+		}
 	}
 
 	/**
@@ -736,6 +930,32 @@ public class RuleEnforcer {
 		LOGGER.debug("{} actionDraw({}, {})", this, player, howMany);
 		for (int i = 0; i < howMany; i++) {
 			actionDraw(player);
+		}
+	}
+
+	/**
+	 * Durchläuft den Stack und ruft für jedes Element resolve(stackable) auf.
+	 * Der Stack wird durchlaufen, jedes mal wenn beide Spieler die Priorität
+	 * abgegeben haben (rule=405.5.)
+	 */
+	void processStack() {
+		LOGGER.debug("{} processStack()", this);
+		final int sizeMagicStack = match.getZoneStack().getSize();
+
+		for (int i = 0; i < sizeMagicStack; i++) {
+			final IsStackable stackable = match.getZoneStack().peek();
+			if (stackable.isPermanentSpell()) {
+				match.addCard(factoryMagicPermanent.create((MagicSpell) stackable), ZoneType.BATTLEFIELD);
+			} else {
+				stackable.resolve();
+			}
+
+			// TODO: Mehre Kreaturen auf dem Stack werden gleichzeitig gelegt.
+			match.popSpell();
+
+			match.resetFlagsPassedPriority();
+			match.determinePlayerPrioritised();
+			match.setFlagNeedPlayerInput(true);
 		}
 	}
 
