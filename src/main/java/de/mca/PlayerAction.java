@@ -33,6 +33,6 @@ public class PlayerAction extends EventObject {
 
 	@Override
 	public String toString() {
-		return pat.toString();
+		return new StringBuilder("[").append(pat).append("]").toString();
 	}
 }

@@ -27,7 +27,7 @@ public class PACastSpell extends PlayerAction {
 
 	@Override
 	public String toString() {
-		return new StringBuilder("[").append(super.toString()).append(" s=").append(spell).append("]").toString();
+		return new StringBuilder(super.toString()).append(" s=[").append(spell).append("]").toString();
 	}
 
 }

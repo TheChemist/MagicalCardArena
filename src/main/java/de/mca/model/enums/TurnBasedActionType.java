@@ -8,7 +8,7 @@ package de.mca.model.enums;
  */
 public enum TurnBasedActionType {
 
-	BEGINNING_OF_COMBAT_STEP("Beginn der Kampfphase"), CLEANUP("Aufraeumen"), CLEAR_MANA_POOLS(
+	BEGINNING_OF_COMBAT_STEP("Beginn der Kampfphase"), CLEANUP("Aufräumen"), CLEAR_MANA_POOLS(
 			"Manapools leeren"), COMBAT_DAMAGE_ASSIGNMENT("Kampfschaden verteilen"), COMBAT_DAMAGE_DEALING(
 					"Kampfschaden verrechnen"), DECLARE_ATTACKER("Angreifer deklarieren"), DECLARE_BLOCKER(
 							"Blocker deklarieren"), DECLARE_DAMAGE_ASSIGNMENT_ORDER_ATTACKER(
