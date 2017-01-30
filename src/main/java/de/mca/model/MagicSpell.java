@@ -53,7 +53,7 @@ public class MagicSpell extends MagicCard implements IsStackable {
 	}
 
 	public boolean canSplice() {
-		// TODO: Feature "Splice"-Fähigkeit.
+		// TODO LOW Feature "Splice"-Fähigkeit.
 		return false;
 	}
 
@@ -63,12 +63,12 @@ public class MagicSpell extends MagicCard implements IsStackable {
 	}
 
 	public boolean hasAdditionalCost() {
-		// TODO: Feature zusätzliche Kosten.
+		// TODO MID Feature zusätzliche Kosten.
 		return false;
 	}
 
 	public boolean hasBuyback() {
-		// TODO: Feature "Kicker"-Fähigkeit.
+		// TODO LOW Feature "Kicker"-Fähigkeit.
 		return false;
 	}
 
@@ -83,22 +83,22 @@ public class MagicSpell extends MagicCard implements IsStackable {
 	}
 
 	public boolean hasKicker() {
-		// TODO: Feature "Buyback"-Fähigkeit.
+		// TODO LOW Feature "Buyback"-Fähigkeit.
 		return false;
 	}
 
 	public boolean hasPhyrexianCost() {
-		// TODO: Feature Phyrexanische Kosten.
+		// TODO LOW Feature Phyrexanische Kosten.
 		return false;
 	}
 
 	public boolean hasVariableCost() {
-		// TODO: Feature variable Kosten.
+		// TODO LOW Feature variable Kosten.
 		return false;
 	}
 
 	public boolean isModal() {
-		// TODO: Feature modale Zaubersprüche.
+		// TODO LOW Feature modale Zaubersprüche.
 		return false;
 	}
 
@@ -113,7 +113,7 @@ public class MagicSpell extends MagicCard implements IsStackable {
 	}
 
 	public boolean requiresTarget() {
-		// TODO: Benötigt der Zauberspruch ein Ziel?
+		// TODO LOW Benötigt der Zauberspruch ein Ziel?
 		return false;
 	}
 

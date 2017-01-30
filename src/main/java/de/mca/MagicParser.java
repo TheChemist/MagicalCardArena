@@ -204,7 +204,7 @@ public class MagicParser {
 		return null;
 	}
 
-	// TODO: Karten überprüfen, Abilities haben auch CostMaps
+	// TODO HIGH Karten überprüfen, Abilities haben auch CostMaps
 	private ActivatedAbility parseAbility(MagicCard card, JsonObject abilityObject) {
 		final AbilityType abilityType = AbilityType.valueOf(abilityObject.get("abilitytype").getAsString());
 		final ObservableList<IsManaMap> listCostMaps = new SimpleListProperty<>(FXCollections.emptyObservableList());

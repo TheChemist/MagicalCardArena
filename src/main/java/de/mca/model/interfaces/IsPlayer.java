@@ -119,7 +119,7 @@ public interface IsPlayer extends IsAttackTarget {
 	}
 
 	public default void fireSelectBlockTarget(MagicPermanent blockTarget) {
-		// TODO: Neue PA benötigt.
+		// TODO HIGH Neue PA benötigt.
 	}
 
 	public default void fireStateBasedAction(StateBasedAction sba) {

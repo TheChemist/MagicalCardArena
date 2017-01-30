@@ -27,7 +27,6 @@ import javafx.collections.ObservableList;
  * @author Maximilian Werling
  *
  */
-// TODO: Klasse wieder abstrahieren.
 public class ActivatedAbility implements IsStackable {
 
 	/**
@@ -113,7 +112,7 @@ public class ActivatedAbility implements IsStackable {
 
 	@Override
 	public String getDisplayName() {
-		// TODO Nachzutragende Methodenimplementierung
+		// TODO MID Nachzutragende Methodenimplementierung
 		return null;
 	}
 
@@ -123,7 +122,7 @@ public class ActivatedAbility implements IsStackable {
 
 	@Override
 	public int getId() {
-		// TODO Nachzutragende Methodenimplementierung
+		// TODO MID Nachzutragende Methodenimplementierung
 		return 0;
 	}
 
@@ -146,7 +145,7 @@ public class ActivatedAbility implements IsStackable {
 
 	@Override
 	public boolean isPermanentSpell() {
-		// TODO Nachzutragende Methodenimplementierung
+		// TODO MID Nachzutragende Methodenimplementierung
 		return false;
 	}
 
@@ -177,7 +176,7 @@ public class ActivatedAbility implements IsStackable {
 
 	@Override
 	public void resolve() {
-		// TODO: Was passiert hier?
+		// TODO LOW Was passiert hier?
 	}
 
 	@Override

@@ -146,7 +146,7 @@ public class Main extends Application {
 	@Override
 	public void stop() throws Exception {
 		Injector.forgetAll();
-		// TODO: Auskommentiert lassen, verhindert Fehleranzeige
+		// TODO LOW Auskommentiert lassen, verhindert Fehleranzeige
 		// System.exit(0);
 	}
 }

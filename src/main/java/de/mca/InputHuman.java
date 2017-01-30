@@ -65,7 +65,6 @@ public class InputHuman implements IsInput {
 		return player;
 	}
 
-	// TODO: Konzept der Interactables einführen?
 	public void input(MagicCard object, ZoneType zoneType) {
 		if (zoneType.equals(ZoneType.HAND)) {
 			// Karte in Hand geklickt
@@ -83,11 +82,11 @@ public class InputHuman implements IsInput {
 			// Karte auf Spielfeld geklickt
 			MagicPermanent magicPermanent = (MagicPermanent) object;
 			if (getPlayer().isAttacking()) {
-				// Angreifer auswählen
+				// Angreifer deklarieren
 
 				getPlayer().fireDeclareAttacker(magicPermanent);
 			} else {
-				// TODO: Fähigkeit spielen
+				// Permanent aktivieren
 
 				getPlayer().fireActivatePermanent(magicPermanent);
 			}

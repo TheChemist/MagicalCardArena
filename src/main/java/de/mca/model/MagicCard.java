@@ -267,7 +267,7 @@ public class MagicCard implements IsObject {
 
 	@Override
 	public int getHandModifier() {
-		// TODO: Bisher keine Verwendung
+		// TODO LOW Bisher keine Verwendung
 		return 0;
 	}
 
@@ -278,7 +278,7 @@ public class MagicCard implements IsObject {
 
 	@Override
 	public int getLifeModifier() {
-		// TODO: Bisher keine Verwendung
+		// TODO LOW Bisher keine Verwendung
 		return 0;
 	}
 

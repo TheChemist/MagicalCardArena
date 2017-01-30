@@ -206,7 +206,7 @@ public class MatchPresenter extends AnimationTimer implements Initializable, IsS
 	private Tab tabStack;
 
 	public MatchPresenter() {
-		// TODO: Threading?
+		// TODO LOW Threading?
 		spriteListBattlefield = new ArrayList<>();
 		spriteListComputerGraveyard = new ArrayList<>();
 		spriteListComputerHand = new ArrayList<>();

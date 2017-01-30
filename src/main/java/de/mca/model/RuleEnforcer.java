@@ -132,7 +132,7 @@ public class RuleEnforcer {
 		LOGGER.debug("{} examinePASelectCostMap({})", this, playerActionSelectCostMap);
 		final IsPlayer player = playerActionSelectCostMap.getSource();
 
-		// TODO: Braucht Anpassung
+		// TODO MID Braucht Anpassung
 		TotalCostInformation totalCostInformation = new TotalCostInformation();
 		totalCostInformation.setInitalCost(playerActionSelectCostMap.getCostMap());
 
@@ -151,7 +151,6 @@ public class RuleEnforcer {
 			break;
 		case PASS_PRIORITY:
 			actionPassPriority(player);
-			// TODO: Hier evtl. nächsten Spieler bestimmen?
 			break;
 		case END_DECLARE_ATTACKERS:
 			structureEndDeclareAttackers(player);
@@ -337,12 +336,12 @@ public class RuleEnforcer {
 
 				match.addAttack(new Attack(attacker, validAttackTargets.get(0)));
 			} else {
-				// TODO: Entscheidung: Ziel auswählen
+				// TODO HIGH Entscheidung: Ziel auswählen
 
 			}
 		} else {
 			// Voraussetzungen sind nicht erfüllt.
-			// TODO: Reagiere mit Hinweis an den Spieler.
+			// TODO MID Reagiere mit Hinweis an den Spieler.
 		}
 	}
 
@@ -581,12 +580,12 @@ public class RuleEnforcer {
 
 				actionActivateAbility(player, listActivatedAbities.get(0));
 			} else {
-				// TODO: Entscheidung: Fähigkeit auswählen
+				// TODO HIGH Entscheidung: Fähigkeit auswählen
 
 			}
 		} else {
 			// Voraussetzungen sind nicht erfüllt.
-			// TODO: Reagiere mit Hinweis an den Spieler.
+			// TODO MID Reagiere mit Hinweis an den Spieler.
 		}
 	}
 
@@ -605,7 +604,6 @@ public class RuleEnforcer {
 		LOGGER.debug("{} actionCastSpell({}, {})", this, player, magicCard);
 		final MagicSpell spell = factoryMagicSpell.create(magicCard, player.getPlayerType());
 
-		// TODO: Gleiche Prüfung für Spells, Abilites
 		if (checkCanCast(player, spell)) {
 			// Alle Voraussetzungen sind erfüllt.
 
@@ -619,43 +617,41 @@ public class RuleEnforcer {
 			TotalCostInformation totalCostInformation = new TotalCostInformation();
 
 			if (spell.isModal()) {
-				// TODO: Entscheidung: Modus wählen.
+				// TODO LOW Entscheidung: Modus wählen.
 			}
 
 			if (spell.canSplice()) {
-				// TODO: Entscheidung: Splicen.
-				// TODO: Entscheidung: Handkarten zeigen.
+				// TODO LOW Entscheidung: Splicen.
 			}
 
 			if (spell.hasBuyback() || spell.hasKicker()) {
-				// TODO: Entscheidung: Kicker.
+				// TODO LOW Entscheidung: Kicker.
 			}
 
 			if (spell.hasVariableCost()) {
-				// TODO: Entscheidung: Wähle Wert für X aus.
+				// TODO LOW Entscheidung: Wähle Wert für X aus.
 			}
 
 			if (spell.hasHybridCost()) {
-				// TODO: Entscheidung: CostMap auswählen.
+				// TODO HIGH Entscheidung: CostMap auswählen.
 			} else {
 				// Wähle erste und einzige CostMap aus.
 				totalCostInformation.setInitalCost(spell.propertyListCostMaps().get(0));
 			}
 
 			if (spell.hasPhyrexianCost()) {
-				// TODO: Entscheidung: Wähle Zahlweise aus.
+				// TODO LOW Entscheidung: Wähle Zahlweise aus.
 			}
 
 			if (spell.requiresTarget()) {
-				// TODO: Entscheidung: Wähle Ziele aus.
+				// TODO MID Entscheidung: Wähle Ziele aus.
 				/**
 				 * Hier stehen noch einige weitere Entscheidungen aus.
 				 */
 			}
 
-			// TODO: Kosten aggregieren und konsolodieren. (in eig Objekt?)
 			if (spell.hasAdditionalCost()) {
-				// TODO: Zusätzliche Kosten dem Objekt hinzufügen.
+				// TODO LOW Zusätzliche Kosten dem Objekt hinzufügen.
 			}
 
 			// Kosten bezahlen.
@@ -672,7 +668,7 @@ public class RuleEnforcer {
 
 		} else {
 			// Voraussetzungen sind nicht erfüllt.
-			// TODO: Reagiere mit Hinweis an den Spieler.
+			// TODO MID Reagiere mit Hinweis an den Spieler.
 		}
 	}
 
@@ -683,7 +679,8 @@ public class RuleEnforcer {
 		for (final Attack attack : match.getListAttacks()) {
 			final List<MagicPermanent> blockers = attack.propertyListBlockers();
 			if (attack.getSource().isFlagBlocked() && blockers.size() > 1) {
-				// TODO: Hier muss eigentlich eine Auswahl des Spielers erfolgen
+				// TODO HIGH Hier muss eigentlich eine Auswahl des Spielers
+				// erfolgen
 				attack.setBlockers(attack.propertyListBlockers());
 			} else {
 				LOGGER.debug("{} actionBeginDamageAssingmentAttacker({}) -> Schadensverteilung nicht notwendig!", this,
@@ -692,8 +689,9 @@ public class RuleEnforcer {
 		}
 	}
 
+	// TODO HIGH Dummy-Methode implementieren
 	private void structureBeginDamageAssignmentBlocker(IsPlayer playerNonactive) {
-		// TODO: Wird erst bei mehreren Blockzielen relevant.
+		// TODO LOW Wird erst bei mehreren Blockzielen relevant.
 		LOGGER.debug("{} actionBeginDamageAssignmentBlocker({})", this, playerNonactive);
 		playerNonactive.setPlayerState(PlayerState.ASSIGNING_DAMAGE_ORDER_BLOCKERS);
 	}
@@ -766,8 +764,9 @@ public class RuleEnforcer {
 	 * @param playerNonactive
 	 *            der nichtaktive Spieler.
 	 */
+	// TODO HIGH Dummy-Methode analog Angriff implementieren.
 	private void structureEndDamageAssignmentBlocker(IsPlayer playerNonactive) {
-		// TODO: Wird erst bei mehreren Blockzielen relevant.
+		// TODO LOW Wird erst bei mehreren Blockzielen relevant.
 		LOGGER.debug("{} actionEndDamageAssignmentAttacker({})", this, playerNonactive);
 		playerNonactive.setPlayerState(PlayerState.DEFENDING);
 	}
@@ -852,7 +851,7 @@ public class RuleEnforcer {
 		}
 
 		// Setze Kampfschaden aller Angriffziele auf 0.
-		for(final IsAttackTarget attackTarget: match.getListAttackTargets()) {
+		for (final IsAttackTarget attackTarget : match.getListAttackTargets()) {
 			attackTarget.resetCombatDamage();
 		}
 
@@ -881,7 +880,7 @@ public class RuleEnforcer {
 		}
 	}
 
-	// TODO: Prüfung ausweiten und wieder reinnehmen.
+	// TODO MID Prüfung ausweiten und wieder reinnehmen.
 	// /**
 	// * Prüft, ob die Kosten eines Permanents oder einer Fähigkeit bezahlt
 	// werden
@@ -938,6 +937,7 @@ public class RuleEnforcer {
 	 * Der Stack wird durchlaufen, jedes mal wenn beide Spieler die Priorität
 	 * abgegeben haben (rule=405.5.)
 	 */
+	// TODO HIGH Funktionsweise des Stacks genau nachlesen.
 	void processStack() {
 		LOGGER.debug("{} processStack()", this);
 		final int sizeMagicStack = match.getZoneStack().getSize();
@@ -950,7 +950,6 @@ public class RuleEnforcer {
 				stackable.resolve();
 			}
 
-			// TODO: Mehre Kreaturen auf dem Stack werden gleichzeitig gelegt.
 			match.popSpell();
 
 			match.resetFlagsPassedPriority();

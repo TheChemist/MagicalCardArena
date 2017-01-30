@@ -510,7 +510,7 @@ public final class Match {
 	 * Beendet das Spiel (rule = 104.).
 	 */
 	private void matchEnd(boolean needPlayerInput) {
-		// TODO: Was passiert, wenn ein Match aus ist?
+		// TODO HIGH Was passiert, wenn ein Match aus ist?
 		if (!needPlayerInput) {
 			LOGGER.debug("{} matchEnd()", this);
 			setFlagIsMatchRunning(false);
@@ -655,7 +655,7 @@ public final class Match {
 
 	/**
 	 * Fügt dem Match einen neuen Angriff hinzu, der zu gegebener Zeit
-	 * durchgeführt wird. TODO: Ziele sind derzeit nur Spieler.
+	 * durchgeführt wird.
 	 *
 	 * @param attack
 	 *            ein Hilfsobjekt, das alle relevanten Informationen zu einen
@@ -677,7 +677,7 @@ public final class Match {
 	}
 
 	boolean checkCanPlayLandCard(IsPlayer p) {
-		// TODO: In den RuleEnforcer verlegen.
+		// TODO HIGH In den RuleEnforcer verlegen.
 		final boolean isActivePlayer = isPlayerActive(p);
 		final boolean currentStepIsMain = getCurrentPhase().isMain();
 		final boolean stackEmpty = magicStack.isEmpty();

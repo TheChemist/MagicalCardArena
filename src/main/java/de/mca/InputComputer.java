@@ -70,39 +70,39 @@ public class InputComputer implements IsInput {
 	}
 
 	public ActivatedAbility determineAbility(List<ActivatedAbility> listLegalAbilities) {
-		// TODO: KI-Entscheidung
+		// TODO MID KI-Entscheidung
 		throw new UnsupportedOperationException("Computer muss Entscheidung treffen, die er nicht treffen kann");
 	}
 
 	public MagicPermanent determineAttacker(List<MagicPermanent> legalAttackers) throws UnsupportedOperationException {
-		// TODO: KI-Entscheidung
+		// TODO MID KI-Entscheidung
 		throw new UnsupportedOperationException("Computer muss Entscheidung treffen, die er nicht treffen kann");
 	}
 
 	public IsAttackTarget determineAttackTarget(List<IsAttackTarget> legalAttackTargets)
 			throws UnsupportedOperationException {
-		// TODO: KI-Entscheidung
+		// TODO MID KI-Entscheidung
 		throw new UnsupportedOperationException("Computer muss Entscheidung treffen, die er nicht treffen kann");
 	}
 
 	public MagicPermanent determineBlocker(List<MagicPermanent> legalBlockers) throws UnsupportedOperationException {
-		// TODO: KI-Entscheidung
+		// TODO MID KI-Entscheidung
 		throw new UnsupportedOperationException("Computer muss Entscheidung treffen, die er nicht treffen kann");
 	}
 
 	public int determineBlockTarget(List<Attack> listAttacks) throws UnsupportedOperationException {
-		// TODO: KI-Entscheidung
+		// TODO MID KI-Entscheidung
 		throw new UnsupportedOperationException("Computer muss Entscheidung treffen, die er nicht treffen kann");
 	}
 
 	public MagicPermanent determineCardToActivate(List<MagicPermanent> legalPermanents)
 			throws UnsupportedOperationException {
-		// TODO: KI-Entscheidung
+		// TODO MID KI-Entscheidung
 		throw new UnsupportedOperationException("Computer muss Entscheidung treffen, die er nicht treffen kann");
 	}
 
 	public MagicCard determineCardToCast(List<MagicCard> legalCards) throws UnsupportedOperationException {
-		// TODO: KI-Entscheidung
+		// TODO MID KI-Entscheidung
 		throw new UnsupportedOperationException("Computer muss Entscheidung treffen, die er nicht treffen kann");
 	}
 
@@ -111,13 +111,13 @@ public class InputComputer implements IsInput {
 	}
 
 	public IsManaMap determineCostGoal(List<IsManaMap> costMaps) throws UnsupportedOperationException {
-		// TODO: KI-Entscheidung
+		// TODO MID KI-Entscheidung
 		throw new UnsupportedOperationException("Computer muss Entscheidung treffen, die er nicht treffen kann");
 	}
 
 	public List<MagicPermanent> determineDamageAssignmentOrderAttacker(List<MagicPermanent> blockers)
 			throws UnsupportedOperationException {
-		// TODO: KI-Entscheidung
+		// TODO MID KI-Entscheidung
 		throw new UnsupportedOperationException("Computer muss Entscheidung treffen, die er nicht treffen kann");
 	}
 

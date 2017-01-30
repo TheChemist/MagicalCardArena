@@ -541,7 +541,7 @@ public final class Player implements IsPlayer {
 	@Override
 	public String toString() {
 		return getDisplayName();
-		// TODO: Detaillierte Status-Ausgabe
+		// TODO LOW Detaillierte Status-Ausgabe
 		// new StringBuilder("[pt=[").append(getPlayerType()).append("]
 		// ps=[").append(getPlayerState())
 		// .append("] l=[").append(getLife()).append("]]").toString();
