@@ -40,7 +40,7 @@ public interface IsZone<T> {
 	 *
 	 * @return eine Liste mit allen Karten der Zone.
 	 */
-	public List<? extends T> getAll();
+	public List<T> getAll();
 
 	/**
 	 * Liefert eine Liste mit allen Karten einer bestimmten Farbe der Zone.
@@ -49,7 +49,7 @@ public interface IsZone<T> {
 	 *            Die Farbe, der die Karten entsprechen sollen.
 	 * @return eine Liste mit allen Karten einer bestimmten Farbe der Zone.
 	 */
-	public List<? extends T> getAll(ColorType color);
+	public List<T> getAll(ColorType color);
 
 	/**
 	 * Liefert eine Liste mit allen Karten einer bestimmten Menge umgewandelten
@@ -61,7 +61,7 @@ public interface IsZone<T> {
 	 * @return eine Liste mit allen Karten einer bestimmten Menge umgewandelten
 	 *         Manas der Zone.
 	 */
-	public List<? extends T> getAll(int convertedManaCost);
+	public List<T> getAll(int convertedManaCost);
 
 	/**
 	 * Liefert eine Liste mit allen Karten eines bestimmten Kerntyps der Zone.
@@ -70,7 +70,7 @@ public interface IsZone<T> {
 	 *            Der Kerntyp, dem die Karten entsprechen sollen.
 	 * @return eine Liste mit allen Karten eines bestimmten Kerntyps der Zone.
 	 */
-	public List<? extends T> getAll(ObjectType coreType);
+	public List<T> getAll(ObjectType coreType);
 
 	/**
 	 * Liefert eine Liste mit allen Karten eines bestimmten Spielers der Zone.
@@ -79,7 +79,7 @@ public interface IsZone<T> {
 	 *            Der Spieler, dem die Karten entsprechen sollen.
 	 * @return eine Liste mit allen Karten eines bestimmten Spielers der Zone.
 	 */
-	public List<? extends T> getAll(PlayerType playerOwning);
+	public List<T> getAll(PlayerType playerOwning);
 
 	/**
 	 * Liefert eine Liste mit allen Karten eines bestimmten Subtyps der Zone.
@@ -88,7 +88,7 @@ public interface IsZone<T> {
 	 *            Der Subtype, dem die Karten entsprechen sollen.
 	 * @return eine Liste mit allen Karten eines bestimmten Subtyps der Zone.
 	 */
-	public List<? extends T> getAll(SubType subTyp);
+	public List<T> getAll(SubType subTyp);
 
 	/**
 	 * Liefert eine Liste mit allen Karten eines bestimmten Supertyps der Zone.
@@ -97,14 +97,14 @@ public interface IsZone<T> {
 	 *            Der Supertyp, dem die Karten entsprechen sollen.
 	 * @return eine Liste mit allen Karten eines bestimmten Supertyps der Zone.
 	 */
-	public List<? extends T> getAll(SuperType superType);
+	public List<T> getAll(SuperType superType);
 
 	/**
 	 * Liefert eine Liste mit allen Artefaktkarten der Zone.
 	 *
 	 * @return eine Liste mit allen Artefaktkarten der Zone.
 	 */
-	public List<? extends T> getArtifacts();
+	public List<T> getArtifacts();
 
 	/**
 	 * Liefert die unterste Karte der Zone (index = 0).
@@ -129,7 +129,7 @@ public interface IsZone<T> {
 
 	/**
 	 * Liefert den Spielertyp des Spielers, mit dem die Zone assoziert ist.
-	 * 
+	 *
 	 * @return Spielertyp des assozierten Spielers.
 	 */
 	public PlayerType getPlayerType();
