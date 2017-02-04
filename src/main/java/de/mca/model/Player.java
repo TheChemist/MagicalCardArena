@@ -14,6 +14,7 @@ import de.mca.model.enums.ColorType;
 import de.mca.model.enums.PlayerState;
 import de.mca.model.enums.PlayerType;
 import de.mca.model.enums.StateBasedActionType;
+import de.mca.model.enums.StepType;
 import de.mca.model.enums.ZoneType;
 import de.mca.model.interfaces.IsManaMap;
 import de.mca.model.interfaces.IsPlayer;
@@ -143,20 +144,6 @@ public final class Player implements IsPlayer {
 		zoneLibrary = zoneFactory.create(playerType, ZoneType.LIBRARY);
 	}
 
-	/**
-	 * Der Spieler zieht eine Karte.
-	 */
-	@Override
-	public void actionDraw() {
-		if (checkCanDraw()) {
-			final MagicCard magicCard = getZoneLibrary().getTop();
-			removeCard(magicCard, ZoneType.LIBRARY);
-			addCard(magicCard, ZoneType.HAND);
-		} else {
-			fireStateBasedAction(new StateBasedAction(this, StateBasedActionType.PLAYER_CANT_DRAW));
-		}
-	}
-
 	@Override
 	public void addAllCards(List<MagicCard> cardList, ZoneType zoneType) {
 		switch (zoneType) {
@@ -200,7 +187,7 @@ public final class Player implements IsPlayer {
 	@Override
 	public void addLife(int life) {
 		LOGGER.trace("{} addLife({})", this, life);
-		this.propertyLife.add(life);
+		propertyLife().add(life);
 	}
 
 	@Override
@@ -223,14 +210,12 @@ public final class Player implements IsPlayer {
 	@Override
 	public void applyCombatDamage() {
 		LOGGER.debug("{} applyCombatDamage()", this);
-		setLife(getLife() - getCombatDamage());
+		removeLife(getCombatDamage());
 	}
 
 	@Override
 	public void assignCombatDamage(int combatDamage) {
-		if (combatDamage > 0) {
-			setCombatDamage(getCombatDamage() + combatDamage);
-		}
+		setCombatDamage(getCombatDamage() + combatDamage);
 	}
 
 	@Override
@@ -241,11 +226,6 @@ public final class Player implements IsPlayer {
 	@Override
 	public boolean equals(PlayerType playerType) {
 		return getPlayerType().equals(playerType);
-	}
-
-	@Override
-	public List<MagicCard> getCardsHand() {
-		return getZoneHand().getAll();
 	}
 
 	@Override
@@ -276,16 +256,6 @@ public final class Player implements IsPlayer {
 	@Override
 	public boolean getFlagPlayedLand() {
 		return propertyFlagPlayedLand.get();
-	}
-
-	@Override
-	public List<MagicCard> getLibraryCards() {
-		return getZoneLibrary().getAll();
-	}
-
-	@Override
-	public int getLife() {
-		return propertyLife.get();
 	}
 
 	@Override
@@ -321,6 +291,11 @@ public final class Player implements IsPlayer {
 	@Override
 	public ZoneDefault<MagicCard> getZoneHand() {
 		return zoneHand;
+	}
+
+	@Override
+	public ZoneDefault<MagicCard> getZoneLibrary() {
+		return zoneLibrary;
 	}
 
 	@Override
@@ -447,7 +422,10 @@ public final class Player implements IsPlayer {
 	@Override
 	public void removeLife(int life) {
 		LOGGER.trace("{} removeLife({})", this, life);
-		this.propertyLife.subtract(life);
+		propertyLife().subtract(life);
+		if (getLife() < 1) {
+			fireStateBasedAction(new StateBasedAction(this, StateBasedActionType.PLAYER_LIFE_ZERO));
+		}
 	}
 
 	@Override
@@ -501,7 +479,7 @@ public final class Player implements IsPlayer {
 
 	@Override
 	public void setFlagPassedPriority(boolean flagPassedPriority) {
-		LOGGER.debug("{} setFlagPassedPriority({})", this, flagPassedPriority);
+		LOGGER.trace("{} setFlagPassedPriority({})", this, flagPassedPriority);
 		this.propertyFlagPassedPriority.set(flagPassedPriority);
 	}
 
@@ -509,15 +487,6 @@ public final class Player implements IsPlayer {
 	public void setFlagPlayedLand(boolean flagPlayedLand) {
 		LOGGER.trace("{} setFlagPlayedLand({})", this, flagPlayedLand);
 		this.propertyFlagPlayedLand.set(flagPlayedLand);
-	}
-
-	@Override
-	public void setLife(int life) {
-		LOGGER.debug("{} setLife({})", this, life);
-		this.propertyLife.set(life);
-		if (getLife() < 1) {
-			fireStateBasedAction(new StateBasedAction(this, StateBasedActionType.PLAYER_LIFE_ZERO));
-		}
 	}
 
 	@Override
@@ -547,27 +516,16 @@ public final class Player implements IsPlayer {
 		// .append("] l=[").append(getLife()).append("]]").toString();
 	}
 
-	/**
-	 * Prüft, ob mindestens noch eine Karte in der Bibliothek ist.
-	 *
-	 * @param player
-	 *            Der Spieler, für den geprüft wird.
-	 * @return true, wenn gezogen werden kann.
-	 */
-	private boolean checkCanDraw() {
-		return getZoneLibrary().getSize() >= 1;
-	}
-
 	private int getCombatDamage() {
 		return propertyCombatDamage().get();
 	}
 
-	private ZoneDefault<MagicCard> getZoneLibrary() {
-		return zoneLibrary;
+	private int getLife() {
+		return propertyLife.get();
 	}
 
 	private void setCombatDamage(int combatDamage) {
-		LOGGER.debug("{} setCombatDamage({})", this, combatDamage);
+		LOGGER.trace("{} setCombatDamage({})", this, combatDamage);
 		propertyCombatDamage().set(combatDamage);
 	}
 

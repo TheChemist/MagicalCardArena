@@ -11,7 +11,7 @@ import de.mca.model.interfaces.IsPlayer;
  */
 public interface IsInput {
 
-	public void buttonProgressClicked(boolean flagNeedPlayerInput);
+	// public void requestInput(boolean flagNeedPlayerInput);
 
 	public IsPlayer getPlayer();
 

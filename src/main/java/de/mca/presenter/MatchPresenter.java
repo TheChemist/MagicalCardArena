@@ -3,15 +3,19 @@ package de.mca.presenter;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.function.Consumer;
 
+import com.google.common.eventbus.EventBus;
+import com.google.common.eventbus.Subscribe;
 import com.google.inject.Inject;
 
 import de.mca.InputComputer;
 import de.mca.InputHuman;
 import de.mca.MagicParser;
 import de.mca.Main;
+import de.mca.PASelectCostMap;
 import de.mca.factories.FactoryMatch;
 import de.mca.factories.FactoryPlayer;
 import de.mca.io.FileManager;
@@ -23,6 +27,7 @@ import de.mca.model.Match;
 import de.mca.model.enums.ColorType;
 import de.mca.model.enums.PlayerType;
 import de.mca.model.enums.ZoneType;
+import de.mca.model.interfaces.IsManaMap;
 import de.mca.model.interfaces.IsPlayer;
 import de.mca.model.interfaces.IsStackable;
 import de.mca.model.interfaces.IsZone;
@@ -34,7 +39,10 @@ import javafx.collections.ListChangeListener;
 import javafx.collections.MapChangeListener;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.Label;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.Tab;
@@ -205,8 +213,10 @@ public class MatchPresenter extends AnimationTimer implements Initializable, IsS
 	@FXML
 	private Tab tabStack;
 
-	public MatchPresenter() {
+	@Inject
+	public MatchPresenter(EventBus eventBus) {
 		// TODO LOW Threading?
+		eventBus.register(this);
 		spriteListBattlefield = new ArrayList<>();
 		spriteListComputerGraveyard = new ArrayList<>();
 		spriteListComputerHand = new ArrayList<>();
@@ -214,6 +224,33 @@ public class MatchPresenter extends AnimationTimer implements Initializable, IsS
 		spriteListHumanGraveyard = new ArrayList<>();
 		spriteListHumanHand = new ArrayList<>();
 		spriteListStack = new ArrayList<>();
+	}
+
+	@Subscribe
+	public void examineInputRequests(PASelectCostMap paSelectCostMap) {
+		Alert alert = new Alert(AlertType.CONFIRMATION);
+		alert.setTitle("How do you want to pay?");
+		alert.setHeaderText(null);
+		alert.setContentText("Choose your option!");
+		alert.getButtonTypes().clear();
+
+		for (final IsManaMap costMap : paSelectCostMap.getMagicSpell().getListCostMaps()) {
+			ButtonType buttonType = new ButtonType(costMap.toString());
+			alert.getButtonTypes().add(buttonType);
+		}
+
+		Optional<ButtonType> result = alert.showAndWait();
+
+		for (int i = 0; i < alert.getButtonTypes().size(); i++) {
+			if (result.get() == alert.getButtonTypes().get(i)) {
+				System.out.println("User Input: " + paSelectCostMap.getMagicSpell().getListCostMaps().get(i));
+			}
+		}
+	}
+
+	@Subscribe
+	public void examineButtonChange(ProgressNameChange progressNameChange) {
+		buttonProgress.setText(progressNameChange.getName());
 	}
 
 	@Override
@@ -264,8 +301,8 @@ public class MatchPresenter extends AnimationTimer implements Initializable, IsS
 		paneCardZoom.getChildren().add(imageViewCardZoom);
 		tabCardZoom.setContent(paneCardZoom);
 
-		buttonProgress.setOnAction((actionEvent) -> {
-			inputHuman.buttonProgressClicked(getMatchActive().propertyFlagNeedPlayerInput().get());
+		buttonProgress.setOnAction(actionEvent -> {
+			inputHuman.progress();
 		});
 
 		// Center Pane

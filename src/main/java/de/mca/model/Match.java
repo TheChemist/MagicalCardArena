@@ -17,6 +17,7 @@ import de.mca.factories.FactoryZone;
 import de.mca.model.enums.ObjectType;
 import de.mca.model.enums.PlayerState;
 import de.mca.model.enums.PlayerType;
+import de.mca.model.enums.StepType;
 import de.mca.model.enums.ZoneType;
 import de.mca.model.interfaces.IsAttackTarget;
 import de.mca.model.interfaces.IsPlayer;
@@ -261,16 +262,14 @@ public final class Match {
 
 			// Spiele Hauptphasen
 			ruleEnforcer.processStateBasedActions();
-			if (getPlayerActive().getFlagPassedPriority() && getPlayerNonactive().getFlagPassedPriority()
-					&& !getZoneStack().isEmpty()) {
+			if (checkProcessStack()) {
 				// Spieler haben gepasst, aber es liegt etwas auf dem Stack.
 
 				ruleEnforcer.processStack();
-			} else if (!getPlayerActive().getFlagPassedPriority() || !getPlayerNonactive().getFlagPassedPriority()) {
+			} else if (checkContinueRound()) {
 				// Ein Spieler hat nicht noch gepasst.
 
 				determinePlayerPrioritised();
-				setFlagNeedPlayerInput(true);
 			} else {
 				// Spieler haben gespasst, es liegt nichts auf dem Stack.
 
@@ -316,17 +315,14 @@ public final class Match {
 
 				// Spiele Schritt
 				ruleEnforcer.processStateBasedActions();
-				if (getPlayerActive().getFlagPassedPriority() && getPlayerNonactive().getFlagPassedPriority()
-						&& !getZoneStack().isEmpty()) {
+				if (checkProcessStack()) {
 					// Spieler haben gepasst, aber es liegt etwas auf dem Stack.
 
 					ruleEnforcer.processStack();
-				} else if (!getPlayerActive().getFlagPassedPriority()
-						|| !getPlayerNonactive().getFlagPassedPriority()) {
+				} else if (checkContinueRound()) {
 					// Ein Spieler hat nicht noch gepasst.
 
 					determinePlayerPrioritised();
-					setFlagNeedPlayerInput(true);
 				} else {
 					// Spieler haben gespasst, es liegt nichts auf dem Stack.
 
@@ -352,6 +348,26 @@ public final class Match {
 
 		// Beende Match
 		matchEnd(getFlagMatchRunning());
+	}
+
+	private boolean checkContinueRound() {
+		final boolean playerActivePassed = getPlayerActive().getFlagPassedPriority();
+		final boolean playerNonactivePassed = getPlayerNonactive().getFlagPassedPriority();
+
+		LOGGER.debug("{} checkContinueRound() -> {}", this, !playerActivePassed || !playerNonactivePassed);
+
+		return !playerActivePassed || !playerNonactivePassed;
+	}
+
+	private boolean checkProcessStack() {
+		final boolean playerActivePassed = getPlayerActive().getFlagPassedPriority();
+		final boolean playerNonactivePassed = getPlayerNonactive().getFlagPassedPriority();
+		final boolean isStackEmpty = getZoneStack().isEmpty();
+
+		LOGGER.debug("{} checkProcessStack() -> {}", this,
+				playerActivePassed && playerNonactivePassed && !isStackEmpty);
+
+		return playerActivePassed && playerNonactivePassed && !isStackEmpty;
 	}
 
 	/**
@@ -466,6 +482,10 @@ public final class Match {
 		return result;
 	}
 
+	private IsPlayer getPlayerPrioritized() {
+		return propertyPlayerPrioritized().get();
+	}
+
 	private int getTurnNumber() {
 		return getCurrentTurn().propertyTurnNumber().get();
 	}
@@ -573,7 +593,11 @@ public final class Match {
 	private void setPlayerPrioritized(IsPlayer playerPrioritized) {
 		LOGGER.trace("{} setPlayerPrioritized({})", this, playerPrioritized);
 		propertyPlayerPrioritized().set(playerPrioritized);
-		playerPrioritized.setPlayerState(PlayerState.PRIORITIZED);
+
+		// Setze Input Flag.
+		setFlagNeedPlayerInput(true, "setPlayerPrioritized()");
+
+		getPlayerPrioritized().setPlayerState(PlayerState.PRIORITIZED);
 	}
 
 	/**
@@ -674,17 +698,6 @@ public final class Match {
 			getZoneExile().add(magicCard);
 			propertyExileSize().set(getZoneExile().getSize());
 		}
-	}
-
-	boolean checkCanPlayLandCard(IsPlayer p) {
-		// TODO HIGH In den RuleEnforcer verlegen.
-		final boolean isActivePlayer = isPlayerActive(p);
-		final boolean currentStepIsMain = getCurrentPhase().isMain();
-		final boolean stackEmpty = magicStack.isEmpty();
-		final boolean landFlag = !getPlayerActive().getFlagPlayedLand();
-		LOGGER.debug("{} checkCanPlayLandCard({}) = {}", this, p,
-				(isActivePlayer && currentStepIsMain && landFlag && stackEmpty));
-		return isActivePlayer && currentStepIsMain && landFlag && stackEmpty;
 	}
 
 	void declareBlocker(int attackIndex, MagicPermanent blocker) {
@@ -845,9 +858,20 @@ public final class Match {
 		this.propertyMatchRunning.set(flagIsMatchRunning);
 	}
 
-	void setFlagNeedPlayerInput(boolean flagNeedPlayerInput) {
-		LOGGER.debug("{} setFlagNeedPlayerInput() -> {}", this, flagNeedPlayerInput);
+	void setFlagNeedPlayerInput(boolean flagNeedPlayerInput, String caller) {
+		LOGGER.debug("{} setFlagNeedPlayerInput({}, {})", this, flagNeedPlayerInput, caller);
 		this.propertyNeedPlayerInput.set(flagNeedPlayerInput);
+
+		// TODO MID Besseren Ort finden
+		if (flagNeedPlayerInput) {
+			if (getCurrentStep().equals(StepType.DECLARE_ATTACKERS)) {
+				ruleEnforcer.checkInteractability(getPlayerActive());
+			} else if (getCurrentStep().equals(StepType.DECLARE_BLOCKERS)) {
+				ruleEnforcer.checkInteractability(getPlayerNonactive());
+			} else {
+				ruleEnforcer.checkInteractability(getPlayerPrioritized());
+			}
+		}
 	}
 
 	void skipStepCombatDamage() {

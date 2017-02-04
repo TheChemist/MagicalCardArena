@@ -5,7 +5,6 @@ import org.slf4j.LoggerFactory;
 
 import de.mca.model.MagicCard;
 import de.mca.model.MagicPermanent;
-import de.mca.model.enums.PlayerState;
 import de.mca.model.enums.ZoneType;
 import de.mca.model.interfaces.IsPlayer;
 
@@ -26,11 +25,8 @@ public class InputHuman implements IsInput {
 
 	}
 
-	@Override
-	public void buttonProgressClicked(boolean flagNeedPlayerInput) {
-		final PlayerState playerState = getPlayer().getPlayerState();
-
-		switch (playerState) {
+	public void progress() {
+		switch (getPlayer().getPlayerState()) {
 		case SELECTING_ATTACKER:
 			if (getPlayer().getFlagDeclaringAttackers()) {
 				// Spieler befindet sich im Auswahlmodus für Angreifer.
@@ -54,7 +50,7 @@ public class InputHuman implements IsInput {
 			}
 			break;
 		default:
-			LOGGER.debug("{} buttonProgressClicked({}) -> Pass priority!", this, flagNeedPlayerInput);
+			LOGGER.debug("{} progress() -> Pass priority!", this);
 			inputPassPriority();
 			break;
 		}

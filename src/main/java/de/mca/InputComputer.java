@@ -19,6 +19,18 @@ import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 
 /**
+ * TODO HIGH Überlegen, wann der Computer aktiviert werden und eine Handlung
+ * berechnen soll. Möglichkeit: Wann immer er a) priorisiert wird (playerState =
+ * PRIORITIZED) b) Angreifer auswählen kann (playerState = ATTACKING +
+ * flagDeclaringAttackers = true) c) Blocker auswählen kann (playerState =
+ * DEFENDING + flagDeclaringBlockers = true)
+ *
+ * Alte Überlegungen: Stattdessen sollte der Spieler immer dann zu einer
+ * Handlung bewogen werden, wenn das Match einen Input benötigt
+ * (flagNeedPlayerInput).
+ *
+ * Eine Kombination des PS und verschiedener Flags sollten ausreichen, um zu
+ * bestimmen, ob und welche Art von Input vom Spieler benötigt werden.
  *
  * @author Maximilian Werling
  *
@@ -35,39 +47,41 @@ public class InputComputer implements IsInput {
 	InputComputer() {
 	}
 
-	@Override
-	public void buttonProgressClicked(boolean flagNeedPlayerInput) {
-		final PlayerState playerState = getPlayer().getPlayerState();
-
-		switch (playerState) {
-		case ACTIVE:
-		case NONACTIVE:
-			LOGGER.trace("{} buttonProgressClicked({}) -> Nothing to do!", this, flagNeedPlayerInput);
-			break;
-		case SELECTING_ATTACKER:
-			if (getPlayer().getFlagDeclaringAttackers()) {
-				// Spieler befindet sich im Auswahlmodus für Angreifer.
-
-				inputEndDeclareAttackers();
-			}
-			break;
-		case DEFENDING:
-			if (getPlayer().getFlagDeclaringBlockers()) {
-				// Spieler befindet sich im Auswahlmodus für Verteidiger.
-
-				inputEndDeclareBlockers();
-			}
-			break;
-		case DISCARDING:
-			LOGGER.trace("{} buttonProgressClicked({}) -> Discard!", this, flagNeedPlayerInput);
-			inputDiscard(determineCardToDiscard(getPlayer().getZoneHand().getAll()));
-			break;
-		default:
-			LOGGER.trace("{} buttonProgressClicked({}) -> Pass priority!", this, flagNeedPlayerInput);
-			inputPassPriority();
-			break;
-		}
-	}
+	// @Override
+	// public void requestInput(boolean flagNeedPlayerInput) {
+	// final PlayerState playerState = getPlayer().getPlayerState();
+	// switch (playerState) {
+	// case ACTIVE:
+	// case NONACTIVE:
+	// LOGGER.trace("{} buttonProgressClicked({}) -> Nothing to do!", this,
+	// flagNeedPlayerInput);
+	// break;
+	// case SELECTING_ATTACKER:
+	// if (getPlayer().getFlagDeclaringAttackers()) {
+	// // Spieler befindet sich im Auswahlmodus für Angreifer.
+	//
+	// inputEndDeclareAttackers();
+	// }
+	// break;
+	// case DEFENDING:
+	// if (getPlayer().getFlagDeclaringBlockers()) {
+	// // Spieler befindet sich im Auswahlmodus für Verteidiger.
+	//
+	// inputEndDeclareBlockers();
+	// }
+	// break;
+	// case DISCARDING:
+	// LOGGER.trace("{} buttonProgressClicked({}) -> Discard!", this,
+	// flagNeedPlayerInput);
+	// inputDiscard(determineCardToDiscard(getPlayer().getZoneHand().getAll()));
+	// break;
+	// default:
+	// LOGGER.trace("{} buttonProgressClicked({}) -> Pass priority!", this,
+	// flagNeedPlayerInput);
+	// inputPassPriority();
+	// break;
+	// }
+	// }
 
 	public ActivatedAbility determineAbility(List<ActivatedAbility> listLegalAbilities) {
 		// TODO MID KI-Entscheidung
@@ -128,29 +142,61 @@ public class InputComputer implements IsInput {
 
 	public void setMatch(Match match) {
 		this.match = match;
-		/**
-		 * Stattdessen sollte der Spieler immer dann zu einer Handlung bewogen
-		 * werden, wenn das Match einen Input benötigt (flagNeedPlayerInput).
-		 *
-		 * Eine Kombination des PS und verschiedener Flags sollten ausreichen,
-		 * um zu bestimmen, ob und welche Art von Input vom Spieler benötigt
-		 * werden.
-		 */
-		this.match.propertyFlagNeedPlayerInput().addListener(new ChangeListener<Boolean>() {
-
-			@Override
-			public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
-				if (newValue) {
-					buttonProgressClicked(newValue);
-				}
-			}
-
-		});
+		// this.match.propertyFlagNeedPlayerInput().addListener(new
+		// ChangeListener<Boolean>() {
+		//
+		// @Override
+		// public void changed(ObservableValue<? extends Boolean> observable,
+		// Boolean oldValue, Boolean newValue) {
+		// if (newValue) {
+		// requestInput(newValue);
+		// }
+		// }
+		//
+		// });
 	}
 
 	@Override
 	public void setPlayer(IsPlayer player) {
 		this.player = player;
+		this.player.propertyPlayerState().addListener(new ChangeListener<PlayerState>() {
+
+			@Override
+			public void changed(ObservableValue<? extends PlayerState> observable, PlayerState oldValue,
+					PlayerState newValue) {
+				// TODO HIGH Reaktion des Computers abgefragen.
+				switch (newValue) {
+				case ACTIVE:
+				case NONACTIVE:
+					LOGGER.debug("{} changed({}) -> Nothing to do!", this, newValue);
+					break;
+				case SELECTING_ATTACKER:
+					if (getPlayer().getFlagDeclaringAttackers()) {
+						// Spieler befindet sich im Auswahlmodus für Angreifer.
+
+						inputEndDeclareAttackers();
+					}
+					break;
+				case DEFENDING:
+					if (getPlayer().getFlagDeclaringBlockers()) {
+						// Spieler befindet sich im Auswahlmodus für
+						// Verteidiger.
+
+						inputEndDeclareBlockers();
+					}
+					break;
+				case DISCARDING:
+					LOGGER.debug("{} changed({}) -> Discard!", this, newValue);
+					inputDiscard(determineCardToDiscard(getPlayer().getZoneHand().getAll()));
+					break;
+				default:
+					LOGGER.debug("{} changed({}) -> Pass priority!", this, newValue);
+					inputPassPriority();
+					break;
+				}
+			}
+
+		});
 	}
 
 	@Override
