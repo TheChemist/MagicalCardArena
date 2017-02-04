@@ -42,7 +42,7 @@ public class InputComputer implements IsInput {
 		switch (playerState) {
 		case ACTIVE:
 		case NONACTIVE:
-			LOGGER.debug("{} buttonProgressClicked({}) -> Nothing to do!", this, flagNeedPlayerInput);
+			LOGGER.trace("{} buttonProgressClicked({}) -> Nothing to do!", this, flagNeedPlayerInput);
 			break;
 		case SELECTING_ATTACKER:
 			if (getPlayer().getFlagDeclaringAttackers()) {
@@ -59,11 +59,11 @@ public class InputComputer implements IsInput {
 			}
 			break;
 		case DISCARDING:
-			LOGGER.debug("{} buttonProgressClicked({}) -> Discard!", this, flagNeedPlayerInput);
-			inputDiscard(determineCardToDiscard(getPlayer().getCardsHand()));
+			LOGGER.trace("{} buttonProgressClicked({}) -> Discard!", this, flagNeedPlayerInput);
+			inputDiscard(determineCardToDiscard(getPlayer().getZoneHand().getAll()));
 			break;
 		default:
-			LOGGER.debug("{} buttonProgressClicked({}) -> Pass priority!", this, flagNeedPlayerInput);
+			LOGGER.trace("{} buttonProgressClicked({}) -> Pass priority!", this, flagNeedPlayerInput);
 			inputPassPriority();
 			break;
 		}

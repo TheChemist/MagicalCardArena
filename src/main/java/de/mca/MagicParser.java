@@ -20,7 +20,6 @@ import de.mca.io.ResourceReadingException;
 import de.mca.model.ActivatedAbility;
 import de.mca.model.Deck;
 import de.mca.model.Effect;
-import de.mca.model.EffectProduceMana;
 import de.mca.model.MagicCard;
 import de.mca.model.ManaMapDefault;
 import de.mca.model.enums.AbilityType;
@@ -152,7 +151,7 @@ public class MagicParser {
 			card.setListCostMaps(FXCollections.observableArrayList(new ManaMapDefault()));
 		}
 
-		// parse Abilities
+		// parse abilities
 		if (elementAbilities != null) {
 			final ObservableList<ActivatedAbility> listAbilities = FXCollections.observableArrayList();
 			final JsonArray cardAbilities = elementAbilities.getAsJsonArray();
@@ -198,8 +197,7 @@ public class MagicParser {
 				tempMap.put(manaColor, howMuch);
 			}
 
-			final EffectProduceMana result = factoryEffect.create(source, new ManaMapDefault(tempMap));
-			return result;
+			return factoryEffect.create(source, new ManaMapDefault(tempMap));
 		}
 		return null;
 	}
@@ -215,8 +213,7 @@ public class MagicParser {
 		}
 		final JsonArray effectArray = abilityObject.get("effects").getAsJsonArray();
 
-		final ActivatedAbility result = abilityFactory.create(card, abilityType, additionalCostType, effectArray, listCostMaps);
-		return result;
+		return abilityFactory.create(card, abilityType, additionalCostType, effectArray, listCostMaps);
 	}
 
 }

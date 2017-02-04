@@ -112,8 +112,7 @@ public class ActivatedAbility implements IsStackable {
 
 	@Override
 	public String getDisplayName() {
-		// TODO MID Nachzutragende Methodenimplementierung
-		return null;
+		return abilityType.toString();
 	}
 
 	public JsonArray getEffectInformation() {

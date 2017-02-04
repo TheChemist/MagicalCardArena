@@ -23,6 +23,11 @@ import de.mca.model.enums.ZoneType;
 import de.mca.model.interfaces.IsPlayer;
 import de.mca.model.interfaces.IsZone;
 
+/**
+ *
+ * @author Maximilian Werling
+ *
+ */
 public class MainModule extends AbstractModule {
 
 	private final EventBus eventBus = new EventBus("Default EventBus");

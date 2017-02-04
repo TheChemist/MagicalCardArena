@@ -4,17 +4,17 @@ import java.util.List;
 
 import com.google.common.eventbus.EventBus;
 
-import de.mca.PAActivatePermanent;
 import de.mca.PACastSpell;
-import de.mca.PADeclareAttacker;
-import de.mca.PADeclareBlocker;
 import de.mca.PADiscard;
+import de.mca.PASelectCostMap;
+import de.mca.PASelectPermanent;
 import de.mca.PlayerAction;
 import de.mca.PlayerActionType;
 import de.mca.SAPlayLand;
 import de.mca.model.Deck;
 import de.mca.model.MagicCard;
 import de.mca.model.MagicPermanent;
+import de.mca.model.MagicSpell;
 import de.mca.model.ManaMapDefault;
 import de.mca.model.StateBasedAction;
 import de.mca.model.enums.ColorType;
@@ -30,8 +30,6 @@ import javafx.beans.property.ObjectProperty;
  *
  */
 public interface IsPlayer extends IsAttackTarget {
-
-	public void actionDraw();
 
 	public void addAllCards(List<MagicCard> cardList, ZoneType zoneType);
 
@@ -56,77 +54,124 @@ public interface IsPlayer extends IsAttackTarget {
 	public void addMana(ColorType color, int howMany);
 
 	/**
-	 * Liefert, ob der Spieler sich einen Spielertyp mit übergebenen Typ teilt.
+	 * Prüft, ob sich der Spieler einen Spielertyp mit einem übergebenem teilt.
 	 *
 	 * @param playerType
-	 *            ein Spielertyp, der zum Vergleich herangezogen wird.
+	 *            der Spielertyp.
 	 * @return true, wenn der Spielertyp des Spielers dem übergebenen
 	 *         Spielertyps entspricht.
 	 */
 	public boolean equals(PlayerType playerType);
 
+	/**
+	 * Wird durch Spielerinput ausgelöst und legt eine Spieleraktion auf den
+	 * Eventbus: Der Spieler hat ein Permanent aktiviert.
+	 *
+	 * @param magicPermanent
+	 *            das aktivierte Permanent.
+	 */
 	public default void fireActivatePermanent(MagicPermanent magicPermanent) {
-		getEventBus().post(new PAActivatePermanent(this, magicPermanent));
+		getEventBus().post(new PASelectPermanent(this, magicPermanent, PlayerActionType.ACTIVATE_PERMANENT));
 	}
 
+	/**
+	 * Wird durch Spielerinput ausgelöst und legt eine Spieleraktion auf den
+	 * Eventbus: Der Spieler beschwört einen Zauberspruch.
+	 *
+	 * @param magicCard
+	 *            der Zauberspruch.
+	 */
 	public default void fireCastSpell(MagicCard magicCard) {
 		getEventBus().post(new PACastSpell(this, magicCard));
 	}
 
 	/**
-	 * Lässt den Spieler das Spiel aufgeben. Der Spieler verliert dadurch das
-	 * Spiel (rule = 104.3a).
+	 * Wird durch Spielerinput ausgelöst und legt eine Spieleraktion auf den
+	 * Eventbus: Der Spieler gibt auf.
 	 */
 	public default void fireConcede() {
 		getEventBus().post(new PlayerAction(this, PlayerActionType.CONCEDE));
 	}
 
+	/**
+	 * Wird durch Spielerinput ausgelöst und legt eine Spieleraktion auf den
+	 * Eventbus: Der Spieler deklariert einen Angreifer.
+	 *
+	 * @param attacker
+	 *            der Angreifer.
+	 */
 	public default void fireDeclareAttacker(MagicPermanent magicPermanent) {
-		getEventBus().post(new PADeclareAttacker(this, magicPermanent, null));
+		getEventBus().post(new PASelectPermanent(this, magicPermanent, PlayerActionType.DECLARE_ATTACKER));
 	}
 
-	public default void fireDeclareBlocker(int attackerIndex, MagicPermanent blocker) {
-		getEventBus().post(new PADeclareBlocker(this, attackerIndex, blocker));
+	/**
+	 * Wird durch Spielerinput ausgelöst und legt eine Spieleraktion auf den
+	 * Eventbus: Der Spieler deklariert einen Blocker.
+	 *
+	 * @param blocker
+	 *            der Blocker.
+	 */
+	public default void fireDeclareBlocker(MagicPermanent blocker) {
+		getEventBus().post(new PASelectPermanent(this, blocker, PlayerActionType.DECLARE_BLOCKER));
 	}
 
+	/**
+	 * Wird durch Spielerinput ausgelöst und legt eine Spieleraktion auf den
+	 * Eventbus: Der Spieler wirft eine Karte ab.
+	 *
+	 * @param magicCard
+	 *            die abgeworfene Karte.
+	 */
 	public default void fireDiscard(MagicCard magicCard) {
 		getEventBus().post(new PADiscard(this, magicCard));
 	}
 
 	/**
-	 * Wird aufgerufen, wenn der Spieler alle Angreifer deklariert hat.
+	 * Wird durch Spielerinput ausgelöst und legt eine Spieleraktion auf den
+	 * Eventbus: Der Spieler hat möchte keine weiteren Angreifer deklarieren.
 	 */
 	public default void fireEndDeclareAttackers() {
 		getEventBus().post(new PlayerAction(this, PlayerActionType.END_DECLARE_ATTACKERS));
 	}
 
 	/**
-	 * Wird aufgerufen, wenn der Spieler alle Blocker deklariert hat.
+	 * Wird durch Spielerinput ausgelöst und legt eine Spieleraktion auf den
+	 * Eventbus: Der Spieler möchte keine weiteren Blocker deklarieren.
 	 */
 	public default void fireEndDeclareBlockers() {
 		getEventBus().post(new PlayerAction(this, PlayerActionType.END_DECLARE_BLOCKERS));
 	}
 
 	/**
-	 * Lässt den Spieler seine Priorität abgeben.
+	 * Wird durch Spielerinput ausgelöst und legt eine Spieleraktion auf den
+	 * Eventbus: Der Spieler gibt die Priorität ab.
 	 */
 	public default void firePassPriority() {
 		getEventBus().post(new PlayerAction(this, PlayerActionType.PASS_PRIORITY));
 	}
 
+	/**
+	 * Wird durch Spielerinput ausgelöst und legt eine Spieleraktion auf den
+	 * Eventbus: Der Spieler möchte ein Land spielen.
+	 *
+	 * @param magicCard
+	 *            das Land.
+	 */
 	public default void firePlayLand(MagicCard magicCard) {
 		getEventBus().post(new SAPlayLand(this, magicCard));
 	}
 
-	public default void fireSelectBlockTarget(MagicPermanent blockTarget) {
-		// TODO HIGH Neue PA benötigt.
+	public default void fireSelectCostMap(MagicSpell spell) {
+		getEventBus().post(new PASelectCostMap(this, spell));
 	}
 
+	/**
+	 * Wird durch Spielerinput ausgelöst und legt eine Spieleraktion auf den
+	 * Eventbus:
+	 */
 	public default void fireStateBasedAction(StateBasedAction sba) {
 		getEventBus().post(sba);
 	}
-
-	public List<MagicCard> getCardsHand();
 
 	public String getDisplayName();
 
@@ -150,8 +195,6 @@ public interface IsPlayer extends IsAttackTarget {
 
 	public boolean getFlagPlayedLand();
 
-	public List<MagicCard> getLibraryCards();
-
 	public IsManaMap getManaCostAlreadyPaid();
 
 	public IsManaMap getManaCostGoal();
@@ -166,36 +209,38 @@ public interface IsPlayer extends IsAttackTarget {
 
 	public IsZone<MagicCard> getZoneHand();
 
+	public IsZone<MagicCard> getZoneLibrary();
+
 	/**
-	 * Liefert, ob der Spieler gerade eine Fähigkeit aktiviert.
+	 * Prüft, ob der Spieler gerade eine Fähigkeit aktiviert.
 	 *
 	 * @return true, wenn der Spieler eine Fähigkeit aktiviert.
 	 */
 	public boolean isActivatingAbility();
 
 	/**
-	 * Liefert, ob der Spieler der aktive Spieler ist.
+	 * Prüft, ob der Spieler der aktive Spieler ist.
 	 *
 	 * @return true, wenn der Spieler der aktive Spieler ist.
 	 */
 	public boolean isActive();
 
 	/**
-	 * Liefert, ob der Spieler gerade der angreifende Spieler ist.
+	 * Prüft, ob der Spieler gerade der angreifende Spieler ist.
 	 *
 	 * @return true, wenn der Spieler der angreifende Spieler ist.
 	 */
 	public boolean isAttacking();
 
 	/**
-	 * Liefert, ob der Spieler gerade einen Zauberspruch beschwört.
+	 * Prüft, ob der Spieler gerade einen Zauberspruch beschwört.
 	 *
 	 * @return true, wenn der Spieler einen Zauberspruch beschwört.
 	 */
 	public boolean isCastingSpell();
 
 	/**
-	 * Liefert, ob der Spieler gerade der verteidigende Spieler ist.
+	 * Prüft, ob der Spieler gerade der verteidigende Spieler ist.
 	 *
 	 * @return true, wenn der Spieler der verteidigende Spieler ist.
 	 */
@@ -204,28 +249,28 @@ public interface IsPlayer extends IsAttackTarget {
 	public boolean isDiscarding();
 
 	/**
-	 * Liefert, ob der Spieler der nichtaktive Spieler ist.
+	 * Prüft, ob der Spieler der nichtaktive Spieler ist.
 	 *
 	 * @return true, wenn der Spieler der nichtaktive Spieler ist.
 	 */
 	public boolean isNonactive();
 
 	/**
-	 * Liefert, ob der Spieler gerade bezahlt.
+	 * Prüft, ob der Spieler gerade bezahlt.
 	 *
 	 * @return true, wenn der Spieler bezahlt.
 	 */
 	public boolean isPaying();
 
 	/**
-	 * Liefert, ob der Spieler priorisiert ist.
+	 * Prüft, ob der Spieler priorisiert ist.
 	 *
 	 * @return true, wenn der Spieler priorisiert ist.
 	 */
 	public boolean isPrioritised();
 
 	/**
-	 * Liefert, ob der Spieler gerade eine Spezialaktion ausführt.
+	 * Prüft, ob der Spieler gerade eine Spezialaktion ausführt.
 	 *
 	 * @return true, wenn der Spieler eine Spezialaktion ausführt.
 	 */
@@ -286,9 +331,5 @@ public interface IsPlayer extends IsAttackTarget {
 	public void setManaCostGoal(IsManaMap manaCostGoal);
 
 	public void setPlayerState(PlayerState ps);
-
-	int getLife();
-
-	void setLife(int life);
 
 }
