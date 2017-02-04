@@ -1,7 +1,9 @@
 package de.mca.model;
 
+import java.util.List;
 import java.util.Set;
 
+import de.mca.factories.IsInteractable;
 import de.mca.model.enums.ColorType;
 import de.mca.model.enums.ObjectType;
 import de.mca.model.enums.PlayerType;
@@ -30,7 +32,7 @@ import javafx.collections.ObservableSet;
  * @author Maximilian Werling
  *
  */
-public class MagicCard implements IsObject {
+public class MagicCard implements IsObject, IsInteractable {
 
 	/**
 	 * Höhe eines Kartenscans. Angegeben in Double, um das Seitenverhältnis
@@ -50,6 +52,11 @@ public class MagicCard implements IsObject {
 	 * Speichert den Filenamen der Karte (inklusive der Dateiendung).
 	 */
 	private String fileName;
+	/**
+	 * Zeigt an, ob mit der Objekt, in gegebenem Kontext, interagiert werden
+	 * kann.
+	 */
+	private boolean flagIsInteractable;
 	/**
 	 * Speichert die eindeutige Identifikationsnummer des Objekts. Wird beim
 	 * erstellen der Karten vergeben. Üblicherweise von 0 bis
@@ -266,6 +273,11 @@ public class MagicCard implements IsObject {
 	}
 
 	@Override
+	public boolean getFlagIsInteractable() {
+		return flagIsInteractable;
+	}
+
+	@Override
 	public int getHandModifier() {
 		// TODO LOW Bisher keine Verwendung
 		return 0;
@@ -274,6 +286,10 @@ public class MagicCard implements IsObject {
 	@Override
 	public int getId() {
 		return id;
+	}
+
+	public List<IsManaMap> getListCostMaps() {
+		return propertyListCostMaps.get();
 	}
 
 	@Override
@@ -464,6 +480,11 @@ public class MagicCard implements IsObject {
 
 	public void setFileName(String fileName) {
 		this.fileName = fileName;
+	}
+
+	@Override
+	public void setFlagIsInteractable(boolean flagIsInteractable) {
+		this.flagIsInteractable = flagIsInteractable;
 	}
 
 	public void setListCharacteristicAbilities(ObservableList<ActivatedAbility> listAbilities) {

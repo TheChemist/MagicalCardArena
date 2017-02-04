@@ -4,6 +4,7 @@ import de.mca.io.FileManager;
 import de.mca.model.MagicPermanent;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.image.Image;
+import javafx.scene.paint.Color;
 import javafx.scene.transform.Rotate;
 
 class SpriteMagicPermanent extends Sprite {
@@ -89,6 +90,11 @@ class SpriteMagicPermanent extends Sprite {
 			gc.restore();
 		} else {
 			gc.drawImage(getImage(), getX(), getY(), getWidth(), getHeight());
+		}
+
+		if(getMagicPermanent().getFlagIsInteractable()) {
+			gc.setStroke(Color.GREEN);
+			gc.strokeRect(getX(), getY(), getWidth(), getHeight());
 		}
 	}
 

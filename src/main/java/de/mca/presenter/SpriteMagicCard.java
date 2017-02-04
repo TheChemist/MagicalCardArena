@@ -4,9 +4,10 @@ import de.mca.io.FileManager;
 import de.mca.model.MagicCard;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.image.Image;
+import javafx.scene.paint.Color;
 
 /**
- * 
+ *
  * @author Maximilian Werling
  *
  */
@@ -61,6 +62,11 @@ class SpriteMagicCard extends Sprite {
 	@Override
 	public void render(GraphicsContext gc) {
 		gc.drawImage(getImage(), getX(), getY(), getWidth(), getHeight());
+
+		if (getMagicObject().getFlagIsInteractable()) {
+			gc.setStroke(Color.GREEN);
+			gc.strokeRect(getX(), getY(), getWidth(), getHeight());
+		}
 	}
 
 	@Override
