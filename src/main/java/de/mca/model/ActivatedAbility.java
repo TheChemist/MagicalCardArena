@@ -1,6 +1,7 @@
 package de.mca.model;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import com.google.common.eventbus.EventBus;
 import com.google.gson.JsonArray;
@@ -23,6 +24,7 @@ import javafx.collections.ObservableList;
 
 /**
  * Bildet eine Ability im Sinne von Regel 112.1a im offiziellen Regebuch ab.
+ * TODO MID Bisher gibt es nur aktivierte Fähigkeiten.
  *
  * @author Maximilian Werling
  *
@@ -125,6 +127,10 @@ public class ActivatedAbility implements IsStackable {
 		return 0;
 	}
 
+	public List<Effect> getListEffects() {
+		return propertyListEffects().get();
+	}
+
 	public MagicParser getMagicParser() {
 		return magicParser;
 	}
@@ -154,10 +160,6 @@ public class ActivatedAbility implements IsStackable {
 	}
 
 	public ListProperty<Effect> propertyListEffects() {
-		return propertyListEffects;
-	}
-
-	public ObservableList<Effect> propertyListMagicEffects() {
 		return propertyListEffects;
 	}
 

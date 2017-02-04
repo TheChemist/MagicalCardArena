@@ -288,14 +288,18 @@ public class MagicCard implements IsObject, IsInteractable {
 		return id;
 	}
 
-	public List<IsManaMap> getListCostMaps() {
-		return propertyListCostMaps.get();
-	}
-
 	@Override
 	public int getLifeModifier() {
 		// TODO LOW Bisher keine Verwendung
 		return 0;
+	}
+
+	public List<ActivatedAbility> getListAbilities() {
+		return propertyListAbilities().get();
+	}
+
+	public List<IsManaMap> getListCostMaps() {
+		return propertyListCostMaps().get();
 	}
 
 	@Override
@@ -402,7 +406,7 @@ public class MagicCard implements IsObject, IsInteractable {
 	}
 
 	@Override
-	public ObservableList<ActivatedAbility> propertyListAbilities() {
+	public ListProperty<ActivatedAbility> propertyListAbilities() {
 		return propertyListAbilities;
 	}
 

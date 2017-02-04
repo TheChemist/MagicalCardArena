@@ -227,6 +227,11 @@ public class MatchPresenter extends AnimationTimer implements Initializable, IsS
 	}
 
 	@Subscribe
+	public void examineButtonChange(ProgressNameChange progressNameChange) {
+		buttonProgress.setText(progressNameChange.getName());
+	}
+
+	@Subscribe
 	public void examineInputRequests(PASelectCostMap paSelectCostMap) {
 		Alert alert = new Alert(AlertType.CONFIRMATION);
 		alert.setTitle("How do you want to pay?");
@@ -246,11 +251,6 @@ public class MatchPresenter extends AnimationTimer implements Initializable, IsS
 				System.out.println("User Input: " + paSelectCostMap.getMagicSpell().getListCostMaps().get(i));
 			}
 		}
-	}
-
-	@Subscribe
-	public void examineButtonChange(ProgressNameChange progressNameChange) {
-		buttonProgress.setText(progressNameChange.getName());
 	}
 
 	@Override

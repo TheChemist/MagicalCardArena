@@ -17,6 +17,8 @@ public interface IsManaMap {
 
 	public void addAll(IsManaMap manaMap);
 
+	public boolean contains(IsManaMap costMap);
+
 	public boolean containsKey(ColorType color);
 
 	public boolean equals(IsManaMap manaMap);

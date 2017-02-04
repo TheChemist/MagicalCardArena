@@ -25,37 +25,6 @@ public class InputHuman implements IsInput {
 
 	}
 
-	public void progress() {
-		switch (getPlayer().getPlayerState()) {
-		case SELECTING_ATTACKER:
-			if (getPlayer().getFlagDeclaringAttackers()) {
-				// Spieler befindet sich im Auswahlmodus für Angreifer.
-
-				inputEndDeclareAttackers();
-			} else {
-				// Spieler befindet sich in Prioritätsphase.
-
-				inputPassPriority();
-			}
-			break;
-		case DEFENDING:
-			if (getPlayer().getFlagDeclaringBlockers()) {
-				// Spieler befindet sich im Auswahlmodus für Verteidiger.
-
-				inputEndDeclareBlockers();
-			} else {
-				// Spieler befindet sich in Prioritätsphase.
-
-				inputPassPriority();
-			}
-			break;
-		default:
-			LOGGER.debug("{} progress() -> Pass priority!", this);
-			inputPassPriority();
-			break;
-		}
-	}
-
 	@Override
 	public IsPlayer getPlayer() {
 		return player;
@@ -86,6 +55,37 @@ public class InputHuman implements IsInput {
 
 				getPlayer().fireActivatePermanent(magicPermanent);
 			}
+		}
+	}
+
+	public void progress() {
+		switch (getPlayer().getPlayerState()) {
+		case SELECTING_ATTACKER:
+			if (getPlayer().getFlagDeclaringAttackers()) {
+				// Spieler befindet sich im Auswahlmodus für Angreifer.
+
+				inputEndDeclareAttackers();
+			} else {
+				// Spieler befindet sich in Prioritätsphase.
+
+				inputPassPriority();
+			}
+			break;
+		case DEFENDING:
+			if (getPlayer().getFlagDeclaringBlockers()) {
+				// Spieler befindet sich im Auswahlmodus für Verteidiger.
+
+				inputEndDeclareBlockers();
+			} else {
+				// Spieler befindet sich in Prioritätsphase.
+
+				inputPassPriority();
+			}
+			break;
+		default:
+			LOGGER.debug("{} progress() -> Pass priority!", this);
+			inputPassPriority();
+			break;
 		}
 	}
 

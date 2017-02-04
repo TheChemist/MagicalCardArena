@@ -9,7 +9,9 @@ import java.util.List;
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
 
+import de.mca.model.enums.AbilityType;
 import de.mca.model.enums.ColorType;
+import de.mca.model.enums.EffectType;
 import de.mca.model.enums.ObjectType;
 import de.mca.model.enums.PlayerType;
 import de.mca.model.enums.SubType;
@@ -73,11 +75,41 @@ public final class ZoneDefault<E extends MagicCard> implements IsZone<E> {
 	}
 
 	@Override
+	public List<E> getAll(AbilityType abilityType) {
+		final List<E> result = new ArrayList<>();
+		for (final E card : cardList) {
+			final List<ActivatedAbility> listAbilities = card.getListAbilities();
+			for (final ActivatedAbility ability : listAbilities) {
+				if (ability.getAbilityType().equals(abilityType)) {
+					result.add(card);
+				}
+			}
+		}
+		return result;
+	}
+
+	@Override
 	public List<E> getAll(ColorType color) {
 		final List<E> result = new ArrayList<>();
 		for (final E card : cardList) {
 			if (card.contains(color)) {
 				result.add(card);
+			}
+		}
+		return result;
+	}
+
+	public List<E> getAll(EffectType effectType) {
+		final List<E> result = new ArrayList<>();
+		for (final E card : cardList) {
+			final List<ActivatedAbility> listAbilities = card.getListAbilities();
+			for (final ActivatedAbility ability : listAbilities) {
+				final List<Effect> listEffects = ability.getListEffects();
+				for (final Effect effect : listEffects) {
+					if (effect.getEffectType().equals(effectType)) {
+						result.add(card);
+					}
+				}
 			}
 		}
 		return result;

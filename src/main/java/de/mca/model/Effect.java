@@ -24,7 +24,7 @@ public abstract class Effect extends EventObject {
 		this.magicEffectType = magicEffectType;
 	}
 
-	public EffectType getMagicEffectType() {
+	public EffectType getEffectType() {
 		return magicEffectType;
 	}
 

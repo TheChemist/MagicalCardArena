@@ -359,17 +359,6 @@ public final class Match {
 		return !playerActivePassed || !playerNonactivePassed;
 	}
 
-	private boolean checkProcessStack() {
-		final boolean playerActivePassed = getPlayerActive().getFlagPassedPriority();
-		final boolean playerNonactivePassed = getPlayerNonactive().getFlagPassedPriority();
-		final boolean isStackEmpty = getZoneStack().isEmpty();
-
-		LOGGER.debug("{} checkProcessStack() -> {}", this,
-				playerActivePassed && playerNonactivePassed && !isStackEmpty);
-
-		return playerActivePassed && playerNonactivePassed && !isStackEmpty;
-	}
-
 	/**
 	 * Prüft, ob im aktuellen Spielschritt die Priorität an die Spieler erteilt
 	 * wird.
@@ -379,6 +368,17 @@ public final class Match {
 	 */
 	private boolean checkPlayersGetPriority() {
 		return getCurrentStep().getFlagPlayersGetPriority();
+	}
+
+	private boolean checkProcessStack() {
+		final boolean playerActivePassed = getPlayerActive().getFlagPassedPriority();
+		final boolean playerNonactivePassed = getPlayerNonactive().getFlagPassedPriority();
+		final boolean isStackEmpty = getZoneStack().isEmpty();
+
+		LOGGER.debug("{} checkProcessStack() -> {}", this,
+				playerActivePassed && playerNonactivePassed && !isStackEmpty);
+
+		return playerActivePassed && playerNonactivePassed && !isStackEmpty;
 	}
 
 	/**
@@ -734,10 +734,6 @@ public final class Match {
 		}
 
 		LOGGER.debug("{} determinePlayerPrioritised() -> Beide Spieler haben schon gepasst", this);
-	}
-
-	List<MagicPermanent> getCardsBattlefield() {
-		return zoneBattlefield.getAll();
 	}
 
 	Phase getCurrentPhase() {

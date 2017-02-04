@@ -45,7 +45,19 @@ public class ManaMapDefault implements IsManaMap {
 
 	@Override
 	public void addAll(IsManaMap manaMap) {
-		manaMap.getKeySet().forEach(key -> add(key, manaMap.get(key)));
+		manaMap.getKeySet().forEach(key -> add(key, get(key) + manaMap.get(key)));
+	}
+
+	@Override
+	public boolean contains(IsManaMap costMap) {
+		// TODO MID Benötigt intensives Testen, sollten sich fehler zeigen.
+		final IsManaMap difference = getDifference(costMap);
+
+		if (difference.getTotalMana() < 0 && !hasNegativeTrueColor(difference)) {
+			return true;
+		} else {
+			return false;
+		}
 	}
 
 	@Override
@@ -66,9 +78,17 @@ public class ManaMapDefault implements IsManaMap {
 	@Override
 	public IsManaMap getDifference(IsManaMap manaMap) {
 		final IsManaMap result = new ManaMapDefault();
-		for (final ColorType key : getKeySet()) {
-			result.add(key, get(key) - manaMap.get(key));
-		}
+
+		/**
+		 * In dieser Art der Berechnung können sich negative Manawerte ergeben.
+		 */
+		result.add(ColorType.BLACK, manaMap.get(ColorType.BLACK) - get(ColorType.BLACK));
+		result.add(ColorType.BLUE, manaMap.get(ColorType.BLUE) - get(ColorType.BLUE));
+		result.add(ColorType.GREEN, manaMap.get(ColorType.GREEN) - get(ColorType.GREEN));
+		result.add(ColorType.NONE, manaMap.get(ColorType.NONE) - get(ColorType.NONE));
+		result.add(ColorType.RED, manaMap.get(ColorType.RED) - get(ColorType.RED));
+		result.add(ColorType.WHITE, manaMap.get(ColorType.WHITE) - get(ColorType.WHITE));
+
 		return result;
 	}
 
@@ -157,6 +177,25 @@ public class ManaMapDefault implements IsManaMap {
 			index++;
 		}
 		return bldr.append("]").toString();
+	}
+
+	/**
+	 * Prüft, ob in einer ManaMap negative Werte bei den echten Farben
+	 * auftauchen.
+	 *
+	 * @param difference
+	 *            die Differenz aus zwei ManaMaps. Nur so können negative Werte
+	 *            zustande kommen.
+	 * @return true, wenn ein negativer Wert bei einer echten Farbe entdeckt
+	 *         wurde.
+	 */
+	private boolean hasNegativeTrueColor(IsManaMap difference) {
+		for (final ColorType key : getKeySet()) {
+			if (key.isTrueColor() && get(key) < 0) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	private MapProperty<ColorType, Integer> propertyMapMana() {

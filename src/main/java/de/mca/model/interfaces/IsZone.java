@@ -2,7 +2,9 @@ package de.mca.model.interfaces;
 
 import java.util.List;
 
+import de.mca.model.enums.AbilityType;
 import de.mca.model.enums.ColorType;
+import de.mca.model.enums.EffectType;
 import de.mca.model.enums.ObjectType;
 import de.mca.model.enums.PlayerType;
 import de.mca.model.enums.SubType;
@@ -43,6 +45,17 @@ public interface IsZone<T> {
 	public List<T> getAll();
 
 	/**
+	 * Liefert eine Liste mit allen Karten, die Fähigkeiten eines bestimmten
+	 * Typs besitzen.
+	 *
+	 * @param abilityType
+	 *            der Fähigkeitstyp.
+	 * @return eine Liste mit allen Karten, die Fähigkeiten eines bestimmten
+	 *         Typs besitzen.
+	 */
+	public List<T> getAll(AbilityType abilityType);
+
+	/**
 	 * Liefert eine Liste mit allen Karten einer bestimmten Farbe der Zone.
 	 *
 	 * @param color
@@ -50,6 +63,17 @@ public interface IsZone<T> {
 	 * @return eine Liste mit allen Karten einer bestimmten Farbe der Zone.
 	 */
 	public List<T> getAll(ColorType color);
+
+	/**
+	 * Liefert eine Liste mit allen Karten, die Fähigkeiten haben, die einen
+	 * speziellen Effekt auslösen.
+	 *
+	 * @param effectType
+	 *            der EffektTyp.
+	 * @return eine Liste mit allen Karten, die Fähigkeiten haben, die einen
+	 *         speziellen Effekt auslösen.
+	 */
+	public List<T> getAll(EffectType effectType);
 
 	/**
 	 * Liefert eine Liste mit allen Karten einer bestimmten Menge umgewandelten
