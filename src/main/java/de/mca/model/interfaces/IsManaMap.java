@@ -53,7 +53,7 @@ public interface IsManaMap {
 
 	public void manaRemove(ColorType color);
 
-	public MapProperty<ColorType, Integer> propertyManaMap();
+	public MapProperty<ColorType, Integer> propertyMapMana();
 
 	public void remove(ColorType color, int howMuch);
 

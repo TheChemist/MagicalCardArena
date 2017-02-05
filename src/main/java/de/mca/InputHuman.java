@@ -5,8 +5,12 @@ import org.slf4j.LoggerFactory;
 
 import de.mca.model.MagicCard;
 import de.mca.model.MagicPermanent;
+import de.mca.model.enums.PlayerState;
 import de.mca.model.enums.ZoneType;
 import de.mca.model.interfaces.IsPlayer;
+import de.mca.presenter.MatchPresenter;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 
 /**
  *
@@ -19,7 +23,14 @@ public class InputHuman implements IsInput {
 	 * Speichert den Logger.
 	 */
 	private final static Logger LOGGER = LoggerFactory.getLogger("Input");
+	/**
+	 * Speichert den Spieler.
+	 */
 	private IsPlayer player;
+	/**
+	 * Speichert den MatchPresenter
+	 */
+	private MatchPresenter matchPresenter;
 
 	InputHuman() {
 
@@ -83,7 +94,7 @@ public class InputHuman implements IsInput {
 			}
 			break;
 		default:
-			LOGGER.debug("{} progress() -> Pass priority!", this);
+			LOGGER.trace("{} progress() -> Pass priority!", this);
 			inputPassPriority();
 			break;
 		}
@@ -92,6 +103,33 @@ public class InputHuman implements IsInput {
 	@Override
 	public void setPlayer(IsPlayer player) {
 		this.player = player;
+		this.player.propertyPlayerState().addListener(new ChangeListener<PlayerState>() {
+
+			@Override
+			public void changed(ObservableValue<? extends PlayerState> observable, PlayerState oldValue,
+					PlayerState newValue) {
+				switch (newValue) {
+				case SELECTING_ATTACKER:
+					if (getPlayer().getFlagDeclaringAttackers()) {
+						// Auswahlmodus für Angreifer.
+						matchPresenter.getMatchActive().getRuleEnforcer().checkInteractable(getPlayer());
+					}
+					break;
+				case DEFENDING:
+					if (getPlayer().getFlagDeclaringBlockers()) {
+						// Auswahlmodus für Blocker.
+						matchPresenter.getMatchActive().getRuleEnforcer().checkInteractable(getPlayer());
+					}
+					break;
+				case PRIORITIZED:
+					matchPresenter.getMatchActive().getRuleEnforcer().checkInteractable(getPlayer());
+					break;
+				default:
+					break;
+				}
+			}
+
+		});
 	}
 
 	@Override
@@ -100,5 +138,10 @@ public class InputHuman implements IsInput {
 			return "Noch kein Spieler gesetzt.";
 		}
 		return getPlayer().toString();
+	}
+
+	@Override
+	public void setParent(MatchPresenter matchPresenter) {
+		this.matchPresenter = matchPresenter;
 	}
 }

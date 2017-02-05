@@ -124,32 +124,11 @@ public interface IsZone<T> {
 	public List<T> getAll(SuperType superType);
 
 	/**
-	 * Liefert eine Liste mit allen Artefaktkarten der Zone.
-	 *
-	 * @return eine Liste mit allen Artefaktkarten der Zone.
-	 */
-	public List<T> getArtifacts();
-
-	/**
 	 * Liefert die unterste Karte der Zone (index = 0).
 	 *
 	 * @return die unterste Karte der Zone.
 	 */
 	public T getBottom();
-
-	/**
-	 * Liefert eine Liste mit allen Monsterkarten der Zone.
-	 *
-	 * @return eine Liste mit allen Monsterkarten der Zone.
-	 */
-	public List<? extends T> getCreatures();
-
-	/**
-	 * Liefert eine Liste mit allen Länderkarten der Zone.
-	 *
-	 * @return eine Liste mit allen Länderkarten der Zone.
-	 */
-	public List<? extends T> getLands();
 
 	/**
 	 * Liefert den Spielertyp des Spielers, mit dem die Zone assoziert ist.

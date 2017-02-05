@@ -3,6 +3,7 @@ package de.mca;
 import de.mca.model.MagicCard;
 import de.mca.model.MagicPermanent;
 import de.mca.model.interfaces.IsPlayer;
+import de.mca.presenter.MatchPresenter;
 
 /**
  *
@@ -11,7 +12,7 @@ import de.mca.model.interfaces.IsPlayer;
  */
 public interface IsInput {
 
-	// public void requestInput(boolean flagNeedPlayerInput);
+	public void setParent(MatchPresenter matchPresenter);
 
 	public IsPlayer getPlayer();
 
@@ -22,7 +23,7 @@ public interface IsInput {
 	 * @param magicPermanent
 	 *            das aktivierte Permanent.
 	 */
-	public default void inputActivatedPermanent(MagicPermanent magicPermanent) {
+	public default void inputActivatePermanent(MagicPermanent magicPermanent) {
 		getPlayer().fireActivatePermanent(magicPermanent);
 	}
 

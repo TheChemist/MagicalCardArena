@@ -262,4 +262,8 @@ public class MagicPermanent extends MagicCard {
 		return eventBus;
 	}
 
+	public boolean isActivatable() {
+		return !getListAbilities().isEmpty();
+	}
+
 }

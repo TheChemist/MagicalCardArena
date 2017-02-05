@@ -3,6 +3,9 @@ package de.mca.model;
 import java.util.List;
 import java.util.Set;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import de.mca.factories.IsInteractable;
 import de.mca.model.enums.ColorType;
 import de.mca.model.enums.ObjectType;
@@ -34,6 +37,10 @@ import javafx.collections.ObservableSet;
  */
 public class MagicCard implements IsObject, IsInteractable {
 
+	/**
+	 * Speichert den Logger.
+	 */
+	private final static Logger LOGGER = LoggerFactory.getLogger("MagicCard");
 	/**
 	 * Höhe eines Kartenscans. Angegeben in Double, um das Seitenverhältnis
 	 * exakt errechnen zu können.
@@ -385,6 +392,10 @@ public class MagicCard implements IsObject, IsInteractable {
 		return isArtifact() || isCreature() || isEnchantment() || isLand() || isPlaneswalker();
 	}
 
+	public boolean isPermanentSpell() {
+		return isArtifact() || isCreature() || isEnchantment() || isPlaneswalker();
+	}
+
 	public boolean isPlaneswalker() {
 		return propertySetObjectTypes().contains(ObjectType.PLANESWALKER);
 	}
@@ -488,6 +499,7 @@ public class MagicCard implements IsObject, IsInteractable {
 
 	@Override
 	public void setFlagIsInteractable(boolean flagIsInteractable) {
+		LOGGER.trace("{} setFlagIsInteractable({})", this, flagIsInteractable);
 		this.flagIsInteractable = flagIsInteractable;
 	}
 
@@ -555,7 +567,7 @@ public class MagicCard implements IsObject, IsInteractable {
 	@Override
 	public String toString() {
 		return new StringBuilder("[").append(displayName).append(" id=[").append(id).append("] z=[")
-				.append(getCurrentZone()).append("] cm=[").append(propertyListCostMaps.size()).append("]]").toString();
+				.append(getCurrentZone()).append("] cm=[").append(getConvertedManaCost()).append("]]").toString();
 	}
 
 }

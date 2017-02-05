@@ -10,27 +10,16 @@ import de.mca.model.ActivatedAbility;
 import de.mca.model.Attack;
 import de.mca.model.MagicCard;
 import de.mca.model.MagicPermanent;
-import de.mca.model.Match;
+import de.mca.model.enums.ObjectType;
 import de.mca.model.enums.PlayerState;
 import de.mca.model.interfaces.IsAttackTarget;
 import de.mca.model.interfaces.IsManaMap;
 import de.mca.model.interfaces.IsPlayer;
+import de.mca.presenter.MatchPresenter;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 
 /**
- * TODO HIGH Überlegen, wann der Computer aktiviert werden und eine Handlung
- * berechnen soll. Möglichkeit: Wann immer er a) priorisiert wird (playerState =
- * PRIORITIZED) b) Angreifer auswählen kann (playerState = ATTACKING +
- * flagDeclaringAttackers = true) c) Blocker auswählen kann (playerState =
- * DEFENDING + flagDeclaringBlockers = true)
- *
- * Alte Überlegungen: Stattdessen sollte der Spieler immer dann zu einer
- * Handlung bewogen werden, wenn das Match einen Input benötigt
- * (flagNeedPlayerInput).
- *
- * Eine Kombination des PS und verschiedener Flags sollten ausreichen, um zu
- * bestimmen, ob und welche Art von Input vom Spieler benötigt werden.
  *
  * @author Maximilian Werling
  *
@@ -41,47 +30,17 @@ public class InputComputer implements IsInput {
 	 * Speichert den Logger.
 	 */
 	private final static Logger LOGGER = LoggerFactory.getLogger("Input");
-	private Match match;
+	/**
+	 * Speichert den MatchPresenter.
+	 */
+	private MatchPresenter matchPresenter;
+	/**
+	 * Speichert den Spieler.
+	 */
 	private IsPlayer player;
 
 	InputComputer() {
 	}
-
-	// @Override
-	// public void requestInput(boolean flagNeedPlayerInput) {
-	// final PlayerState playerState = getPlayer().getPlayerState();
-	// switch (playerState) {
-	// case ACTIVE:
-	// case NONACTIVE:
-	// LOGGER.trace("{} buttonProgressClicked({}) -> Nothing to do!", this,
-	// flagNeedPlayerInput);
-	// break;
-	// case SELECTING_ATTACKER:
-	// if (getPlayer().getFlagDeclaringAttackers()) {
-	// // Spieler befindet sich im Auswahlmodus für Angreifer.
-	//
-	// inputEndDeclareAttackers();
-	// }
-	// break;
-	// case DEFENDING:
-	// if (getPlayer().getFlagDeclaringBlockers()) {
-	// // Spieler befindet sich im Auswahlmodus für Verteidiger.
-	//
-	// inputEndDeclareBlockers();
-	// }
-	// break;
-	// case DISCARDING:
-	// LOGGER.trace("{} buttonProgressClicked({}) -> Discard!", this,
-	// flagNeedPlayerInput);
-	// inputDiscard(determineCardToDiscard(getPlayer().getZoneHand().getAll()));
-	// break;
-	// default:
-	// LOGGER.trace("{} buttonProgressClicked({}) -> Pass priority!", this,
-	// flagNeedPlayerInput);
-	// inputPassPriority();
-	// break;
-	// }
-	// }
 
 	public ActivatedAbility determineAbility(List<ActivatedAbility> listLegalAbilities) {
 		// TODO MID KI-Entscheidung
@@ -140,22 +99,6 @@ public class InputComputer implements IsInput {
 		return player;
 	}
 
-	public void setMatch(Match match) {
-		this.match = match;
-		// this.match.propertyFlagNeedPlayerInput().addListener(new
-		// ChangeListener<Boolean>() {
-		//
-		// @Override
-		// public void changed(ObservableValue<? extends Boolean> observable,
-		// Boolean oldValue, Boolean newValue) {
-		// if (newValue) {
-		// requestInput(newValue);
-		// }
-		// }
-		//
-		// });
-	}
-
 	@Override
 	public void setPlayer(IsPlayer player) {
 		this.player = player;
@@ -164,34 +107,60 @@ public class InputComputer implements IsInput {
 			@Override
 			public void changed(ObservableValue<? extends PlayerState> observable, PlayerState oldValue,
 					PlayerState newValue) {
-				// TODO HIGH Reaktion des Computers abgefragen.
 				switch (newValue) {
-				case ACTIVE:
-				case NONACTIVE:
-					LOGGER.debug("{} changed({}) -> Nothing to do!", this, newValue);
-					break;
 				case SELECTING_ATTACKER:
 					if (getPlayer().getFlagDeclaringAttackers()) {
-						// Spieler befindet sich im Auswahlmodus für Angreifer.
+						// Auswahlmodus für Angreifer.
+						matchPresenter.getMatchActive().getRuleEnforcer().checkInteractable(getPlayer());
 
 						inputEndDeclareAttackers();
 					}
 					break;
 				case DEFENDING:
 					if (getPlayer().getFlagDeclaringBlockers()) {
-						// Spieler befindet sich im Auswahlmodus für
-						// Verteidiger.
+						// Auswahlmodus für Blocker.
+						matchPresenter.getMatchActive().getRuleEnforcer().checkInteractable(getPlayer());
 
 						inputEndDeclareBlockers();
 					}
 					break;
 				case DISCARDING:
-					LOGGER.debug("{} changed({}) -> Discard!", this, newValue);
+					LOGGER.debug("{} changed({}) -> Discard!", player, newValue);
 					inputDiscard(determineCardToDiscard(getPlayer().getZoneHand().getAll()));
 					break;
-				default:
-					LOGGER.debug("{} changed({}) -> Pass priority!", this, newValue);
+				case PRIORITIZED:
+					matchPresenter.getMatchActive().getRuleEnforcer().checkInteractable(getPlayer());
+
+					// Spiele zufälliges Land
+					for (final MagicCard magicCard : player.getZoneHand().getAll(ObjectType.LAND)) {
+						if (magicCard.getFlagIsInteractable()) {
+							LOGGER.debug("{} changed({}) -> Playing Land!", player, newValue);
+							inputPlayLand(magicCard);
+							return;
+						}
+					}
+
+					for (final MagicPermanent magicPermanent : matchPresenter.getMatchActive().getZoneBattlefield()
+							.getAll(ObjectType.LAND)) {
+						if (magicPermanent.getFlagIsInteractable()) {
+							LOGGER.debug("{} changed({}) -> Activating Permanent!", player, newValue);
+							inputActivatePermanent(magicPermanent);
+							break;
+						}
+					}
+
+					for (final MagicCard magicCard : player.getZoneHand().getAll(ObjectType.CREATURE)) {
+						if (magicCard.getFlagIsInteractable()) {
+							LOGGER.debug("{} changed({}) -> Casting Spell!", player, newValue);
+							inputCastSpell(magicCard);
+							return;
+						}
+					}
+
 					inputPassPriority();
+					break;
+				default:
+					LOGGER.debug("{} changed({}) -> Nothing to do!", player, newValue);
 					break;
 				}
 			}
@@ -205,5 +174,10 @@ public class InputComputer implements IsInput {
 			return "Noch kein Spieler gesetzt.";
 		}
 		return getPlayer().toString();
+	}
+
+	@Override
+	public void setParent(MatchPresenter matchPresenter) {
+		this.matchPresenter = matchPresenter;
 	}
 }

@@ -45,15 +45,14 @@ public class ManaMapDefault implements IsManaMap {
 
 	@Override
 	public void addAll(IsManaMap manaMap) {
-		manaMap.getKeySet().forEach(key -> add(key, get(key) + manaMap.get(key)));
+		manaMap.getKeySet().forEach(key -> add(key, manaMap.get(key)));
 	}
 
 	@Override
 	public boolean contains(IsManaMap costMap) {
 		// TODO MID Benötigt intensives Testen, sollten sich fehler zeigen.
 		final IsManaMap difference = getDifference(costMap);
-
-		if (difference.getTotalMana() < 0 && !hasNegativeTrueColor(difference)) {
+		if (difference.getTotalMana() <= 0 && !hasPositiveTrueColor(difference)) {
 			return true;
 		} else {
 			return false;
@@ -77,19 +76,19 @@ public class ManaMapDefault implements IsManaMap {
 
 	@Override
 	public IsManaMap getDifference(IsManaMap manaMap) {
-		final IsManaMap result = new ManaMapDefault();
+		final ObservableMap<ColorType, Integer> result = FXCollections.observableHashMap();
 
 		/**
 		 * In dieser Art der Berechnung können sich negative Manawerte ergeben.
 		 */
-		result.add(ColorType.BLACK, manaMap.get(ColorType.BLACK) - get(ColorType.BLACK));
-		result.add(ColorType.BLUE, manaMap.get(ColorType.BLUE) - get(ColorType.BLUE));
-		result.add(ColorType.GREEN, manaMap.get(ColorType.GREEN) - get(ColorType.GREEN));
-		result.add(ColorType.NONE, manaMap.get(ColorType.NONE) - get(ColorType.NONE));
-		result.add(ColorType.RED, manaMap.get(ColorType.RED) - get(ColorType.RED));
-		result.add(ColorType.WHITE, manaMap.get(ColorType.WHITE) - get(ColorType.WHITE));
+		result.put(ColorType.BLACK, manaMap.get(ColorType.BLACK) - get(ColorType.BLACK));
+		result.put(ColorType.BLUE, manaMap.get(ColorType.BLUE) - get(ColorType.BLUE));
+		result.put(ColorType.GREEN, manaMap.get(ColorType.GREEN) - get(ColorType.GREEN));
+		result.put(ColorType.NONE, manaMap.get(ColorType.NONE) - get(ColorType.NONE));
+		result.put(ColorType.RED, manaMap.get(ColorType.RED) - get(ColorType.RED));
+		result.put(ColorType.WHITE, manaMap.get(ColorType.WHITE) - get(ColorType.WHITE));
 
-		return result;
+		return new ManaMapDefault(result);
 	}
 
 	@Override
@@ -144,7 +143,7 @@ public class ManaMapDefault implements IsManaMap {
 	}
 
 	@Override
-	public MapProperty<ColorType, Integer> propertyManaMap() {
+	public MapProperty<ColorType, Integer> propertyMapMana() {
 		return propertyMapMana;
 	}
 
@@ -157,7 +156,7 @@ public class ManaMapDefault implements IsManaMap {
 
 	@Override
 	public void removeAll() {
-		propertyManaMap().keySet().forEach(color -> remove(color, get(color)));
+		propertyMapMana().clear();
 	}
 
 	@Override
@@ -180,25 +179,24 @@ public class ManaMapDefault implements IsManaMap {
 	}
 
 	/**
-	 * Prüft, ob in einer ManaMap negative Werte bei den echten Farben
-	 * auftauchen.
+	 * Prüft, ob in einer ManaMap postive Werte bei den echten Farben
+	 * auftauchen. Ein positiver Wert in einer Differenz, bedeutet, dass für
+	 * diese Farbe nicht genügend Mana zur Verfügung steht. Ein positiver Wert
+	 * bei NONE ist insofern nicht problematisch, da farbiges Mana zur Deckung
+	 * genutzt werden kann.
 	 *
 	 * @param difference
 	 *            die Differenz aus zwei ManaMaps. Nur so können negative Werte
 	 *            zustande kommen.
-	 * @return true, wenn ein negativer Wert bei einer echten Farbe entdeckt
+	 * @return true, wenn ein positiver Wert bei einer echten Farbe entdeckt
 	 *         wurde.
 	 */
-	private boolean hasNegativeTrueColor(IsManaMap difference) {
+	private boolean hasPositiveTrueColor(IsManaMap difference) {
 		for (final ColorType key : getKeySet()) {
 			if (key.isTrueColor() && get(key) < 0) {
 				return true;
 			}
 		}
 		return false;
-	}
-
-	private MapProperty<ColorType, Integer> propertyMapMana() {
-		return propertyMapMana;
 	}
 }

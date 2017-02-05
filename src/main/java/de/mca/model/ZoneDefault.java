@@ -171,23 +171,8 @@ public final class ZoneDefault<E extends MagicCard> implements IsZone<E> {
 	}
 
 	@Override
-	public List<E> getArtifacts() {
-		return getAll(ObjectType.ARTIFACT);
-	}
-
-	@Override
 	public E getBottom() {
 		return cardList.get(0);
-	}
-
-	@Override
-	public List<E> getCreatures() {
-		return getAll(ObjectType.CREATURE);
-	}
-
-	@Override
-	public List<E> getLands() {
-		return getAll(ObjectType.LAND);
 	}
 
 	@Override

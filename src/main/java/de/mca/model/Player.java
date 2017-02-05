@@ -14,7 +14,6 @@ import de.mca.model.enums.ColorType;
 import de.mca.model.enums.PlayerState;
 import de.mca.model.enums.PlayerType;
 import de.mca.model.enums.StateBasedActionType;
-import de.mca.model.enums.StepType;
 import de.mca.model.enums.ZoneType;
 import de.mca.model.interfaces.IsManaMap;
 import de.mca.model.interfaces.IsPlayer;
@@ -194,7 +193,7 @@ public final class Player implements IsPlayer {
 	public void addMana(ColorType colorType, int howMuch) {
 		for (int i = 0; i < howMuch; i++) {
 			final IsManaMap manaLeftToPay = manaCostGoal.getDifference(manaCostAlreadyPaid);
-			if (manaLeftToPay.containsKey(colorType)) {
+			if (manaLeftToPay.get(colorType) > 0) {
 				LOGGER.trace("{} manaAdd({}) -> Direkt eingezahlt ({})!", this, colorType, colorType);
 				manaCostAlreadyPaid.manaAdd(colorType);
 			} else if (manaLeftToPay.hasColorlessMana()) {

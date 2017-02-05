@@ -17,7 +17,6 @@ import de.mca.factories.FactoryZone;
 import de.mca.model.enums.ObjectType;
 import de.mca.model.enums.PlayerState;
 import de.mca.model.enums.PlayerType;
-import de.mca.model.enums.StepType;
 import de.mca.model.enums.ZoneType;
 import de.mca.model.interfaces.IsAttackTarget;
 import de.mca.model.interfaces.IsPlayer;
@@ -214,7 +213,7 @@ public final class Match {
 	@Override
 	public String toString() {
 		return new StringBuilder("[").append("r=[").append(getTurnNumber()).append("] p=[").append(getCurrentPhase())
-				.append("] s=[").append(getCurrentStep()).append("] ap=").append(getPlayerActive()).append("]")
+				.append("] s=[").append(getCurrentStep()).append("] ap=[").append(getPlayerActive()).append("]]")
 				.toString();
 	}
 
@@ -354,9 +353,9 @@ public final class Match {
 		final boolean playerActivePassed = getPlayerActive().getFlagPassedPriority();
 		final boolean playerNonactivePassed = getPlayerNonactive().getFlagPassedPriority();
 
-		LOGGER.debug("{} checkContinueRound() -> {}", this, !playerActivePassed || !playerNonactivePassed);
-
-		return !playerActivePassed || !playerNonactivePassed;
+		final boolean result = !playerActivePassed || !playerNonactivePassed;
+		LOGGER.trace("{} checkContinueRound() -> {}", this, result);
+		return result;
 	}
 
 	/**
@@ -375,10 +374,9 @@ public final class Match {
 		final boolean playerNonactivePassed = getPlayerNonactive().getFlagPassedPriority();
 		final boolean isStackEmpty = getZoneStack().isEmpty();
 
-		LOGGER.debug("{} checkProcessStack() -> {}", this,
-				playerActivePassed && playerNonactivePassed && !isStackEmpty);
-
-		return playerActivePassed && playerNonactivePassed && !isStackEmpty;
+		final boolean result = playerActivePassed && playerNonactivePassed && !isStackEmpty;
+		LOGGER.trace("{} checkProcessStack() -> {}", this, result);
+		return result;
 	}
 
 	/**
@@ -435,7 +433,7 @@ public final class Match {
 	 */
 	private List<MagicPermanent> getControlledCreatures(IsPlayer player) {
 		final List<MagicPermanent> result = new ArrayList<>();
-		getListControlledCards(player).forEach(magicPermanent -> {
+		getZoneBattlefield().getAll(player.getPlayerType()).forEach(magicPermanent -> {
 			if (magicPermanent.contains(ObjectType.CREATURE)) {
 				result.add(magicPermanent);
 			}
@@ -753,16 +751,6 @@ public final class Match {
 	}
 
 	/**
-	 * Liefert eine Liste aller kontrollierten Karten auf dem Spielfeld.
-	 *
-	 * @return eine Liste aller kontrollierten Karten auf dem Spielfeld.
-	 */
-
-	List<MagicPermanent> getListControlledCards(IsPlayer player) {
-		return zoneBattlefield.getAll(player.getPlayerType());
-	}
-
-	/**
 	 * Liefert den aktiven Spieler.
 	 *
 	 * @return den aktiven Spieler.
@@ -855,19 +843,8 @@ public final class Match {
 	}
 
 	void setFlagNeedPlayerInput(boolean flagNeedPlayerInput, String caller) {
-		LOGGER.debug("{} setFlagNeedPlayerInput({}, {})", this, flagNeedPlayerInput, caller);
+		LOGGER.trace("{} setFlagNeedPlayerInput({}, {})", this, flagNeedPlayerInput, caller);
 		this.propertyNeedPlayerInput.set(flagNeedPlayerInput);
-
-		// TODO MID Besseren Ort finden
-		if (flagNeedPlayerInput) {
-			if (getCurrentStep().equals(StepType.DECLARE_ATTACKERS)) {
-				ruleEnforcer.checkInteractability(getPlayerActive());
-			} else if (getCurrentStep().equals(StepType.DECLARE_BLOCKERS)) {
-				ruleEnforcer.checkInteractability(getPlayerNonactive());
-			} else {
-				ruleEnforcer.checkInteractability(getPlayerPrioritized());
-			}
-		}
 	}
 
 	void skipStepCombatDamage() {
@@ -876,5 +853,9 @@ public final class Match {
 
 	void skipStepDeclareBlockers() {
 		getCurrentTurn().skipStepDeclareBlockers();
+	}
+
+	public RuleEnforcer getRuleEnforcer() {
+		return ruleEnforcer;
 	}
 }

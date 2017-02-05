@@ -189,7 +189,7 @@ public class MatchPresenter extends AnimationTimer implements Initializable, IsS
 	@SuppressWarnings("unused")
 	private Main screenController;
 	private float secondsElapsedSinceLastFpsUpdate = 0f;
-	private final List<SpriteMagicPermanent> spriteListBattlefield;
+	private List<SpriteMagicPermanent> spriteListBattlefield;
 	private final List<SpriteMagicCard> spriteListComputerGraveyard;
 	private final List<SpriteMagicCard> spriteListComputerHand;
 	private final List<SpriteMagicCard> spriteListExile;
@@ -217,6 +217,7 @@ public class MatchPresenter extends AnimationTimer implements Initializable, IsS
 	public MatchPresenter(EventBus eventBus) {
 		// TODO LOW Threading?
 		eventBus.register(this);
+
 		spriteListBattlefield = new ArrayList<>();
 		spriteListComputerGraveyard = new ArrayList<>();
 		spriteListComputerHand = new ArrayList<>();
@@ -346,6 +347,10 @@ public class MatchPresenter extends AnimationTimer implements Initializable, IsS
 
 	@FXML
 	public void play() {
+		if (getMatchActive() != null) {
+			stop();
+		}
+
 		// Parameter für Testmatch
 		String nameHuman = "Human";
 		String nameComputer = "Computer";
@@ -359,7 +364,9 @@ public class MatchPresenter extends AnimationTimer implements Initializable, IsS
 		IsPlayer playerComputer = matchActive.getPlayer(PlayerType.COMPUTER);
 		IsPlayer playerHuman = matchActive.getPlayer(PlayerType.HUMAN);
 		setMatchActive(matchActive);
-		inputComputer.setMatch(matchActive);
+
+		inputComputer.setParent(this);
+		inputHuman.setParent(this);
 
 		// Game Loop
 		matchUpdater = () -> matchActive.update();
@@ -460,7 +467,7 @@ public class MatchPresenter extends AnimationTimer implements Initializable, IsS
 	}
 
 	private void bindManaPool(IsPlayer player) {
-		player.getManaPool().propertyManaMap().addListener(new MapChangeListener<ColorType, Integer>() {
+		player.getManaPool().propertyMapMana().addListener(new MapChangeListener<ColorType, Integer>() {
 
 			@Override
 			public void onChanged(
@@ -615,7 +622,7 @@ public class MatchPresenter extends AnimationTimer implements Initializable, IsS
 		}
 	}
 
-	private Match getMatchActive() {
+	public Match getMatchActive() {
 		return matchActive;
 	}
 

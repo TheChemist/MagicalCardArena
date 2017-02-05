@@ -9,19 +9,17 @@ package de.mca;
  */
 public enum SpecialActionType {
 
-	PLAY_A_LAND("Ein Land spielen", "115.2a");
+	PLAY_A_LAND("Ein Land spielen");
 
 	private final String displayName;
-	private final String rule;
 
-	private SpecialActionType(String displayName, String rule) {
+	private SpecialActionType(String displayName) {
 		this.displayName = displayName;
-		this.rule = rule;
 	}
 
 	@Override
 	public String toString() {
-		return new StringBuilder(displayName).append(" r=[").append(rule).append("]").toString();
+		return displayName;
 	}
 
 }
