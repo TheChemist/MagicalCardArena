@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import de.mca.Constants;
-import de.mca.InputHuman;
+import de.mca.model.InputHuman;
 import de.mca.model.MagicPermanent;
 import de.mca.model.enums.PlayerType;
 import de.mca.model.enums.ZoneType;
@@ -74,8 +74,10 @@ class CanvasZoneBattlefield extends AdaptableCanvas {
 
 		if (playerControlling.equals(PlayerType.HUMAN)) {
 			// Wird unten gezeichnet.
+
 			if (magicPermanent.isCreature()) {
 				// Wird in Reihe zwei gezeichnet.
+
 				positionX = sprite.getWidth() * indexHumanRowTwo * X_OFFSET;
 				positionY = getHeight() / 2.0 + Y_OFFSET / 2;
 
@@ -97,12 +99,14 @@ class CanvasZoneBattlefield extends AdaptableCanvas {
 
 				positionX = sprite.getWidth() * indexComputerRowTwo * X_OFFSET;
 				positionY = getHeight() / 2.0 - Y_OFFSET / 2 - sprite.getHeight();
+
 				indexComputerRowTwo++;
 			} else {
 				// Wird in Reihe eins gezeichnet.
 
-				positionX = sprite.getWidth() * indexComputerRowOne * 2;
+				positionX = sprite.getWidth() * indexComputerRowOne * X_OFFSET;
 				positionY = getHeight() / 4.0 - Y_OFFSET / 2 - sprite.getHeight();
+
 				indexComputerRowOne++;
 			}
 
