@@ -127,16 +127,18 @@ public final class Match {
 			@Assisted("deckComputer") Deck deckComputer, ZoneDefault<MagicPermanent> zoneBattlefield) {
 		playerComputer.setDisplayName(nameComputer);
 		playerComputer.setDeck(deckComputer);
+		playerComputer.setMatch(this);
 		playerHuman.setDisplayName(nameHuman);
 		playerHuman.setDeck(deckHuman);
+		playerHuman.setMatch(this);
+
+		ruleEnforcer.setMatch(this);
 
 		this.factoryMagicPermanent = magicPermanentFactory;
 		this.magicStack = magicStack;
 		this.ruleEnforcer = ruleEnforcer;
 		this.zoneBattlefield = zoneBattlefield;
 		this.zoneExile = zoneFactory.create(PlayerType.NONE, ZoneType.EXILE);
-
-		ruleEnforcer.setMatch(this);
 
 		propertyBattlefieldSize = new SimpleIntegerProperty(0);
 		propertyCurrentPhase = new SimpleObjectProperty<>(null);
@@ -768,6 +770,10 @@ public final class Match {
 		return getCurrentTurn().getPlayerOpponent(getPlayerActive().getPlayerType());
 	}
 
+	RuleEnforcer getRuleEnforcer() {
+		return ruleEnforcer;
+	}
+
 	int getTotalAttackers() {
 		return propertyListAttacks.size();
 	}
@@ -853,9 +859,5 @@ public final class Match {
 
 	void skipStepDeclareBlockers() {
 		getCurrentTurn().skipStepDeclareBlockers();
-	}
-
-	public RuleEnforcer getRuleEnforcer() {
-		return ruleEnforcer;
 	}
 }

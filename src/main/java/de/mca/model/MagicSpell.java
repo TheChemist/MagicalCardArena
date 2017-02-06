@@ -20,10 +20,6 @@ import javafx.beans.property.SimpleObjectProperty;
 public class MagicSpell extends MagicCard implements IsStackable {
 
 	/**
-	 * Speichert den EventBus.
-	 */
-	private final EventBus eventBus;
-	/**
 	 * Speichert den Spielertyp des kontrollierenden Spielers.
 	 *
 	 * @see http://magiccards.info/rule/109-objects.html#rule-109-4
@@ -31,9 +27,8 @@ public class MagicSpell extends MagicCard implements IsStackable {
 	private final ObjectProperty<PlayerType> playerControlling;
 
 	@Inject
-	MagicSpell(EventBus eventBus, @Assisted MagicCard magicCard, @Assisted PlayerType playerControlling) {
+	MagicSpell(@Assisted MagicCard magicCard, @Assisted PlayerType playerControlling) {
 		super(magicCard.getId());
-		this.eventBus = eventBus;
 		this.playerControlling = new SimpleObjectProperty<>(playerControlling);
 		setDisplayName(magicCard.getDisplayName());
 		setFileName(magicCard.getFileName());
@@ -118,16 +113,8 @@ public class MagicSpell extends MagicCard implements IsStackable {
 	}
 
 	@Override
-	public void resolve() {
-		propertyListEffects().forEach(effect -> getEventBus().post(effect));
-	}
-
-	@Override
 	public void setPlayerControlling(PlayerType playerControlling) {
 		this.playerControlling.set(playerControlling);
 	}
 
-	private EventBus getEventBus() {
-		return eventBus;
-	}
 }

@@ -2,21 +2,11 @@ package de.mca.model.interfaces;
 
 import java.util.List;
 
-import com.google.common.eventbus.EventBus;
-
-import de.mca.PACastSpell;
-import de.mca.PADiscard;
-import de.mca.PASelectCostMap;
-import de.mca.PASelectPermanent;
-import de.mca.PlayerAction;
-import de.mca.PlayerActionType;
-import de.mca.SAPlayLand;
 import de.mca.model.Deck;
 import de.mca.model.MagicCard;
-import de.mca.model.MagicPermanent;
-import de.mca.model.MagicSpell;
 import de.mca.model.ManaMapDefault;
-import de.mca.model.StateBasedAction;
+import de.mca.model.Match;
+import de.mca.model.RuleEnforcer;
 import de.mca.model.enums.ColorType;
 import de.mca.model.enums.PlayerState;
 import de.mca.model.enums.PlayerType;
@@ -63,119 +53,7 @@ public interface IsPlayer extends IsAttackTarget {
 	 */
 	public boolean equals(PlayerType playerType);
 
-	/**
-	 * Wird durch Spielerinput ausgelöst und legt eine Spieleraktion auf den
-	 * Eventbus: Der Spieler hat ein Permanent aktiviert.
-	 *
-	 * @param magicPermanent
-	 *            das aktivierte Permanent.
-	 */
-	public default void fireActivatePermanent(MagicPermanent magicPermanent) {
-		getEventBus().post(new PASelectPermanent(this, magicPermanent, PlayerActionType.ACTIVATE_PERMANENT));
-	}
-
-	/**
-	 * Wird durch Spielerinput ausgelöst und legt eine Spieleraktion auf den
-	 * Eventbus: Der Spieler beschwört einen Zauberspruch.
-	 *
-	 * @param magicCard
-	 *            der Zauberspruch.
-	 */
-	public default void fireCastSpell(MagicCard magicCard) {
-		getEventBus().post(new PACastSpell(this, magicCard));
-	}
-
-	/**
-	 * Wird durch Spielerinput ausgelöst und legt eine Spieleraktion auf den
-	 * Eventbus: Der Spieler gibt auf.
-	 */
-	public default void fireConcede() {
-		getEventBus().post(new PlayerAction(this, PlayerActionType.CONCEDE));
-	}
-
-	/**
-	 * Wird durch Spielerinput ausgelöst und legt eine Spieleraktion auf den
-	 * Eventbus: Der Spieler deklariert einen Angreifer.
-	 *
-	 * @param attacker
-	 *            der Angreifer.
-	 */
-	public default void fireDeclareAttacker(MagicPermanent magicPermanent) {
-		getEventBus().post(new PASelectPermanent(this, magicPermanent, PlayerActionType.DECLARE_ATTACKER));
-	}
-
-	/**
-	 * Wird durch Spielerinput ausgelöst und legt eine Spieleraktion auf den
-	 * Eventbus: Der Spieler deklariert einen Blocker.
-	 *
-	 * @param blocker
-	 *            der Blocker.
-	 */
-	public default void fireDeclareBlocker(MagicPermanent blocker) {
-		getEventBus().post(new PASelectPermanent(this, blocker, PlayerActionType.DECLARE_BLOCKER));
-	}
-
-	/**
-	 * Wird durch Spielerinput ausgelöst und legt eine Spieleraktion auf den
-	 * Eventbus: Der Spieler wirft eine Karte ab.
-	 *
-	 * @param magicCard
-	 *            die abgeworfene Karte.
-	 */
-	public default void fireDiscard(MagicCard magicCard) {
-		getEventBus().post(new PADiscard(this, magicCard));
-	}
-
-	/**
-	 * Wird durch Spielerinput ausgelöst und legt eine Spieleraktion auf den
-	 * Eventbus: Der Spieler hat möchte keine weiteren Angreifer deklarieren.
-	 */
-	public default void fireEndDeclareAttackers() {
-		getEventBus().post(new PlayerAction(this, PlayerActionType.END_DECLARE_ATTACKERS));
-	}
-
-	/**
-	 * Wird durch Spielerinput ausgelöst und legt eine Spieleraktion auf den
-	 * Eventbus: Der Spieler möchte keine weiteren Blocker deklarieren.
-	 */
-	public default void fireEndDeclareBlockers() {
-		getEventBus().post(new PlayerAction(this, PlayerActionType.END_DECLARE_BLOCKERS));
-	}
-
-	/**
-	 * Wird durch Spielerinput ausgelöst und legt eine Spieleraktion auf den
-	 * Eventbus: Der Spieler gibt die Priorität ab.
-	 */
-	public default void firePassPriority() {
-		getEventBus().post(new PlayerAction(this, PlayerActionType.PASS_PRIORITY));
-	}
-
-	/**
-	 * Wird durch Spielerinput ausgelöst und legt eine Spieleraktion auf den
-	 * Eventbus: Der Spieler möchte ein Land spielen.
-	 *
-	 * @param magicCard
-	 *            das Land.
-	 */
-	public default void firePlayLand(MagicCard magicCard) {
-		getEventBus().post(new SAPlayLand(this, magicCard));
-	}
-
-	public default void fireSelectCostMap(MagicSpell spell) {
-		getEventBus().post(new PASelectCostMap(this, spell));
-	}
-
-	/**
-	 * Wird durch Spielerinput ausgelöst und legt eine Spieleraktion auf den
-	 * Eventbus:
-	 */
-	public default void fireStateBasedAction(StateBasedAction sba) {
-		getEventBus().post(sba);
-	}
-
 	public String getDisplayName();
-
-	public EventBus getEventBus();
 
 	/**
 	 * Prüft, ob der Spieler noch im Begriff ist Angreifer zu deklarieren.
@@ -201,9 +79,13 @@ public interface IsPlayer extends IsAttackTarget {
 
 	public IsManaMap getManaPool();
 
+	public Match getMatch();
+
 	public PlayerState getPlayerState();
 
 	public PlayerType getPlayerType();
+
+	public RuleEnforcer getRuleEnforcer();
 
 	public IsZone<MagicCard> getZoneGraveyard();
 
@@ -329,6 +211,8 @@ public interface IsPlayer extends IsAttackTarget {
 	public void setManaCostAlreadyPaid(ManaMapDefault manaMapDefault);
 
 	public void setManaCostGoal(IsManaMap manaCostGoal);
+
+	public void setMatch(Match match);
 
 	public void setPlayerState(PlayerState ps);
 

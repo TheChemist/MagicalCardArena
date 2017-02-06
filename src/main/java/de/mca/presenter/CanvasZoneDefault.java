@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import de.mca.Constants;
-import de.mca.InputHuman;
+import de.mca.model.InputHuman;
 import de.mca.model.MagicCard;
 import de.mca.model.enums.ZoneType;
 import javafx.beans.binding.DoubleBinding;

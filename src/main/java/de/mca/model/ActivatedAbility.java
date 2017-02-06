@@ -46,10 +46,6 @@ public class ActivatedAbility implements IsStackable {
 	 */
 	private final JsonArray effectObject;
 	/**
-	 * Speichert den EventBus.
-	 */
-	private final EventBus eventBus;
-	/**
 	 * Speichert den MagicParser, um den Effekt zu parsen.
 	 */
 	private final MagicParser magicParser;
@@ -71,10 +67,9 @@ public class ActivatedAbility implements IsStackable {
 	private final ObjectProperty<IsObject> propertySource;
 
 	@Inject
-	ActivatedAbility(EventBus eventBus, MagicParser magicParser, @Assisted IsObject source,
-			@Assisted AbilityType abilityType, @Assisted AdditionalCostType additionalCostType,
-			@Assisted JsonArray effectObject, @Assisted ObservableList<IsManaMap> listCostMaps) {
-		this.eventBus = eventBus;
+	ActivatedAbility(MagicParser magicParser, @Assisted IsObject source, @Assisted AbilityType abilityType,
+			@Assisted AdditionalCostType additionalCostType, @Assisted JsonArray effectObject,
+			@Assisted ObservableList<IsManaMap> listCostMaps) {
 		this.magicParser = magicParser;
 		this.abilityType = abilityType;
 		this.additionalCostType = additionalCostType;
@@ -92,16 +87,6 @@ public class ActivatedAbility implements IsStackable {
 	public void add(Effect magicEffect) {
 		magicEffect.setPlayerType(getPlayerControlling());
 		propertyListEffects().add(magicEffect);
-	}
-
-	public void generateEffects() {
-		propertyListEffects.forEach(effect -> {
-			if (effect.getPlayerType() == null || effect.getPlayerType().equals(PlayerType.NONE)) {
-				throw new NullPointerException("Effekt wird von keinem Spieler kontrolliert!");
-			}
-
-			fireMagicEffect(effect);
-		});
 	}
 
 	public AbilityType getAbilityType() {
@@ -176,11 +161,6 @@ public class ActivatedAbility implements IsStackable {
 	}
 
 	@Override
-	public void resolve() {
-		// TODO LOW Was passiert hier?
-	}
-
-	@Override
 	public void setPlayerControlling(PlayerType playerControlling) {
 		propertyListEffects().forEach(effect -> effect.setPlayerType(playerControlling));
 		propertyPlayerControlling().set(playerControlling);
@@ -193,14 +173,6 @@ public class ActivatedAbility implements IsStackable {
 	@Override
 	public String toString() {
 		return abilityType.toString();
-	}
-
-	protected void fireMagicEffect(Effect magicEffect) {
-		getEventBus().post(magicEffect);
-	}
-
-	protected EventBus getEventBus() {
-		return eventBus;
 	}
 
 }

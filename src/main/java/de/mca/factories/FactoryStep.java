@@ -2,6 +2,7 @@ package de.mca.factories;
 
 import java.util.Set;
 
+import de.mca.model.RuleEnforcer;
 import de.mca.model.Step;
 import de.mca.model.enums.StepType;
 import de.mca.model.enums.TurnBasedActionType;
@@ -12,7 +13,7 @@ import de.mca.model.enums.TurnBasedActionType;
  *
  */
 public interface FactoryStep {
-	
-	Step create(StepType stepType, Set<TurnBasedActionType> startTBAs);
-	
+
+	Step create(RuleEnforcer ruleEnforcer, StepType stepType, Set<TurnBasedActionType> startTBAs);
+
 }

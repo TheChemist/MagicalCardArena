@@ -1,12 +1,11 @@
-package de.mca;
+package de.mca.model;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import de.mca.model.MagicCard;
-import de.mca.model.MagicPermanent;
 import de.mca.model.enums.PlayerState;
 import de.mca.model.enums.ZoneType;
+import de.mca.model.interfaces.IsInput;
 import de.mca.model.interfaces.IsPlayer;
 import de.mca.presenter.MatchPresenter;
 import javafx.beans.value.ChangeListener;
@@ -24,16 +23,21 @@ public class InputHuman implements IsInput {
 	 */
 	private final static Logger LOGGER = LoggerFactory.getLogger("Input");
 	/**
-	 * Speichert den Spieler.
-	 */
-	private IsPlayer player;
-	/**
 	 * Speichert den MatchPresenter
 	 */
 	private MatchPresenter matchPresenter;
+	/**
+	 * Speichert den Spieler.
+	 */
+	private IsPlayer player;
 
 	InputHuman() {
 
+	}
+
+	@Override
+	public MatchPresenter getMatchPresenter() {
+		return matchPresenter;
 	}
 
 	@Override
@@ -41,17 +45,22 @@ public class InputHuman implements IsInput {
 		return player;
 	}
 
+	@Override
+	public RuleEnforcer getRuleEnforcer() {
+		return getPlayer().getRuleEnforcer();
+	}
+
 	public void input(MagicCard object, ZoneType zoneType) {
 		if (zoneType.equals(ZoneType.HAND)) {
 			// Karte in Hand geklickt
 			MagicCard magicCard = object;
 			if (getPlayer().isDiscarding()) {
-				getPlayer().fireDiscard(magicCard);
+				inputDiscard(magicCard);
 			} else {
 				if (magicCard.isLand()) {
-					getPlayer().firePlayLand(magicCard);
+					inputPlayLand(magicCard);
 				} else {
-					getPlayer().fireCastSpell(magicCard);
+					inputCastSpell(magicCard);
 				}
 			}
 		} else if (zoneType.equals(ZoneType.BATTLEFIELD)) {
@@ -60,11 +69,11 @@ public class InputHuman implements IsInput {
 			if (getPlayer().isAttacking()) {
 				// Angreifer deklarieren
 
-				getPlayer().fireDeclareAttacker(magicPermanent);
+				inputDeclareAttacker(magicPermanent);
 			} else {
 				// Permanent aktivieren
 
-				getPlayer().fireActivatePermanent(magicPermanent);
+				inputActivatePermanent(magicPermanent);
 			}
 		}
 	}
@@ -101,6 +110,11 @@ public class InputHuman implements IsInput {
 	}
 
 	@Override
+	public void setMatchPresenter(MatchPresenter matchPresenter) {
+		this.matchPresenter = matchPresenter;
+	}
+
+	@Override
 	public void setPlayer(IsPlayer player) {
 		this.player = player;
 		this.player.propertyPlayerState().addListener(new ChangeListener<PlayerState>() {
@@ -112,17 +126,17 @@ public class InputHuman implements IsInput {
 				case SELECTING_ATTACKER:
 					if (getPlayer().getFlagDeclaringAttackers()) {
 						// Auswahlmodus für Angreifer.
-						matchPresenter.getMatchActive().getRuleEnforcer().checkInteractable(getPlayer());
+						getPlayer().getRuleEnforcer().checkInteractable(getPlayer());
 					}
 					break;
 				case DEFENDING:
 					if (getPlayer().getFlagDeclaringBlockers()) {
 						// Auswahlmodus für Blocker.
-						matchPresenter.getMatchActive().getRuleEnforcer().checkInteractable(getPlayer());
+						getPlayer().getRuleEnforcer().checkInteractable(getPlayer());
 					}
 					break;
 				case PRIORITIZED:
-					matchPresenter.getMatchActive().getRuleEnforcer().checkInteractable(getPlayer());
+					getPlayer().getRuleEnforcer().checkInteractable(getPlayer());
 					break;
 				default:
 					break;
@@ -138,10 +152,5 @@ public class InputHuman implements IsInput {
 			return "Noch kein Spieler gesetzt.";
 		}
 		return getPlayer().toString();
-	}
-
-	@Override
-	public void setParent(MatchPresenter matchPresenter) {
-		this.matchPresenter = matchPresenter;
 	}
 }

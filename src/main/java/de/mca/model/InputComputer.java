@@ -1,4 +1,4 @@
-package de.mca;
+package de.mca.model;
 
 import java.util.List;
 import java.util.Random;
@@ -6,13 +6,10 @@ import java.util.Random;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import de.mca.model.ActivatedAbility;
-import de.mca.model.Attack;
-import de.mca.model.MagicCard;
-import de.mca.model.MagicPermanent;
 import de.mca.model.enums.ObjectType;
 import de.mca.model.enums.PlayerState;
 import de.mca.model.interfaces.IsAttackTarget;
+import de.mca.model.interfaces.IsInput;
 import de.mca.model.interfaces.IsManaMap;
 import de.mca.model.interfaces.IsPlayer;
 import de.mca.presenter.MatchPresenter;
@@ -95,8 +92,23 @@ public class InputComputer implements IsInput {
 	}
 
 	@Override
+	public MatchPresenter getMatchPresenter() {
+		return matchPresenter;
+	}
+
+	@Override
 	public IsPlayer getPlayer() {
 		return player;
+	}
+
+	@Override
+	public RuleEnforcer getRuleEnforcer() {
+		return getPlayer().getRuleEnforcer();
+	}
+
+	@Override
+	public void setMatchPresenter(MatchPresenter matchPresenter) {
+		this.matchPresenter = matchPresenter;
 	}
 
 	@Override
@@ -107,11 +119,12 @@ public class InputComputer implements IsInput {
 			@Override
 			public void changed(ObservableValue<? extends PlayerState> observable, PlayerState oldValue,
 					PlayerState newValue) {
+				LOGGER.debug("{} changed({})", player, newValue);
 				switch (newValue) {
 				case SELECTING_ATTACKER:
 					if (getPlayer().getFlagDeclaringAttackers()) {
 						// Auswahlmodus für Angreifer.
-						matchPresenter.getMatchActive().getRuleEnforcer().checkInteractable(getPlayer());
+						getPlayer().getRuleEnforcer().checkInteractable(getPlayer());
 
 						inputEndDeclareAttackers();
 					}
@@ -119,22 +132,21 @@ public class InputComputer implements IsInput {
 				case DEFENDING:
 					if (getPlayer().getFlagDeclaringBlockers()) {
 						// Auswahlmodus für Blocker.
-						matchPresenter.getMatchActive().getRuleEnforcer().checkInteractable(getPlayer());
+						getPlayer().getRuleEnforcer().checkInteractable(getPlayer());
 
 						inputEndDeclareBlockers();
 					}
 					break;
 				case DISCARDING:
-					LOGGER.debug("{} changed({}) -> Discard!", player, newValue);
 					inputDiscard(determineCardToDiscard(getPlayer().getZoneHand().getAll()));
 					break;
 				case PRIORITIZED:
-					matchPresenter.getMatchActive().getRuleEnforcer().checkInteractable(getPlayer());
+					getPlayer().getRuleEnforcer().checkInteractable(getPlayer());
 
 					// Spiele zufälliges Land
 					for (final MagicCard magicCard : player.getZoneHand().getAll(ObjectType.LAND)) {
-						if (magicCard.getFlagIsInteractable()) {
-							LOGGER.debug("{} changed({}) -> Playing Land!", player, newValue);
+						if (matchPresenter.getMatchActive().getCurrentPhase().isMain()
+								&& magicCard.getFlagIsInteractable()) {
 							inputPlayLand(magicCard);
 							return;
 						}
@@ -142,16 +154,16 @@ public class InputComputer implements IsInput {
 
 					for (final MagicPermanent magicPermanent : matchPresenter.getMatchActive().getZoneBattlefield()
 							.getAll(ObjectType.LAND)) {
-						if (magicPermanent.getFlagIsInteractable()) {
-							LOGGER.debug("{} changed({}) -> Activating Permanent!", player, newValue);
+						if (matchPresenter.getMatchActive().getCurrentPhase().isMain()
+								&& magicPermanent.getFlagIsInteractable()) {
 							inputActivatePermanent(magicPermanent);
-							break;
+							return;
 						}
 					}
 
 					for (final MagicCard magicCard : player.getZoneHand().getAll(ObjectType.CREATURE)) {
-						if (magicCard.getFlagIsInteractable()) {
-							LOGGER.debug("{} changed({}) -> Casting Spell!", player, newValue);
+						if (matchPresenter.getMatchActive().getCurrentPhase().isMain()
+								&& magicCard.getFlagIsInteractable()) {
 							inputCastSpell(magicCard);
 							return;
 						}
@@ -160,7 +172,6 @@ public class InputComputer implements IsInput {
 					inputPassPriority();
 					break;
 				default:
-					LOGGER.debug("{} changed({}) -> Nothing to do!", player, newValue);
 					break;
 				}
 			}
@@ -174,10 +185,5 @@ public class InputComputer implements IsInput {
 			return "Noch kein Spieler gesetzt.";
 		}
 		return getPlayer().toString();
-	}
-
-	@Override
-	public void setParent(MatchPresenter matchPresenter) {
-		this.matchPresenter = matchPresenter;
 	}
 }

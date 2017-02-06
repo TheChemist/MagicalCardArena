@@ -75,33 +75,40 @@ public class Turn {
 		propertyFlagTurnSkipped = new SimpleBooleanProperty(false);
 		propertyTurnNumber = new SimpleIntegerProperty(0);
 
-		final Step untap = stepFactory.create(StepType.UNTAP_STEP, EnumSet.of(TurnBasedActionType.UNTAP));
-		final Step upkeep = stepFactory.create(StepType.UPKEEP_STEP, EnumSet.noneOf(TurnBasedActionType.class));
-		final Step draw = stepFactory.create(StepType.DRAW_STEP, EnumSet.of(TurnBasedActionType.DRAW));
+		final Step untap = stepFactory.create(parent.getRuleEnforcer(), StepType.UNTAP_STEP,
+				EnumSet.of(TurnBasedActionType.UNTAP));
+		final Step upkeep = stepFactory.create(parent.getRuleEnforcer(), StepType.UPKEEP_STEP,
+				EnumSet.noneOf(TurnBasedActionType.class));
+		final Step draw = stepFactory.create(parent.getRuleEnforcer(), StepType.DRAW_STEP,
+				EnumSet.of(TurnBasedActionType.DRAW));
 		final Phase beginning = phaseFactory.create(PhaseType.BEGINNING_PHASE, ImmutableList.of(untap, upkeep, draw),
 				parent);
 
-		final Phase precombatMain = phaseFactory.create(PhaseType.PRECOMBAT_MAIN_PHASE,
-				ImmutableList.of(stepFactory.create(StepType.NONE, EnumSet.noneOf(TurnBasedActionType.class))), parent);
+		final Phase precombatMain = phaseFactory.create(PhaseType.PRECOMBAT_MAIN_PHASE, ImmutableList.of(
+				stepFactory.create(parent.getRuleEnforcer(), StepType.NONE, EnumSet.noneOf(TurnBasedActionType.class))),
+				parent);
 
-		final Step beginningOfCombat = stepFactory.create(StepType.BEGINNING_OF_COMBAT_STEP,
+		final Step beginningOfCombat = stepFactory.create(parent.getRuleEnforcer(), StepType.BEGINNING_OF_COMBAT_STEP,
 				EnumSet.of(TurnBasedActionType.BEGINNING_OF_COMBAT_STEP));
-		final Step declareAttackers = stepFactory.create(StepType.DECLARE_ATTACKERS,
+		final Step declareAttackers = stepFactory.create(parent.getRuleEnforcer(), StepType.DECLARE_ATTACKERS,
 				EnumSet.of(TurnBasedActionType.DECLARE_ATTACKER));
-		final Step declareBlockers = stepFactory.create(StepType.DECLARE_BLOCKERS,
+		final Step declareBlockers = stepFactory.create(parent.getRuleEnforcer(), StepType.DECLARE_BLOCKERS,
 				EnumSet.of(TurnBasedActionType.DECLARE_BLOCKER));
-		final Step combatDamage = stepFactory.create(StepType.COMBAT_DAMAGE_STEP,
+		final Step combatDamage = stepFactory.create(parent.getRuleEnforcer(), StepType.COMBAT_DAMAGE_STEP,
 				EnumSet.of(TurnBasedActionType.DECLARE_DAMAGE_ASSIGNMENT_ORDER_ATTACKER));
-		final Step endOfCombat = stepFactory.create(StepType.END_OF_COMBAT, EnumSet.noneOf(TurnBasedActionType.class));
+		final Step endOfCombat = stepFactory.create(parent.getRuleEnforcer(), StepType.END_OF_COMBAT,
+				EnumSet.noneOf(TurnBasedActionType.class));
 		final Phase combat = phaseFactory.create(PhaseType.COMBAT_PHASE,
 				ImmutableList.of(beginningOfCombat, declareAttackers, declareBlockers, combatDamage, endOfCombat),
 				parent);
 
-		final Phase postcombatMain = phaseFactory.create(PhaseType.POSTCOMBAT_MAIN_PHASE,
-				ImmutableList.of(stepFactory.create(StepType.NONE, EnumSet.noneOf(TurnBasedActionType.class))), parent);
+		final Phase postcombatMain = phaseFactory.create(PhaseType.POSTCOMBAT_MAIN_PHASE, ImmutableList.of(
+				stepFactory.create(parent.getRuleEnforcer(), StepType.NONE, EnumSet.noneOf(TurnBasedActionType.class))),
+				parent);
 
-		final Step end = stepFactory.create(StepType.END_STEP, EnumSet.noneOf(TurnBasedActionType.class));
-		final Step cleanup = stepFactory.create(StepType.CLEANUP_STEP,
+		final Step end = stepFactory.create(parent.getRuleEnforcer(), StepType.END_STEP,
+				EnumSet.noneOf(TurnBasedActionType.class));
+		final Step cleanup = stepFactory.create(parent.getRuleEnforcer(), StepType.CLEANUP_STEP,
 				EnumSet.of(TurnBasedActionType.DISCARD, TurnBasedActionType.CLEANUP));
 		final Phase ending = phaseFactory.create(PhaseType.ENDING_PHASE, ImmutableList.of(end, cleanup), parent);
 

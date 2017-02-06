@@ -38,10 +38,6 @@ import javafx.collections.ObservableSet;
 public class MagicCard implements IsObject, IsInteractable {
 
 	/**
-	 * Speichert den Logger.
-	 */
-	private final static Logger LOGGER = LoggerFactory.getLogger("MagicCard");
-	/**
 	 * Höhe eines Kartenscans. Angegeben in Double, um das Seitenverhältnis
 	 * exakt errechnen zu können.
 	 */
@@ -51,6 +47,10 @@ public class MagicCard implements IsObject, IsInteractable {
 	 * exakt errechnen zu können.
 	 */
 	public static final double CARD_WIDTH = 312.0;
+	/**
+	 * Speichert den Logger.
+	 */
+	private final static Logger LOGGER = LoggerFactory.getLogger("MagicCard");
 	/**
 	 * Speichert den Namen, so wie er auf der Karte zu lesen ist.
 	 */

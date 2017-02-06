@@ -1,5 +1,6 @@
 package de.mca.model.interfaces;
 
+import de.mca.model.Effect;
 import de.mca.model.enums.PlayerType;
 import javafx.collections.ObservableList;
 
@@ -48,10 +49,12 @@ public interface IsStackable {
 	 */
 	public ObservableList<IsManaMap> propertyListCostMaps();
 
-	/**
-	 * Wird aufgerufen, wenn das Stackable aufgelöst wird.
-	 */
-	public void resolve();
+	// /**
+	// * Wird aufgerufen, wenn das Stackable aufgelöst wird.
+	// */
+	// public void resolve();
+
+	public ObservableList<Effect> propertyListEffects();
 
 	/**
 	 * Setzt den Spieler, der das Stackable kontrolliert.

@@ -40,6 +40,8 @@ public interface IsManaMap {
 
 	public int getTotalMana();
 
+	public Set<ColorType> getTrueColorKeySet();
+
 	public boolean hasColorlessMana();
 
 	/**

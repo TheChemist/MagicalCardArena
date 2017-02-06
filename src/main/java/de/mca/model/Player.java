@@ -5,7 +5,6 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.eventbus.EventBus;
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
 
@@ -39,10 +38,6 @@ public final class Player implements IsPlayer {
 	 */
 	private final static Logger LOGGER = LoggerFactory.getLogger("Player");
 	/**
-	 * Speichert den EventBus.
-	 */
-	private final EventBus eventBus;
-	/**
 	 * Speichert den Bezahlfortschritt des aktuellen Spruchs oder Fähigkeit.
 	 */
 	private IsManaMap manaCostAlreadyPaid;
@@ -54,6 +49,7 @@ public final class Player implements IsPlayer {
 	 * Speichert den Manapool des Spielers.
 	 */
 	private final IsManaMap manaPool;
+	private Match match;
 	/**
 	 * Speichert den Spielertyp. Dient zur Identifikation.
 	 */
@@ -118,8 +114,7 @@ public final class Player implements IsPlayer {
 	private final ZoneDefault<MagicCard> zoneLibrary;
 
 	@Inject
-	public Player(EventBus eventBus, FactoryZone zoneFactory, @Assisted PlayerType playerType) {
-		this.eventBus = eventBus;
+	public Player(FactoryZone zoneFactory, @Assisted PlayerType playerType) {
 		this.playerType = playerType;
 
 		propertyCombatDamage = new SimpleIntegerProperty(0);
@@ -233,11 +228,6 @@ public final class Player implements IsPlayer {
 	}
 
 	@Override
-	public EventBus getEventBus() {
-		return eventBus;
-	}
-
-	@Override
 	public boolean getFlagDeclaringAttackers() {
 		return propertyFlagDeclaringAttackers.get();
 	}
@@ -273,6 +263,11 @@ public final class Player implements IsPlayer {
 	}
 
 	@Override
+	public Match getMatch() {
+		return match;
+	}
+
+	@Override
 	public PlayerState getPlayerState() {
 		return propertyPlayerState().get();
 	}
@@ -280,6 +275,11 @@ public final class Player implements IsPlayer {
 	@Override
 	public PlayerType getPlayerType() {
 		return playerType;
+	}
+
+	@Override
+	public RuleEnforcer getRuleEnforcer() {
+		return getMatch().getRuleEnforcer();
 	}
 
 	@Override
@@ -423,7 +423,7 @@ public final class Player implements IsPlayer {
 		LOGGER.trace("{} removeLife({})", this, life);
 		propertyLife().subtract(life);
 		if (getLife() < 1) {
-			fireStateBasedAction(new StateBasedAction(this, StateBasedActionType.PLAYER_LIFE_ZERO));
+			getRuleEnforcer().addStateBasedAction(new StateBasedAction(this, StateBasedActionType.PLAYER_LIFE_ZERO));
 		}
 	}
 
@@ -498,6 +498,11 @@ public final class Player implements IsPlayer {
 	public void setManaCostGoal(IsManaMap manaCostGoal) {
 		LOGGER.trace("{} setManaCostGoal({})", this, manaCostGoal);
 		this.manaCostGoal = manaCostGoal;
+	}
+
+	@Override
+	public void setMatch(Match match) {
+		this.match = match;
 	}
 
 	@Override

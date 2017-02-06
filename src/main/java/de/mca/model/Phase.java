@@ -3,7 +3,6 @@ package de.mca.model;
 import java.util.List;
 import java.util.ListIterator;
 
-import com.google.common.eventbus.EventBus;
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
 
@@ -20,10 +19,6 @@ import javafx.beans.property.SimpleBooleanProperty;
  */
 public class Phase {
 
-	/**
-	 * Speichert den EventBus.
-	 */
-	private final EventBus eventBus;
 	/**
 	 * Speichert den Iterator, der über die Spielschritte läuft.
 	 */
@@ -54,8 +49,7 @@ public class Phase {
 	private final BooleanProperty propertyFlagPhaseSkipped;
 
 	@Inject
-	Phase(EventBus eventBus, @Assisted PhaseType phaseType, @Assisted List<Step> listSteps, @Assisted Match parent) {
-		this.eventBus = eventBus;
+	Phase(@Assisted PhaseType phaseType, @Assisted List<Step> listSteps, @Assisted Match parent) {
 		this.listSteps = listSteps;
 		this.parent = parent;
 		this.phaseType = phaseType;
@@ -68,13 +62,18 @@ public class Phase {
 		parent.propertyCurrentStep().set(listSteps.get(0));
 	}
 
+	public boolean isMain() {
+		return phaseType.isMain();
+	}
+
 	@Override
 	public String toString() {
 		return phaseType.toString();
 	}
 
 	private void fireEndTBA() {
-		eventBus.post(new TurnBasedAction(this, TurnBasedActionType.CLEAR_MANA_POOLS));
+		parent.getRuleEnforcer()
+				.examineTurnBasedAction(new TurnBasedAction(this, TurnBasedActionType.CLEAR_MANA_POOLS));
 	}
 
 	boolean equals(PhaseType phaseType) {
@@ -103,10 +102,6 @@ public class Phase {
 
 	boolean isCombatPhase() {
 		return phaseType.isCombatPhase();
-	}
-
-	boolean isMain() {
-		return phaseType.isMain();
 	}
 
 	void phaseBegin() {

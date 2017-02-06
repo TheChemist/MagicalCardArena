@@ -99,6 +99,7 @@ public final class ZoneDefault<E extends MagicCard> implements IsZone<E> {
 		return result;
 	}
 
+	@Override
 	public List<E> getAll(EffectType effectType) {
 		final List<E> result = new ArrayList<>();
 		for (final E card : cardList) {

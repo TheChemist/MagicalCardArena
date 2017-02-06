@@ -1,6 +1,5 @@
 package de.mca.model;
 
-import com.google.common.eventbus.EventBus;
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
 
@@ -28,10 +27,6 @@ public class MagicPermanent extends MagicCard {
 	 * Speichert den Schaden der der Kreatur zugefügt wurden.
 	 */
 	private final IntegerProperty damage;
-	/**
-	 * Speichert den EventBus.
-	 */
-	private final EventBus eventBus;
 	/**
 	 * Zeigt an, ob die Kreatur gerade angreift.
 	 */
@@ -79,9 +74,8 @@ public class MagicPermanent extends MagicCard {
 	 */
 	private final ObjectProperty<PlayerType> playerControlling;
 
-	private MagicPermanent(int id, EventBus eventBus, PlayerType playerControlling) {
+	private MagicPermanent(int id, PlayerType playerControlling) {
 		super(id);
-		this.eventBus = eventBus;
 		this.playerControlling = new SimpleObjectProperty<>(playerControlling);
 		baseToughness = getToughness();
 		damage = new SimpleIntegerProperty(0);
@@ -98,8 +92,8 @@ public class MagicPermanent extends MagicCard {
 	}
 
 	@Inject
-	MagicPermanent(EventBus eventBus, @Assisted MagicCard magicCard) {
-		this(magicCard.getId(), eventBus, magicCard.getPlayerOwning());
+	MagicPermanent(@Assisted MagicCard magicCard) {
+		this(magicCard.getId(), magicCard.getPlayerOwning());
 		setDisplayName(magicCard.getDisplayName());
 		setFileName(magicCard.getFileName());
 		setListCharacteristicAbilities(magicCard.propertyListAbilities());
@@ -142,6 +136,10 @@ public class MagicPermanent extends MagicCard {
 		return !getFlagIsTapped();
 	}
 
+	public int getBaseToughness() {
+		return baseToughness;
+	}
+
 	public int getDamage() {
 		return damage.get();
 	}
@@ -156,6 +154,10 @@ public class MagicPermanent extends MagicCard {
 
 	public PlayerType getPlayerControlling() {
 		return playerControlling.get();
+	}
+
+	public boolean isActivatable() {
+		return !getListAbilities().isEmpty();
 	}
 
 	public boolean isFlagAttacking() {
@@ -237,33 +239,15 @@ public class MagicPermanent extends MagicCard {
 
 	public void setPlayerControlling(PlayerType playerControlling) {
 		this.playerControlling.set(playerControlling);
-		;
 	}
 
-	/**
-	 * Prüft, ob die Kreatur tödlich verwundet wurde.
-	 *
-	 * @return true, wenn der Schaden größer oder gleich groß ist wie die
-	 *         Zähigkeit der Kreatur.
-	 */
-	private boolean checkLethalDamage() {
-		return getToughness() <= 0;
+	@Override
+	public void setToughness(int toughness) {
+		super.setToughness(toughness);
 	}
 
-	/**
-	 * Löst eine statusbasierte Aktion aus, wenn die Verteidigung der bleibenden
-	 * Karte unter 0 fällt.
-	 */
-	private void fireCreatureKill() {
-		getEventBus().post(new SBACreatureToughnessZero(this, getPlayerControlling()));
-	}
-
-	private EventBus getEventBus() {
-		return eventBus;
-	}
-
-	public boolean isActivatable() {
-		return !getListAbilities().isEmpty();
-	}
+	// private EventBus getEventBus() {
+	// return eventBus;
+	// }
 
 }

@@ -2,7 +2,6 @@ package de.mca.model;
 
 import java.util.Set;
 
-import com.google.common.eventbus.EventBus;
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
 
@@ -24,10 +23,6 @@ public class Step {
 	 */
 	private final TurnBasedActionType endTBA;
 	/**
-	 * Speichert den EventBus.
-	 */
-	private final EventBus eventBus;
-	/**
 	 * Zeigt an, ob der Spielschritt wiederholt wird.
 	 */
 	private final BooleanProperty propertyFlagStepRepeated;
@@ -40,6 +35,10 @@ public class Step {
 	 */
 	private final BooleanProperty propertyFlagStepSkipped;
 	/**
+	 * Speichert den RuleEnforcer.
+	 */
+	private RuleEnforcer ruleEnforcer;
+	/**
 	 * Speichert die rundenbasiertes Aktionen, die zu Beginn des Spielschrittes
 	 * gefeuert werden.
 	 */
@@ -50,8 +49,9 @@ public class Step {
 	private final StepType stepType;
 
 	@Inject
-	Step(EventBus eventBus, @Assisted StepType stepType, @Assisted Set<TurnBasedActionType> setStartTBAs) {
-		this.eventBus = eventBus;
+	Step(@Assisted RuleEnforcer ruleEnforcer, @Assisted StepType stepType,
+			@Assisted Set<TurnBasedActionType> setStartTBAs) {
+		this.ruleEnforcer = ruleEnforcer;
 		this.stepType = stepType;
 		this.setStartTBAs = setStartTBAs;
 		endTBA = TurnBasedActionType.CLEAR_MANA_POOLS;
@@ -61,11 +61,11 @@ public class Step {
 	}
 
 	public void fireCombatDamageAssignment() {
-		eventBus.post(new TurnBasedAction(this, TurnBasedActionType.COMBAT_DAMAGE_ASSIGNMENT));
+		ruleEnforcer.examineTurnBasedAction(new TurnBasedAction(this, TurnBasedActionType.COMBAT_DAMAGE_ASSIGNMENT));
 	}
 
 	public void fireCombatDamageDealing() {
-		eventBus.post(new TurnBasedAction(this, TurnBasedActionType.COMBAT_DAMAGE_DEALING));
+		ruleEnforcer.examineTurnBasedAction(new TurnBasedAction(this, TurnBasedActionType.COMBAT_DAMAGE_DEALING));
 	}
 
 	public void fireDeclareDamageAssignmentBlocker() {
@@ -76,7 +76,8 @@ public class Step {
 		 * sequenzielle Abarbeitung zu gewährleisten muss der Aufruf in diesem
 		 * Fall an einen Ort verlegt werden.
 		 */
-		eventBus.post(new TurnBasedAction(this, TurnBasedActionType.DECLARE_DAMAGE_ASSIGNMENT_ORDER_BLOCKER));
+		ruleEnforcer.examineTurnBasedAction(
+				new TurnBasedAction(this, TurnBasedActionType.DECLARE_DAMAGE_ASSIGNMENT_ORDER_BLOCKER));
 	}
 
 	@Override
@@ -85,11 +86,11 @@ public class Step {
 	}
 
 	private void fireEndTBA() {
-		eventBus.post(new TurnBasedAction(this, endTBA));
+		ruleEnforcer.examineTurnBasedAction(new TurnBasedAction(this, endTBA));
 	}
 
 	private void fireStartTBAs() {
-		setStartTBAs.forEach(tbat -> eventBus.post(new TurnBasedAction(this, tbat)));
+		setStartTBAs.forEach(tbat -> ruleEnforcer.examineTurnBasedAction(new TurnBasedAction(this, tbat)));
 	}
 
 	private void setFlagStepRunning(boolean flagRunning) {

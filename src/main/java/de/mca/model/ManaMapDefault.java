@@ -1,5 +1,6 @@
 package de.mca.model;
 
+import java.util.EnumSet;
 import java.util.Set;
 
 import de.mca.model.enums.ColorType;
@@ -110,6 +111,10 @@ public class ManaMapDefault implements IsManaMap {
 	@Override
 	public int getTotalMana() {
 		return getTotalColoredMana() + get(ColorType.NONE);
+	}
+
+	public Set<ColorType> getTrueColorKeySet() {
+		return EnumSet.of(ColorType.BLACK, ColorType.BLUE, ColorType.GREEN, ColorType.RED, ColorType.WHITE);
 	}
 
 	@Override
