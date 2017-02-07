@@ -142,6 +142,7 @@ public class ActivatedAbility implements IsStackable {
 		return propertyListCostMaps;
 	}
 
+	@Override
 	public ListProperty<Effect> propertyListEffects() {
 		return propertyListEffects;
 	}
