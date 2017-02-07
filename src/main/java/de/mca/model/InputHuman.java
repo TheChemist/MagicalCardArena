@@ -36,6 +36,11 @@ public class InputHuman implements IsInput {
 	}
 
 	@Override
+	public Match getMatch() {
+		return getPlayer().getMatch();
+	}
+
+	@Override
 	public MatchPresenter getMatchPresenter() {
 		return matchPresenter;
 	}
@@ -80,7 +85,7 @@ public class InputHuman implements IsInput {
 
 	public void progress() {
 		switch (getPlayer().getPlayerState()) {
-		case SELECTING_ATTACKER:
+		case ATTACKING:
 			if (getPlayer().getFlagDeclaringAttackers()) {
 				// Spieler befindet sich im Auswahlmodus für Angreifer.
 
@@ -123,20 +128,20 @@ public class InputHuman implements IsInput {
 			public void changed(ObservableValue<? extends PlayerState> observable, PlayerState oldValue,
 					PlayerState newValue) {
 				switch (newValue) {
-				case SELECTING_ATTACKER:
+				case ATTACKING:
 					if (getPlayer().getFlagDeclaringAttackers()) {
 						// Auswahlmodus für Angreifer.
-						getPlayer().getRuleEnforcer().checkInteractable(getPlayer());
+						getPlayer().getRuleEnforcer().i_deriveInteractionStatus(getPlayer());
 					}
 					break;
 				case DEFENDING:
 					if (getPlayer().getFlagDeclaringBlockers()) {
 						// Auswahlmodus für Blocker.
-						getPlayer().getRuleEnforcer().checkInteractable(getPlayer());
+						getPlayer().getRuleEnforcer().i_deriveInteractionStatus(getPlayer());
 					}
 					break;
 				case PRIORITIZED:
-					getPlayer().getRuleEnforcer().checkInteractable(getPlayer());
+					getPlayer().getRuleEnforcer().i_deriveInteractionStatus(getPlayer());
 					break;
 				default:
 					break;

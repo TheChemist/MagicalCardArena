@@ -3,7 +3,6 @@ package de.mca.model;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.google.common.eventbus.EventBus;
 import com.google.gson.JsonArray;
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
@@ -135,7 +134,6 @@ public class ActivatedAbility implements IsStackable {
 
 	@Override
 	public boolean isPermanentSpell() {
-		// TODO MID Nachzutragende Methodenimplementierung
 		return false;
 	}
 

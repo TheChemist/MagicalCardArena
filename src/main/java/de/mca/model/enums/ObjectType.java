@@ -35,16 +35,6 @@ public enum ObjectType {
 		return IS_PERMANENT.contains(this);
 	}
 
-	/**
-	 * Bei Permanent Spells handelt es sich um Permanents, die im Zuge ihrer
-	 * Verarbeitungs am Stack zu einem Permanent werden. Dies sind alle,
-	 * abgesehen von Ländern (rule=110.4b). Regel 608.3 beschreibt wie sie auf
-	 * dem Stack zu behandeln sind.
-	 */
-	public boolean isPermanentSpell() {
-		return isPermanent() && isSpell();
-	}
-
 	public final boolean isSpell() {
 		return IS_SPELL.contains(this);
 	}

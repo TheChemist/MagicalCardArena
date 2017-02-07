@@ -309,8 +309,7 @@ public final class Player implements IsPlayer {
 
 	@Override
 	public boolean isAttacking() {
-		return getPlayerState().equals(PlayerState.SELECTING_ATTACKER)
-				|| getPlayerState().equals(PlayerState.SELECTING_ATTACK_TARGET);
+		return getPlayerState().equals(PlayerState.ATTACKING);
 	}
 
 	@Override

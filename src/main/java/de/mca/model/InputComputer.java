@@ -1,6 +1,5 @@
 package de.mca.model;
 
-import java.util.List;
 import java.util.Random;
 
 import org.slf4j.Logger;
@@ -8,10 +7,9 @@ import org.slf4j.LoggerFactory;
 
 import de.mca.model.enums.ObjectType;
 import de.mca.model.enums.PlayerState;
-import de.mca.model.interfaces.IsAttackTarget;
 import de.mca.model.interfaces.IsInput;
-import de.mca.model.interfaces.IsManaMap;
 import de.mca.model.interfaces.IsPlayer;
+import de.mca.model.interfaces.IsZone;
 import de.mca.presenter.MatchPresenter;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -39,56 +37,9 @@ public class InputComputer implements IsInput {
 	InputComputer() {
 	}
 
-	public ActivatedAbility determineAbility(List<ActivatedAbility> listLegalAbilities) {
-		// TODO MID KI-Entscheidung
-		throw new UnsupportedOperationException("Computer muss Entscheidung treffen, die er nicht treffen kann");
-	}
-
-	public MagicPermanent determineAttacker(List<MagicPermanent> legalAttackers) throws UnsupportedOperationException {
-		// TODO MID KI-Entscheidung
-		throw new UnsupportedOperationException("Computer muss Entscheidung treffen, die er nicht treffen kann");
-	}
-
-	public IsAttackTarget determineAttackTarget(List<IsAttackTarget> legalAttackTargets)
-			throws UnsupportedOperationException {
-		// TODO MID KI-Entscheidung
-		throw new UnsupportedOperationException("Computer muss Entscheidung treffen, die er nicht treffen kann");
-	}
-
-	public MagicPermanent determineBlocker(List<MagicPermanent> legalBlockers) throws UnsupportedOperationException {
-		// TODO MID KI-Entscheidung
-		throw new UnsupportedOperationException("Computer muss Entscheidung treffen, die er nicht treffen kann");
-	}
-
-	public int determineBlockTarget(List<Attack> listAttacks) throws UnsupportedOperationException {
-		// TODO MID KI-Entscheidung
-		throw new UnsupportedOperationException("Computer muss Entscheidung treffen, die er nicht treffen kann");
-	}
-
-	public MagicPermanent determineCardToActivate(List<MagicPermanent> legalPermanents)
-			throws UnsupportedOperationException {
-		// TODO MID KI-Entscheidung
-		throw new UnsupportedOperationException("Computer muss Entscheidung treffen, die er nicht treffen kann");
-	}
-
-	public MagicCard determineCardToCast(List<MagicCard> legalCards) throws UnsupportedOperationException {
-		// TODO MID KI-Entscheidung
-		throw new UnsupportedOperationException("Computer muss Entscheidung treffen, die er nicht treffen kann");
-	}
-
-	public MagicCard determineCardToDiscard(List<MagicCard> handCards) {
-		return handCards.get(new Random().nextInt(handCards.size()));
-	}
-
-	public IsManaMap determineCostGoal(List<IsManaMap> costMaps) throws UnsupportedOperationException {
-		// TODO MID KI-Entscheidung
-		throw new UnsupportedOperationException("Computer muss Entscheidung treffen, die er nicht treffen kann");
-	}
-
-	public List<MagicPermanent> determineDamageAssignmentOrderAttacker(List<MagicPermanent> blockers)
-			throws UnsupportedOperationException {
-		// TODO MID KI-Entscheidung
-		throw new UnsupportedOperationException("Computer muss Entscheidung treffen, die er nicht treffen kann");
+	@Override
+	public Match getMatch() {
+		return getPlayer().getMatch();
 	}
 
 	@Override
@@ -121,10 +72,19 @@ public class InputComputer implements IsInput {
 					PlayerState newValue) {
 				LOGGER.debug("{} changed({})", player, newValue);
 				switch (newValue) {
-				case SELECTING_ATTACKER:
+				case ATTACKING:
 					if (getPlayer().getFlagDeclaringAttackers()) {
 						// Auswahlmodus für Angreifer.
-						getPlayer().getRuleEnforcer().checkInteractable(getPlayer());
+						getRuleEnforcer().i_deriveInteractionStatus(getPlayer());
+
+						// Greife an mit allen Kreaturen
+						for (final MagicPermanent magicPermanent : getMatch().getZoneBattlefield()
+								.getAll(ObjectType.CREATURE)) {
+							if (magicPermanent.getFlagIsInteractable()) {
+								inputDeclareAttacker(magicPermanent);
+								return;
+							}
+						}
 
 						inputEndDeclareAttackers();
 					}
@@ -132,38 +92,47 @@ public class InputComputer implements IsInput {
 				case DEFENDING:
 					if (getPlayer().getFlagDeclaringBlockers()) {
 						// Auswahlmodus für Blocker.
-						getPlayer().getRuleEnforcer().checkInteractable(getPlayer());
+						getRuleEnforcer().i_deriveInteractionStatus(getPlayer());
+
+						// Blocke mit allen Kreaturen die erste Kreatur
+						for (final MagicPermanent magicPermanent : getMatch().getZoneBattlefield()
+								.getAll(ObjectType.CREATURE)) {
+							if (magicPermanent.getFlagIsInteractable()) {
+								inputDeclareBlocker(magicPermanent);
+								return;
+							}
+						}
 
 						inputEndDeclareBlockers();
 					}
 					break;
 				case DISCARDING:
-					inputDiscard(determineCardToDiscard(getPlayer().getZoneHand().getAll()));
+					IsZone<MagicCard> zoneHand = getPlayer().getZoneHand();
+					inputDiscard(zoneHand.get(new Random().nextInt(zoneHand.getSize())));
 					break;
 				case PRIORITIZED:
-					getPlayer().getRuleEnforcer().checkInteractable(getPlayer());
+					getRuleEnforcer().i_deriveInteractionStatus(getPlayer());
 
 					// Spiele zufälliges Land
 					for (final MagicCard magicCard : player.getZoneHand().getAll(ObjectType.LAND)) {
-						if (matchPresenter.getMatchActive().getCurrentPhase().isMain()
-								&& magicCard.getFlagIsInteractable()) {
+						if (magicCard.getFlagIsInteractable() && getMatch().getCurrentPhase().isMain()) {
 							inputPlayLand(magicCard);
 							return;
 						}
 					}
 
-					for (final MagicPermanent magicPermanent : matchPresenter.getMatchActive().getZoneBattlefield()
+					// Aktiviere erstes aktivierbares Permanent
+					for (final MagicPermanent magicPermanent : getMatch().getZoneBattlefield()
 							.getAll(ObjectType.LAND)) {
-						if (matchPresenter.getMatchActive().getCurrentPhase().isMain()
-								&& magicPermanent.getFlagIsInteractable()) {
+						if (magicPermanent.getFlagIsInteractable() && getMatch().getCurrentPhase().isMain()) {
 							inputActivatePermanent(magicPermanent);
 							return;
 						}
 					}
 
+					// Beschwöre erste beschwörbaren Zauberspruch.
 					for (final MagicCard magicCard : player.getZoneHand().getAll(ObjectType.CREATURE)) {
-						if (matchPresenter.getMatchActive().getCurrentPhase().isMain()
-								&& magicCard.getFlagIsInteractable()) {
+						if (magicCard.getFlagIsInteractable() && getMatch().getCurrentPhase().isMain()) {
 							inputCastSpell(magicCard);
 							return;
 						}

@@ -3,6 +3,7 @@ package de.mca.model.interfaces;
 import de.mca.model.MagicCard;
 import de.mca.model.MagicPermanent;
 import de.mca.model.MagicSpell;
+import de.mca.model.Match;
 import de.mca.model.RuleEnforcer;
 import de.mca.presenter.MatchPresenter;
 
@@ -12,6 +13,8 @@ import de.mca.presenter.MatchPresenter;
  *
  */
 public interface IsInput {
+
+	public Match getMatch();
 
 	// TODO HIGH Wieder request ermöglich, aber über Input.
 	public MatchPresenter getMatchPresenter();
@@ -31,8 +34,9 @@ public interface IsInput {
 		if (magicPermanent.getFlagIsInteractable()) {
 			// Führe Aktion aus.
 
-			getRuleEnforcer().actionBeginActivatePermanent(getPlayer(), magicPermanent);
+			getRuleEnforcer().i_activatePermanentStart(getPlayer(), magicPermanent);
 		} else {
+			System.out.println("Nope");
 			// Kann Aktion nicht ausführen.
 			/**
 			 * TODO HIGH throws new InteractionException()? Kann über ähnliches
@@ -52,8 +56,9 @@ public interface IsInput {
 		if (magicCard.getFlagIsInteractable()) {
 			// Führe Aktion aus.
 
-			getRuleEnforcer().actionBeginCastSpell(getPlayer(), magicCard);
+			getRuleEnforcer().i_castSpellStart(getPlayer(), magicCard);
 		} else {
+			System.out.println("Nope");
 			// Kann Aktion nicht ausführen.
 			/**
 			 * TODO HIGH throws new InteractionException()? Kann über ähnliches
@@ -66,7 +71,7 @@ public interface IsInput {
 	 * Informiert das Spiel über eine Spielerhandlung: Der Spieler gibt auf.
 	 */
 	public default void inputConcede() {
-		getRuleEnforcer().actionConcede(getPlayer());
+		getRuleEnforcer().i_concede(getPlayer());
 	}
 
 	/**
@@ -80,8 +85,9 @@ public interface IsInput {
 		if (magicPermanent.getFlagIsInteractable()) {
 			// Führe Aktion aus.
 
-			getRuleEnforcer().actionDeclareAttacker(getPlayer(), magicPermanent);
+			getRuleEnforcer().i_declareAttacker(getPlayer(), magicPermanent);
 		} else {
+			System.out.println("Nope");
 			// Kann Aktion nicht ausführen.
 			/**
 			 * TODO HIGH throws new InteractionException()? Kann über ähnliches
@@ -103,8 +109,9 @@ public interface IsInput {
 		if (magicPermanent.getFlagIsInteractable()) {
 			// Führe Aktion aus.
 
-			getRuleEnforcer().actionDeclareBlocker(getPlayer(), magicPermanent);
+			getRuleEnforcer().i_declareBlocker(getPlayer(), magicPermanent);
 		} else {
+			System.out.println("Nope");
 			// Kann Aktion nicht ausführen.
 			/**
 			 * TODO HIGH throws new InteractionException()? Kann über ähnliches
@@ -121,7 +128,7 @@ public interface IsInput {
 	 *            die abgeworfene Karte.
 	 */
 	public default void inputDiscard(MagicCard magicCard) {
-		getRuleEnforcer().actionDiscard(getPlayer(), magicCard);
+		getRuleEnforcer().i_discard(getPlayer(), magicCard);
 	}
 
 	/**
@@ -129,7 +136,7 @@ public interface IsInput {
 	 * keine weiteren Angreifer deklarieren.
 	 */
 	public default void inputEndDeclareAttackers() {
-		getRuleEnforcer().actionEndDeclareAttackers(getPlayer());
+		getRuleEnforcer().i_declareAttackersStop(getPlayer());
 	}
 
 	/**
@@ -137,7 +144,7 @@ public interface IsInput {
 	 * weiteren Blocker deklarieren.
 	 */
 	public default void inputEndDeclareBlockers() {
-		getRuleEnforcer().actionEndDeclareBlockers(getPlayer());
+		getRuleEnforcer().i_declareBlockersStop(getPlayer());
 	}
 
 	/**
@@ -145,7 +152,7 @@ public interface IsInput {
 	 * Priorität ab.
 	 */
 	public default void inputPassPriority() {
-		getRuleEnforcer().actionPassPriority(getPlayer());
+		getRuleEnforcer().i_passPriority(getPlayer());
 	}
 
 	/**
@@ -157,8 +164,9 @@ public interface IsInput {
 	 */
 	public default void inputPlayLand(MagicCard magicCard) {
 		if (magicCard.getFlagIsInteractable()) {
-			getRuleEnforcer().actionPlayLand(getPlayer(), magicCard);
+			getRuleEnforcer().i_playLand(getPlayer(), magicCard);
 		} else {
+			System.out.println("Nope");
 			// Kann Aktion nicht ausführen.
 			/**
 			 * TODO HIGH throws new InteractionException()? Kann über ähnliches

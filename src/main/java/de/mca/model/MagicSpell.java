@@ -1,10 +1,8 @@
 package de.mca.model;
 
-import com.google.common.eventbus.EventBus;
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
 
-import de.mca.model.enums.ObjectType;
 import de.mca.model.enums.PlayerType;
 import de.mca.model.interfaces.IsStackable;
 import javafx.beans.property.ObjectProperty;
@@ -94,16 +92,6 @@ public class MagicSpell extends MagicCard implements IsStackable {
 
 	public boolean isModal() {
 		// TODO LOW Feature modale Zaubersprüche.
-		return false;
-	}
-
-	@Override
-	public boolean isPermanentSpell() {
-		for (final ObjectType ot : propertySetObjectTypes()) {
-			if (ot.isPermanentSpell()) {
-				return true;
-			}
-		}
 		return false;
 	}
 

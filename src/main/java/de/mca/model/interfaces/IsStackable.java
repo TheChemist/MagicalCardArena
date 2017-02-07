@@ -49,11 +49,6 @@ public interface IsStackable {
 	 */
 	public ObservableList<IsManaMap> propertyListCostMaps();
 
-	// /**
-	// * Wird aufgerufen, wenn das Stackable aufgelöst wird.
-	// */
-	// public void resolve();
-
 	public ObservableList<Effect> propertyListEffects();
 
 	/**

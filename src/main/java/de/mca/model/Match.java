@@ -833,7 +833,7 @@ public final class Match {
 	void resetPlayerState(IsPlayer player) {
 		final boolean isCombatPhase = getCurrentPhase().isCombatPhase();
 		if (isPlayerActive(player)) {
-			player.setPlayerState(isCombatPhase ? PlayerState.SELECTING_ATTACKER : PlayerState.ACTIVE);
+			player.setPlayerState(isCombatPhase ? PlayerState.ATTACKING : PlayerState.ACTIVE);
 		} else {
 			player.setPlayerState(isCombatPhase ? PlayerState.DEFENDING : PlayerState.NONACTIVE);
 		}
@@ -849,7 +849,7 @@ public final class Match {
 	}
 
 	void setFlagNeedPlayerInput(boolean flagNeedPlayerInput, String caller) {
-		LOGGER.trace("{} setFlagNeedPlayerInput({}, {})", this, flagNeedPlayerInput, caller);
+		LOGGER.debug("{} setFlagNeedPlayerInput({}, {})", this, flagNeedPlayerInput, caller);
 		this.propertyNeedPlayerInput.set(flagNeedPlayerInput);
 	}
 
