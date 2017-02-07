@@ -35,6 +35,7 @@ public interface IsInput {
 			// Führe Aktion aus.
 
 			getRuleEnforcer().i_activatePermanentStart(getPlayer(), magicPermanent);
+			getPlayer().setFlagNeedInput(false);
 		} else {
 			System.out.println("Nope");
 			// Kann Aktion nicht ausführen.
@@ -57,6 +58,7 @@ public interface IsInput {
 			// Führe Aktion aus.
 
 			getRuleEnforcer().i_castSpellStart(getPlayer(), magicCard);
+			getPlayer().setFlagNeedInput(false);
 		} else {
 			System.out.println("Nope");
 			// Kann Aktion nicht ausführen.
@@ -72,6 +74,7 @@ public interface IsInput {
 	 */
 	public default void inputConcede() {
 		getRuleEnforcer().i_concede(getPlayer());
+		getPlayer().setFlagNeedInput(false);
 	}
 
 	/**
@@ -86,6 +89,7 @@ public interface IsInput {
 			// Führe Aktion aus.
 
 			getRuleEnforcer().i_declareAttacker(getPlayer(), magicPermanent);
+			getPlayer().setFlagNeedInput(false);
 		} else {
 			System.out.println("Nope");
 			// Kann Aktion nicht ausführen.
@@ -110,6 +114,7 @@ public interface IsInput {
 			// Führe Aktion aus.
 
 			getRuleEnforcer().i_declareBlocker(getPlayer(), magicPermanent);
+			getPlayer().setFlagNeedInput(false);
 		} else {
 			System.out.println("Nope");
 			// Kann Aktion nicht ausführen.
@@ -129,6 +134,7 @@ public interface IsInput {
 	 */
 	public default void inputDiscard(MagicCard magicCard) {
 		getRuleEnforcer().i_discard(getPlayer(), magicCard);
+		getPlayer().setFlagNeedInput(false);
 	}
 
 	/**
@@ -137,6 +143,7 @@ public interface IsInput {
 	 */
 	public default void inputEndDeclareAttackers() {
 		getRuleEnforcer().i_declareAttackersStop(getPlayer());
+		getPlayer().setFlagNeedInput(false);
 	}
 
 	/**
@@ -145,6 +152,7 @@ public interface IsInput {
 	 */
 	public default void inputEndDeclareBlockers() {
 		getRuleEnforcer().i_declareBlockersStop(getPlayer());
+		getPlayer().setFlagNeedInput(false);
 	}
 
 	/**
@@ -153,6 +161,7 @@ public interface IsInput {
 	 */
 	public default void inputPassPriority() {
 		getRuleEnforcer().i_passPriority(getPlayer());
+		getPlayer().setFlagNeedInput(false);
 	}
 
 	/**
@@ -165,6 +174,7 @@ public interface IsInput {
 	public default void inputPlayLand(MagicCard magicCard) {
 		if (magicCard.getFlagIsInteractable()) {
 			getRuleEnforcer().i_playLand(getPlayer(), magicCard);
+			getPlayer().setFlagNeedInput(false);
 		} else {
 			System.out.println("Nope");
 			// Kann Aktion nicht ausführen.

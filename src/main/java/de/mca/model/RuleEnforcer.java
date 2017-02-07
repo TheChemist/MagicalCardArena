@@ -240,7 +240,6 @@ public class RuleEnforcer {
 		}
 
 		// Kosten bezahlen.
-
 		actionPaymentStart(player, totalCostInformation);
 	}
 
@@ -252,7 +251,6 @@ public class RuleEnforcer {
 	 */
 	public void i_concede(IsPlayer player) {
 		LOGGER.debug("{} i_concede({})", this, player);
-		match.setFlagNeedPlayerInput(false, "i_concede()");
 		match.setFlagIsMatchRunning(false);
 	}
 
@@ -287,8 +285,7 @@ public class RuleEnforcer {
 
 		}
 
-		// TODO HIGH Trigger für KI.
-		player.setPlayerState(PlayerState.ATTACKING);
+		player.setFlagNeedInput(true);
 	}
 
 	/**
@@ -312,11 +309,10 @@ public class RuleEnforcer {
 			match.skipStepCombatDamage();
 		}
 
-		// Setze flags zurück
+		// Setze flag zurück
 		player.setFlagDeclareAttackers(false);
-		match.setFlagNeedPlayerInput(false, "actionEndDeclareAttackers()");
 
-		// Bestimme Priorität neu.
+		// Bestimme Priorität.
 		match.determinePlayerPrioritised();
 	}
 
@@ -345,8 +341,7 @@ public class RuleEnforcer {
 			match.declareBlocker(0, magicPermanent);
 		}
 
-		// TODO HIGH Trigger für KI.
-		player.setPlayerState(PlayerState.DEFENDING);
+		player.setFlagNeedInput(true);
 	}
 
 	/**
@@ -362,16 +357,15 @@ public class RuleEnforcer {
 			getEventBus().post(new ProgressNameChange(this, "Pass"));
 		}
 
+		// Setze flags zurück.
 		player.setFlagDeclareBlockers(false);
-
-		// Setze flagNeedPlayerInput zurück.
-		match.setFlagNeedPlayerInput(false, "i_declareBlockersStop()");
 
 		// Bestimme Priorität neu.
 		match.determinePlayerPrioritised();
 	}
 
 	public void i_deriveInteractionStatus(IsPlayer player) {
+		LOGGER.debug("{} i_deriveInteractionStatus({})", this, player);
 		for (final MagicCard magicCard : player.getZoneHand().getAll()) {
 			magicCard.setFlagIsInteractable(
 					checkCanPlayLand(player, magicCard) || checkCanCast(player, magicCard) ? true : false);
@@ -405,32 +399,30 @@ public class RuleEnforcer {
 	 */
 	public void i_passPriority(IsPlayer player) {
 		LOGGER.debug("{} i_passPriority({})", this, player);
-		player.setFlagPassedPriority(true);
 		match.resetPlayerState(player);
-		match.setFlagNeedPlayerInput(false, "actionPassPriority()");
+		player.setFlagPassedPriority(true);
 	}
 
 	/**
 	 * Wird aufgerufen, wenn ein Spieler ein Land spielt.
 	 *
-	 * @param playerActive
+	 * @param player
 	 *            der aktive Spieler
-	 * @param landCard
+	 * @param magicCard
 	 *            das Land.
 	 */
-	public void i_playLand(IsPlayer playerActive, MagicCard landCard) {
-		LOGGER.debug("{} i_playLand({}, {})", this, playerActive, landCard);
-		playerActive.setPlayerState(PlayerState.TAKING_SPECIAL_ACTION);
+	public void i_playLand(IsPlayer player, MagicCard magicCard) {
+		LOGGER.debug("{} i_playLand({}, {})", this, player, magicCard);
+		player.setPlayerState(PlayerState.TAKING_SPECIAL_ACTION);
 
 		// Bewege Karten
-		playerActive.removeCard(landCard, ZoneType.HAND);
-		match.addCard(factoryMagicPermanent.create(landCard), ZoneType.BATTLEFIELD);
+		player.removeCard(magicCard, ZoneType.HAND);
+		match.addCard(factoryMagicPermanent.create(magicCard), ZoneType.BATTLEFIELD);
 
-		// Setze Flag
-		playerActive.setFlagPlayedLand(true);
-
-		// Abschließen
-		playerActive.setPlayerState(PlayerState.PRIORITIZED);
+		// Setze Status und flags.
+		player.setPlayerState(PlayerState.PRIORITIZED);
+		player.setFlagPlayedLand(true);
+		player.setFlagNeedInput(true);
 	}
 
 	@Override
@@ -449,13 +441,10 @@ public class RuleEnforcer {
 	 */
 	private void actionActivateAbility(IsPlayer player, ActivatedAbility activatedAbility) {
 		LOGGER.debug("{} actionActivateAbility({}, {})", this, player, activatedAbility);
+		player.setPlayerState(PlayerState.ACTIVATING_ABILITY);
 
 		if (activatedAbility.isManaAbility()) {
 			// Manafertigkeit
-
-			// Wechsel des Spielerstatus zum Triggern von KI.
-			player.setPlayerState(PlayerState.ACTIVATING_ABILITY);
-
 			/**
 			 * Verkürzung für Manafertigkeiten. Effekte werden sofort generiert,
 			 * ohne den Umweg über den Stack.
@@ -477,13 +466,14 @@ public class RuleEnforcer {
 				((MagicPermanent) activatedAbility.getSource()).setFlagTapped(true);
 				break;
 			}
-
-			// Zurücksetzen Spielerstatus
-			player.setPlayerState(PlayerState.PRIORITIZED);
 		} else {
 			// Andere aktivierbare Fähigkeit
 
 		}
+
+		// Setze Status und flag.
+		player.setPlayerState(PlayerState.PRIORITIZED);
+		player.setFlagNeedInput(true);
 	}
 
 	/**
@@ -624,7 +614,7 @@ public class RuleEnforcer {
 
 			actionPaymentStop(player);
 		} else {
-			match.setFlagNeedPlayerInput(true, "stateBasedBeginPayment()");
+			player.setFlagNeedInput(true);
 		}
 	}
 
@@ -642,8 +632,9 @@ public class RuleEnforcer {
 		player.setManaCostAlreadyPaid(new ManaMapDefault());
 		player.setManaCostGoal(new ManaMapDefault());
 
-		// Setze Status zurück.
+		// Setze Status und flag.
 		player.setPlayerState(PlayerState.PRIORITIZED);
+		player.setFlagNeedInput(true);
 	}
 
 	/**
@@ -671,7 +662,7 @@ public class RuleEnforcer {
 		final boolean isActivatingAbility = player.isActivatingAbility();
 
 		final boolean result = isControlling && isUntapped && (isPrioritized || isCastingSpell || isActivatingAbility);
-		LOGGER.debug("{} checkCanActivatePermanent({}, {}) = {}", this, player, magicPermanent, result);
+		LOGGER.trace("{} checkCanActivatePermanent({}, {}) = {}", this, player, magicPermanent, result);
 		return result;
 	}
 
@@ -699,7 +690,7 @@ public class RuleEnforcer {
 		final boolean hasFlagDeclaringAttackers = player.getFlagDeclaringAttackers();
 
 		final boolean result = isControlling && isUnapped && !hasSummoningSickness && hasFlagDeclaringAttackers;
-		LOGGER.debug("{} checkCanAttack({}, {}) = {}", this, player, magicPermanent, result);
+		LOGGER.trace("{} checkCanAttack({}, {}) = {}", this, player, magicPermanent, result);
 		return result;
 	}
 
@@ -724,7 +715,7 @@ public class RuleEnforcer {
 		final boolean hasFlagDeclaringBlockers = player.getFlagDeclaringBlockers();
 
 		final boolean result = isControlling && isUntapped && hasFlagDeclaringBlockers;
-		LOGGER.debug("{} checkCanBlock({}, {}) = {}", this, player, magicPermanent, result);
+		LOGGER.trace("{} checkCanBlock({}, {}) = {}", this, player, magicPermanent, result);
 		return result;
 	}
 
@@ -769,7 +760,7 @@ public class RuleEnforcer {
 		// TODO HIGH Auf potenzielle Manaquellen überprüfen.
 
 		final boolean result = isActivePlayer && isMain && isStackEmpty && canPay;
-		LOGGER.debug("{} checkCanCast({}, {}) = {}", this, player, magicCard, result);
+		LOGGER.trace("{} checkCanCast({}, {}) = {}", this, player, magicCard, result);
 		return result;
 	}
 
@@ -785,7 +776,7 @@ public class RuleEnforcer {
 	 */
 	private boolean checkCanDiscard(IsPlayer player, int howMany) {
 		final boolean result = player.propertyHandSize().get() >= howMany;
-		LOGGER.debug("{} checkCanDiscard({}, {}) = {}", this, player, howMany, result);
+		LOGGER.trace("{} checkCanDiscard({}, {}) = {}", this, player, howMany, result);
 		return result;
 	}
 
@@ -798,7 +789,7 @@ public class RuleEnforcer {
 	 */
 	private boolean checkCanDraw(IsPlayer player) {
 		final boolean result = player.getZoneLibrary().getSize() >= 1;
-		LOGGER.debug("{} checkCanDraw({}) = {}", this, player, result);
+		LOGGER.trace("{} checkCanDraw({}) = {}", this, player, result);
 		return player.getZoneLibrary().getSize() >= 1;
 	}
 
@@ -824,7 +815,7 @@ public class RuleEnforcer {
 		final boolean hasLandFlag = player.getFlagPlayedLand();
 
 		final boolean result = isOwning && isActivePlayer && isMain && !hasLandFlag && isStackEmpty;
-		LOGGER.debug("{} checkCanPlayLand({}, {}) = {}", this, player, magicCard, result);
+		LOGGER.trace("{} checkCanPlayLand({}, {}) = {}", this, player, magicCard, result);
 		return result;
 	}
 
@@ -895,7 +886,7 @@ public class RuleEnforcer {
 		}
 
 		final boolean result = manaCostGoal.equals(manaCostAlreadyPaid);
-		LOGGER.debug("{} checkIsPaid({}) = {}", this, player, result);
+		LOGGER.trace("{} checkIsPaid({}) = {}", this, player, result);
 		return result;
 	}
 
@@ -912,7 +903,7 @@ public class RuleEnforcer {
 
 		// Setze Kampfschaden aller Angriffziele auf 0.
 		for (final IsAttackTarget attackTarget : match.getListAttackTargets()) {
-			attackTarget.resetCombatDamage();
+			attackTarget.resetDamage();
 		}
 
 		// Leere Liste mit Angriffen.
@@ -930,19 +921,21 @@ public class RuleEnforcer {
 		for (final Attack attack : match.getListAttacks()) {
 			final MagicPermanent attacker = attack.getSource();
 			final IsAttackTarget attackTarget = attack.getTarget();
+			final int attackerPower = attacker.getPower();
+
 			if (attacker.isFlagBlocked()) {
+				// Angreifer ist geblockt.
+
 				for (final MagicPermanent blocker : attack.propertyListBlockersSorted()) {
 					final int blockerPower = blocker.getPower();
-					final int attackerPower = attacker.getPower();
-					if (blockerPower > 0) {
-						attacker.setDamage(blockerPower);
-					}
-					if (attackerPower > 0) {
-						blocker.setDamage(attackerPower);
-					}
+
+					attacker.setDamage(blockerPower);
+					blocker.setDamage(attackerPower);
 				}
 			} else {
-				attackTarget.assignCombatDamage(attacker.getPower());
+				// Angreifer ist ungeblockt.
+
+				attackTarget.setDamage(attackTarget.getDamage() + attackerPower);
 			}
 		}
 
@@ -971,7 +964,7 @@ public class RuleEnforcer {
 		}
 
 		for (final IsAttackTarget attackTarget : match.getListAttackTargets()) {
-			attackTarget.applyCombatDamage();
+			attackTarget.substractLife(attackTarget.getDamage());
 		}
 	}
 
@@ -987,12 +980,12 @@ public class RuleEnforcer {
 	 * ja, wird eine Schadensreihenfolge festgelegt.
 	 *
 	 * @see http://magiccards.info/rule/510-combat-damage-step.html
-	 * @param playerActive
+	 * @param player
 	 *            Der aktive Spieler.
 	 */
-	private void tb_damageAssignmentAttackerStart(IsPlayer playerActive) {
-		LOGGER.debug("{} tb_damageAssignmentAttackerStart({})", this, playerActive);
-		playerActive.setPlayerState(PlayerState.ASSINGING_DAMAGE_ORDER_ATTACKER);
+	private void tb_damageAssignmentAttackerStart(IsPlayer player) {
+		LOGGER.debug("{} tb_damageAssignmentAttackerStart({})", this, player);
+		player.setPlayerState(PlayerState.ASSINGING_DAMAGE_ORDER_ATTACKER);
 
 		for (final Attack attack : match.getListAttacks()) {
 			final List<MagicPermanent> blockers = attack.propertyListBlockers();
@@ -1007,14 +1000,14 @@ public class RuleEnforcer {
 	 * Setzt den Spielerstatus des aktiven Spielers zurück auf ATTACKING. Feuert
 	 * danach die nächste TurnBasedAction ab, um den Schritt voran zu treiben.
 	 *
-	 * @param playerActive
+	 * @param player
 	 *            der aktive Spieler.
 	 * @param currentStep
 	 *            der aktuelle Schritt.
 	 */
-	private void tb_damageAssignmentAttackerStop(IsPlayer playerActive, Step currentStep) {
-		LOGGER.debug("{} actionEndDamageAssignmentAttacker({})", this, playerActive);
-		playerActive.setPlayerState(PlayerState.ATTACKING);
+	private void tb_damageAssignmentAttackerStop(IsPlayer player, Step currentStep) {
+		LOGGER.debug("{} tb_damageAssignmentAttackerStop({})", this, player);
+		player.setPlayerState(PlayerState.ATTACKING);
 
 		// Hier wird die nächste TBA abgefeuert.
 		currentStep.fireDeclareDamageAssignmentBlocker();
@@ -1026,15 +1019,13 @@ public class RuleEnforcer {
 	 * wird eine Schadenreihenfolge festgelegt.
 	 *
 	 * @see http://magiccards.info/rule/510-combat-damage-step.html
-	 * @param playerNonactive
+	 * @param player
 	 *            Der nichtaktive Spieler.
 	 */
-	private void tb_damageAssignmentBlockerStart(IsPlayer playerNonactive) {
+	private void tb_damageAssignmentBlockerStart(IsPlayer player) {
 		// TODO LOW Wird erst bei mehreren Blockzielen relevant.
-		LOGGER.debug("{} actionBeginDamageAssignmentBlocker({})", this, playerNonactive);
-		playerNonactive.setPlayerState(PlayerState.ASSIGNING_DAMAGE_ORDER_BLOCKERS);
-		LOGGER.debug("{} actionBeginDamageAssignmentBlocker({}) -> Schadensverteilung nicht notwendig!", this,
-				playerNonactive);
+		LOGGER.debug("{} tb_damageAssignmentBlockerStart({})", this, player);
+		player.setPlayerState(PlayerState.ASSIGNING_DAMAGE_ORDER_BLOCKERS);
 	}
 
 	/**
@@ -1042,14 +1033,14 @@ public class RuleEnforcer {
 	 * Feuert danach die nächste TurnBasedAction ab, um den Schritt voran zu
 	 * treiben.
 	 *
-	 * @param playerNonactive
+	 * @param player
 	 *            der nichtaktive Spieler.
 	 * @param currentStep
 	 *            der aktuelle Schritt.
 	 */
-	private void tb_damageAssignmentBlockerStop(IsPlayer playerNonactive, Step currentStep) {
-		LOGGER.debug("{} structureEndDamageAssignmentBlocker({})", this, playerNonactive);
-		playerNonactive.setPlayerState(PlayerState.DEFENDING);
+	private void tb_damageAssignmentBlockerStop(IsPlayer player, Step currentStep) {
+		LOGGER.debug("{} tb_damageAssignmentBlockerStop({})", this, player);
+		player.setPlayerState(PlayerState.DEFENDING);
 
 		// Hier wird die nächste TBA abgefeuert.
 		currentStep.fireCombatDamageAssignment();
@@ -1059,38 +1050,36 @@ public class RuleEnforcer {
 	 * Setzt die flagDeclareAttackers auf true und verlangt vom Spieler eine
 	 * Reaktion (flagNeedPlayerInput = true).
 	 *
-	 * @param playerActive
+	 * @param player
 	 *            der aktive Spieler.
 	 */
-	private void tb_declareAttackersStart(IsPlayer playerActive) {
-		LOGGER.debug("{} tb_declareAttackersStart({})", this, playerActive);
-		if (playerActive.equals(PlayerType.HUMAN)) {
+	private void tb_declareAttackersStart(IsPlayer player) {
+		LOGGER.debug("{} tb_declareAttackersStart({})", this, player);
+		if (player.equals(PlayerType.HUMAN)) {
 			getEventBus().post(new ProgressNameChange(this, "Finish"));
 		}
 
-		playerActive.setFlagDeclareAttackers(true);
-		playerActive.setPlayerState(PlayerState.ATTACKING);
-
-		match.setFlagNeedPlayerInput(true, "tb_declareAttackersStart()");
+		// Setze Status und flags.
+		player.setFlagDeclareAttackers(true);
+		player.setFlagNeedInput(true);
 	}
 
 	/**
 	 * Setzt die flagDeclareBlockers auf true und verlangt vom Spieler eine
 	 * Reaktion (flagNeedPlayerInput = true).
 	 *
-	 * @param playerNonactive
+	 * @param player
 	 *            der nichtaktive Spieler.
 	 */
-	private void tb_declareBlockersStart(IsPlayer playerNonactive) {
-		LOGGER.debug("{} tb_declareBlockersStart({})", this, playerNonactive);
-		if (playerNonactive.equals(PlayerType.HUMAN)) {
+	private void tb_declareBlockersStart(IsPlayer player) {
+		LOGGER.debug("{} tb_declareBlockersStart({})", this, player);
+		if (player.equals(PlayerType.HUMAN)) {
 			getEventBus().post(new ProgressNameChange(this, "Finish"));
 		}
 
-		playerNonactive.setFlagDeclareBlockers(true);
-		playerNonactive.setPlayerState(PlayerState.DEFENDING);
-
-		match.setFlagNeedPlayerInput(true, "tb_declareBlockersStart()");
+		// Setze Status und flags.
+		player.setFlagDeclareBlockers(true);
+		player.setFlagNeedInput(true);
 	}
 
 	// TODO MID Prüfung ausweiten und wieder reinnehmen.
@@ -1126,9 +1115,9 @@ public class RuleEnforcer {
 
 		// TODO HIGH Spieler muss abwerfen.
 		// TODO HIGH Button muss ausgegraut werde.
+		player.setPlayerState(PlayerState.DISCARDING);
 		for (int i = 0; i < (originalHandSize - Constants.HAND_SIZE); i++) {
-			player.setPlayerState(PlayerState.DISCARDING);
-			match.setFlagNeedPlayerInput(true, "tb_discardStart()");
+			player.setFlagNeedInput(true);
 		}
 	}
 

@@ -92,7 +92,7 @@ public class Attack {
 
 	@Override
 	public String toString() {
-		return new StringBuilder("[Attack s=[").append(source.toString()).append("] t=[").append(target.toString())
+		return new StringBuilder("[Attack s=[").append(source.get().toString()).append("] t=[").append(target.get().toString())
 				.append("]]").toString();
 	}
 

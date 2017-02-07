@@ -49,6 +49,9 @@ public final class Player implements IsPlayer {
 	 * Speichert den Manapool des Spielers.
 	 */
 	private final IsManaMap manaPool;
+	/**
+	 * Speichert eine Referenz auf das aktuelle Match.
+	 */
 	private Match match;
 	/**
 	 * Speichert den Spielertyp. Dient zur Identifikation.
@@ -57,7 +60,7 @@ public final class Player implements IsPlayer {
 	/**
 	 * Speichert den zugefügten Kampfschaden. Wird jede Runde zurück gesetzt.
 	 */
-	private final IntegerProperty propertyCombatDamage;
+	private final IntegerProperty propertyDamage;
 	/**
 	 * Speichert seperat noch Anzahl Karten in der Bibliothek.
 	 */
@@ -74,6 +77,10 @@ public final class Player implements IsPlayer {
 	 * Zeigt an, ob der Spieler gerade Verteidiger deklariert.
 	 */
 	private final BooleanProperty propertyFlagDeclaringBlockers;
+	/**
+	 * Zeigt an, ob von dem Spieler eine Eingabe erwartet wird.
+	 */
+	private final BooleanProperty propertyFlagNeedInput;
 	/**
 	 * Zeigt an, ob der Spieler bereits die Priorität abgegeben hat. Wird am
 	 * Ende jeden Schrittes wieder zurück gesetzt.
@@ -117,12 +124,13 @@ public final class Player implements IsPlayer {
 	public Player(FactoryZone zoneFactory, @Assisted PlayerType playerType) {
 		this.playerType = playerType;
 
-		propertyCombatDamage = new SimpleIntegerProperty(0);
+		propertyDamage = new SimpleIntegerProperty(0);
 		propertyDeckSize = new SimpleIntegerProperty(0);
 		propertyDisplayName = new SimpleStringProperty("");
 		propertyFlagDeclaringAttackers = new SimpleBooleanProperty(false);
 		propertyFlagDeclaringBlockers = new SimpleBooleanProperty(false);
 		propertyFlagPassedPriority = new SimpleBooleanProperty(false);
+		propertyFlagNeedInput = new SimpleBooleanProperty(false);
 		propertyFlagPlayedLand = new SimpleBooleanProperty(false);
 		propertyGraveSize = new SimpleIntegerProperty(0);
 		propertyHandSize = new SimpleIntegerProperty(0);
@@ -180,8 +188,7 @@ public final class Player implements IsPlayer {
 
 	@Override
 	public void addLife(int life) {
-		LOGGER.trace("{} addLife({})", this, life);
-		propertyLife().add(life);
+		setLife(getLife() + life);
 	}
 
 	@Override
@@ -202,17 +209,6 @@ public final class Player implements IsPlayer {
 	}
 
 	@Override
-	public void applyCombatDamage() {
-		LOGGER.debug("{} applyCombatDamage()", this);
-		removeLife(getCombatDamage());
-	}
-
-	@Override
-	public void assignCombatDamage(int combatDamage) {
-		setCombatDamage(getCombatDamage() + combatDamage);
-	}
-
-	@Override
 	public boolean chechIsValidAttackTarget(MagicPermanent attacker) {
 		return !equals(attacker.getPlayerControlling());
 	}
@@ -220,6 +216,11 @@ public final class Player implements IsPlayer {
 	@Override
 	public boolean equals(PlayerType playerType) {
 		return getPlayerType().equals(playerType);
+	}
+
+	@Override
+	public int getDamage() {
+		return propertyDamage().get();
 	}
 
 	@Override
@@ -238,6 +239,11 @@ public final class Player implements IsPlayer {
 	}
 
 	@Override
+	public boolean getFlagNeedInput() {
+		return propertyFlagNeedInput.get();
+	}
+
+	@Override
 	public boolean getFlagPassedPriority() {
 		return propertyFlagPassedPriority.get();
 	}
@@ -245,6 +251,10 @@ public final class Player implements IsPlayer {
 	@Override
 	public boolean getFlagPlayedLand() {
 		return propertyFlagPlayedLand.get();
+	}
+
+	public int getLife() {
+		return propertyLife.get();
 	}
 
 	@Override
@@ -275,6 +285,11 @@ public final class Player implements IsPlayer {
 	@Override
 	public PlayerType getPlayerType() {
 		return playerType;
+	}
+
+	@Override
+	public IntegerProperty getPropertyLife() {
+		return propertyLife;
 	}
 
 	@Override
@@ -348,13 +363,18 @@ public final class Player implements IsPlayer {
 	}
 
 	@Override
-	public IntegerProperty propertyCombatDamage() {
-		return propertyCombatDamage;
+	public IntegerProperty propertyDamage() {
+		return propertyDamage;
 	}
 
 	@Override
 	public IntegerProperty propertyDeckSize() {
 		return propertyDeckSize;
+	}
+
+	@Override
+	public BooleanProperty propertyFlagNeedInput() {
+		return propertyFlagNeedInput;
 	}
 
 	@Override
@@ -418,15 +438,6 @@ public final class Player implements IsPlayer {
 	}
 
 	@Override
-	public void removeLife(int life) {
-		LOGGER.trace("{} removeLife({})", this, life);
-		propertyLife().subtract(life);
-		if (getLife() < 1) {
-			getRuleEnforcer().addStateBasedAction(new StateBasedAction(this, StateBasedActionType.PLAYER_LIFE_ZERO));
-		}
-	}
-
-	@Override
 	public void removeMana(ColorType colorType, int howMuch) {
 		LOGGER.trace("{} removeMana({}, {})", this, colorType, howMuch);
 		for (int i = 0; i < howMuch; i++) {
@@ -441,8 +452,14 @@ public final class Player implements IsPlayer {
 	}
 
 	@Override
-	public void resetCombatDamage() {
-		setCombatDamage(0);
+	public void resetDamage() {
+		setDamage(0);
+	}
+
+	@Override
+	public void setDamage(int damage) {
+		LOGGER.debug("{} setDamage({})", this, damage);
+		propertyDamage().set(damage > 0 ? damage : 0);
 	}
 
 	@Override
@@ -476,6 +493,12 @@ public final class Player implements IsPlayer {
 	}
 
 	@Override
+	public void setFlagNeedInput(boolean flagNeedInput) {
+		LOGGER.debug("{} setFlagNeedInput({})", this, flagNeedInput);
+		propertyFlagNeedInput().set(flagNeedInput);
+	}
+
+	@Override
 	public void setFlagPassedPriority(boolean flagPassedPriority) {
 		LOGGER.trace("{} setFlagPassedPriority({})", this, flagPassedPriority);
 		this.propertyFlagPassedPriority.set(flagPassedPriority);
@@ -485,6 +508,15 @@ public final class Player implements IsPlayer {
 	public void setFlagPlayedLand(boolean flagPlayedLand) {
 		LOGGER.trace("{} setFlagPlayedLand({})", this, flagPlayedLand);
 		this.propertyFlagPlayedLand.set(flagPlayedLand);
+	}
+
+	@Override
+	public void setLife(int life) {
+		LOGGER.trace("{} setLife({})", this, life);
+		propertyLife().set(life);
+		if (life < 1) {
+			getRuleEnforcer().addStateBasedAction(new StateBasedAction(this, StateBasedActionType.PLAYER_LIFE_ZERO));
+		}
 	}
 
 	@Override
@@ -506,8 +538,13 @@ public final class Player implements IsPlayer {
 
 	@Override
 	public void setPlayerState(PlayerState playerState) {
-		LOGGER.trace("{} setPlayerState({})", this, playerState);
+		LOGGER.debug("{} setPlayerState({})", this, playerState);
 		propertyPlayerState().set(playerState);
+	}
+
+	@Override
+	public void substractLife(int life) {
+		setLife(getLife() - life);
 	}
 
 	@Override
@@ -517,19 +554,6 @@ public final class Player implements IsPlayer {
 		// new StringBuilder("[pt=[").append(getPlayerType()).append("]
 		// ps=[").append(getPlayerState())
 		// .append("] l=[").append(getLife()).append("]]").toString();
-	}
-
-	private int getCombatDamage() {
-		return propertyCombatDamage().get();
-	}
-
-	private int getLife() {
-		return propertyLife.get();
-	}
-
-	private void setCombatDamage(int combatDamage) {
-		LOGGER.trace("{} setCombatDamage({})", this, combatDamage);
-		propertyCombatDamage().set(combatDamage);
 	}
 
 	private void setDeckSize(int deckSize) {

@@ -4,6 +4,7 @@ import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
 
 import de.mca.model.enums.PlayerType;
+import de.mca.model.interfaces.IsCombatant;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.ObjectProperty;
@@ -16,17 +17,13 @@ import javafx.beans.property.SimpleObjectProperty;
  * @author Maximilian Werling
  *
  */
-public class MagicPermanent extends MagicCard {
+public class MagicPermanent extends MagicCard implements IsCombatant {
 
 	/**
 	 * Speichert die Grundverteidigung der Kreatur, so wie sie auf der Karte
 	 * steht.
 	 */
 	private final int baseToughness;
-	/**
-	 * Speichert den Schaden der der Kreatur zugefügt wurden.
-	 */
-	private final IntegerProperty damage;
 	/**
 	 * Zeigt an, ob die Kreatur gerade angreift.
 	 */
@@ -73,12 +70,16 @@ public class MagicPermanent extends MagicCard {
 	 * @see http://magiccards.info/rule/109-objects.html#rule-109-4
 	 */
 	private final ObjectProperty<PlayerType> playerControlling;
+	/**
+	 * Speichert den Schaden der der Kreatur zugefügt wurden.
+	 */
+	private final IntegerProperty propertyDamage;
 
 	private MagicPermanent(int id, PlayerType playerControlling) {
 		super(id);
 		this.playerControlling = new SimpleObjectProperty<>(playerControlling);
 		baseToughness = getToughness();
-		damage = new SimpleIntegerProperty(0);
+		propertyDamage = new SimpleIntegerProperty(0);
 		flagAttacking = new SimpleBooleanProperty(false);
 		flagAttackingAlone = new SimpleBooleanProperty(false);
 		flagBlocked = new SimpleBooleanProperty(false);
@@ -111,8 +112,14 @@ public class MagicPermanent extends MagicCard {
 		setToughness(magicCard.getToughness());
 	}
 
+	@Override
 	public void applyCombatDamage() {
 		setToughness(getToughness() - getDamage());
+	}
+
+	@Override
+	public void assignCombatDamage(int combatDamage) {
+		setDamage(getDamage() + combatDamage);
 	}
 
 	/**
@@ -140,8 +147,9 @@ public class MagicPermanent extends MagicCard {
 		return baseToughness;
 	}
 
+	@Override
 	public int getDamage() {
-		return damage.get();
+		return propertyDamage().get();
 	}
 
 	public boolean getFlagHasSummoningSickness() {
@@ -192,8 +200,19 @@ public class MagicPermanent extends MagicCard {
 		return flagPhasedOut.get();
 	}
 
+	@Override
+	public IntegerProperty propertyDamage() {
+		return propertyDamage;
+	}
+
+	@Override
+	public void resetDamage() {
+		setDamage(0);
+	}
+
+	@Override
 	public void setDamage(int damage) {
-		this.damage.set(damage);
+		propertyDamage().set(damage > 0 ? damage : 0);
 	}
 
 	public void setFlagAttacking(boolean flagAttacking) {
@@ -245,9 +264,5 @@ public class MagicPermanent extends MagicCard {
 	public void setToughness(int toughness) {
 		super.setToughness(toughness);
 	}
-
-	// private EventBus getEventBus() {
-	// return eventBus;
-	// }
 
 }

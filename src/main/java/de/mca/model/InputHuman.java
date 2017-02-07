@@ -3,7 +3,6 @@ package de.mca.model;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import de.mca.model.enums.PlayerState;
 import de.mca.model.enums.ZoneType;
 import de.mca.model.interfaces.IsInput;
 import de.mca.model.interfaces.IsPlayer;
@@ -122,29 +121,16 @@ public class InputHuman implements IsInput {
 	@Override
 	public void setPlayer(IsPlayer player) {
 		this.player = player;
-		this.player.propertyPlayerState().addListener(new ChangeListener<PlayerState>() {
+
+		// Erstelle Binding zur flagNeedInput.
+		this.player.propertyFlagNeedInput().addListener(new ChangeListener<Boolean>() {
 
 			@Override
-			public void changed(ObservableValue<? extends PlayerState> observable, PlayerState oldValue,
-					PlayerState newValue) {
-				switch (newValue) {
-				case ATTACKING:
-					if (getPlayer().getFlagDeclaringAttackers()) {
-						// Auswahlmodus für Angreifer.
-						getPlayer().getRuleEnforcer().i_deriveInteractionStatus(getPlayer());
-					}
-					break;
-				case DEFENDING:
-					if (getPlayer().getFlagDeclaringBlockers()) {
-						// Auswahlmodus für Blocker.
-						getPlayer().getRuleEnforcer().i_deriveInteractionStatus(getPlayer());
-					}
-					break;
-				case PRIORITIZED:
+			public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
+				LOGGER.trace("{} changed({}, {})", player, oldValue, newValue);
+
+				if (newValue) {
 					getPlayer().getRuleEnforcer().i_deriveInteractionStatus(getPlayer());
-					break;
-				default:
-					break;
 				}
 			}
 

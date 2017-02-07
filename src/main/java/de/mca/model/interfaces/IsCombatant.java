@@ -1,6 +1,5 @@
 package de.mca.model.interfaces;
 
-import de.mca.model.MagicPermanent;
 import javafx.beans.property.IntegerProperty;
 
 /**
@@ -8,19 +7,20 @@ import javafx.beans.property.IntegerProperty;
  * @author Maximilian Werling
  *
  */
-public interface IsAttackTarget {
-
-	public void addLife(int life);
+public interface IsCombatant {
 
 	/**
-	 * Prüft, ob das Objekt für eine angreifende Kreatur ein legales Ziel
-	 * darstellt.
-	 *
-	 * @param attacker
-	 *            die angreifende Kreatur
-	 * @return true, wenn das Objekt ein legales Ziel darstellt.
+	 * Verrechnet den Kampfschaden mit den Lebenspunkten.
 	 */
-	public boolean chechIsValidAttackTarget(MagicPermanent attacker);
+	public void applyCombatDamage();
+
+	/**
+	 * Teilt dem Ziel eine gewisse Menge Kampfschaden zu.
+	 *
+	 * @param combatDamage
+	 *            die Menge an Kampfschaden, die dem Ziel zugeteilt werden.
+	 */
+	public void assignCombatDamage(int combatDamage);
 
 	/**
 	 * Liefert den aktuellen Schaden des Angriffsziels.
@@ -28,10 +28,6 @@ public interface IsAttackTarget {
 	 * @return der aktuelle Schaden des Ziels.
 	 */
 	public int getDamage();
-
-	public int getLife();
-
-	public IntegerProperty getPropertyLife();
 
 	/**
 	 * Liefert die Schaden-Eigenschaft.
@@ -52,9 +48,5 @@ public interface IsAttackTarget {
 	 *            der Schaden.
 	 */
 	public void setDamage(int damage);
-
-	public void setLife(int life);
-
-	public void substractLife(int life);
 
 }

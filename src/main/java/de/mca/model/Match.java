@@ -14,7 +14,6 @@ import de.mca.Constants;
 import de.mca.factories.FactoryMagicPermanent;
 import de.mca.factories.FactoryTurn;
 import de.mca.factories.FactoryZone;
-import de.mca.model.enums.ObjectType;
 import de.mca.model.enums.PlayerState;
 import de.mca.model.enums.PlayerType;
 import de.mca.model.enums.ZoneType;
@@ -91,10 +90,6 @@ public final class Match {
 	 */
 	private final BooleanProperty propertyMatchRunning;
 	/**
-	 * Zeigt an, ob Input von Spieler benötigt wird.
-	 */
-	private final BooleanProperty propertyNeedPlayerInput;
-	/**
 	 * Speichert den aktiven Spieler.
 	 */
 	private final ObjectProperty<IsPlayer> propertyPlayerActive;
@@ -146,7 +141,6 @@ public final class Match {
 		propertyCurrentTurn = new SimpleObjectProperty<>(null);
 		propertyExileSize = new SimpleIntegerProperty(0);
 		propertyMatchRunning = new SimpleBooleanProperty(false);
-		propertyNeedPlayerInput = new SimpleBooleanProperty(false);
 		propertyListAttacks = new SimpleListProperty<>(FXCollections.observableArrayList(new ArrayList<>()));
 		propertyListAttackTargets = new SimpleListProperty<>(FXCollections.observableArrayList(new ArrayList<>()));
 		propertyListTurns = new SimpleListProperty<>(FXCollections.observableArrayList(new ArrayList<>()));
@@ -192,9 +186,9 @@ public final class Match {
 		return propertyExileSize;
 	}
 
-	public BooleanProperty propertyFlagNeedPlayerInput() {
-		return propertyNeedPlayerInput;
-	}
+	// public BooleanProperty propertyFlagNeedPlayerInput() {
+	// return propertyNeedPlayerInput;
+	// }
 
 	public ObjectProperty<IsPlayer> propertyPlayerActive() {
 		return propertyPlayerActive;
@@ -220,7 +214,7 @@ public final class Match {
 	}
 
 	public void update() {
-		if (getFlagNeedPlayerInput()) {
+		if (waitForInput()) {
 			return;
 		}
 
@@ -275,7 +269,7 @@ public final class Match {
 				// Spieler haben gespasst, es liegt nichts auf dem Stack.
 
 				// Beende Phase
-				phaseEnd(false, isPhaseRunning(), getFlagNeedPlayerInput());
+				phaseEnd(false, isPhaseRunning(), waitForInput());
 			}
 
 		} else {
@@ -307,11 +301,11 @@ public final class Match {
 					 */
 
 					// Beende Phase
-					phaseEnd(false, isPhaseRunning(), getFlagNeedPlayerInput());
+					phaseEnd(false, isPhaseRunning(), waitForInput());
 				}
 			}
 
-			if (checkPlayersGetPriority() && !getFlagNeedPlayerInput()) {
+			if (checkPlayersGetPriority() && !waitForInput()) {
 				// Spieler erhalten in diesem Schritt Priorität.
 
 				// Spiele Schritt
@@ -328,19 +322,19 @@ public final class Match {
 					// Spieler haben gespasst, es liegt nichts auf dem Stack.
 
 					// Beende Schritt
-					stepEnd(getFlagNeedPlayerInput());
+					stepEnd(waitForInput());
 
 					// Beende Phase
-					phaseEnd(getCurrentPhase().hasNextStep(), isPhaseRunning(), getFlagNeedPlayerInput());
+					phaseEnd(getCurrentPhase().hasNextStep(), isPhaseRunning(), waitForInput());
 				}
 			} else {
 				// Spieler erhalten keine Priorität.
 
 				// Beende Schritt
-				stepEnd(getFlagNeedPlayerInput());
+				stepEnd(waitForInput());
 
 				// Beende Phase
-				phaseEnd(getCurrentPhase().hasNextStep(), isPhaseRunning(), getFlagNeedPlayerInput());
+				phaseEnd(getCurrentPhase().hasNextStep(), isPhaseRunning(), waitForInput());
 			}
 		}
 
@@ -428,21 +422,6 @@ public final class Match {
 		return playerStarting;
 	}
 
-	/**
-	 * Liefert eine Liste aller kontrollierten Kreaturen auf dem Spielfeld.
-	 *
-	 * @return eine Liste aller kontrollierten Kreaturen auf dem Spielfeld.
-	 */
-	private List<MagicPermanent> getControlledCreatures(IsPlayer player) {
-		final List<MagicPermanent> result = new ArrayList<>();
-		getZoneBattlefield().getAll(player.getPlayerType()).forEach(magicPermanent -> {
-			if (magicPermanent.contains(ObjectType.CREATURE)) {
-				result.add(magicPermanent);
-			}
-		});
-		return result;
-	}
-
 	private Step getCurrentStep() {
 		return propertyCurrentStep().get();
 	}
@@ -458,32 +437,6 @@ public final class Match {
 	 */
 	private boolean getFlagMatchRunning() {
 		return propertyMatchRunning.get();
-	}
-
-	private List<MagicPermanent> getListLegalAttackers(IsPlayer player) {
-		final List<MagicPermanent> result = new ArrayList<>();
-		getControlledCreatures(player).forEach(magicPermanent -> {
-			final MagicPermanent attacker = magicPermanent;
-			if (attacker.checkCanAttack()) {
-				result.add(attacker);
-			}
-		});
-		return result;
-	}
-
-	private List<MagicPermanent> getListLegalBlockers(IsPlayer player) {
-		final List<MagicPermanent> result = new ArrayList<>();
-		for (final MagicPermanent mp : getControlledCreatures(player)) {
-			final MagicPermanent blocker = mp;
-			if (blocker.checkCanBlock()) {
-				result.add(blocker);
-			}
-		}
-		return result;
-	}
-
-	private IsPlayer getPlayerPrioritized() {
-		return propertyPlayerPrioritized().get();
 	}
 
 	private int getTurnNumber() {
@@ -583,21 +536,20 @@ public final class Match {
 		propertyListTurns.add(turn);
 	}
 
-	private void setPlayerActive(IsPlayer playerActive) {
-		LOGGER.trace("{} setPlayerActive({})", this, playerActive);
-		propertyPlayerActive().set(playerActive);
+	private void setPlayerActive(IsPlayer player) {
+		LOGGER.trace("{} setPlayerActive({})", this, player);
+		propertyPlayerActive().set(player);
 		getPlayerActive().setPlayerState(PlayerState.ACTIVE);
 		getPlayerNonactive().setPlayerState(PlayerState.NONACTIVE);
 	}
 
-	private void setPlayerPrioritized(IsPlayer playerPrioritized) {
-		LOGGER.trace("{} setPlayerPrioritized({})", this, playerPrioritized);
-		propertyPlayerPrioritized().set(playerPrioritized);
+	private void setPlayerPrioritized(IsPlayer player) {
+		LOGGER.trace("{} setPlayerPrioritized({})", this, player);
+		propertyPlayerPrioritized().set(player);
 
-		// Setze Input Flag.
-		setFlagNeedPlayerInput(true, "setPlayerPrioritized()");
-
-		getPlayerPrioritized().setPlayerState(PlayerState.PRIORITIZED);
+		// Setze Status und flag.
+		player.setPlayerState(PlayerState.PRIORITIZED);
+		player.setFlagNeedInput(true);
 	}
 
 	/**
@@ -677,6 +629,13 @@ public final class Match {
 
 	}
 
+	private boolean waitForInput() {
+		final IsPlayer playerActive = getPlayerActive();
+		final IsPlayer playerNonactive = getPlayerNonactive();
+		return playerActive.getFlagNeedInput() || playerNonactive.getFlagNeedInput()
+				|| playerActive.getFlagDeclaringAttackers() || playerNonactive.getFlagDeclaringBlockers();
+	}
+
 	/**
 	 * Fügt dem Match einen neuen Angriff hinzu, der zu gegebener Zeit
 	 * durchgeführt wird.
@@ -714,21 +673,21 @@ public final class Match {
 		final IsPlayer playerNonactive = getPlayerNonactive();
 
 		if (!playerActive.getFlagPassedPriority() && !playerActive.isPaying()) {
-			LOGGER.debug("{} determinePlayerPrioritised() -> {}", this, playerActive);
+			LOGGER.trace("{} determinePlayerPrioritised() -> {}", this, playerActive);
 			setPlayerPrioritized(playerActive);
 			return;
 		} else if (!playerNonactive.getFlagPassedPriority() && playerNonactive.isPaying()) {
-			LOGGER.debug("{} determinePlayerPrioritised() -> {}", this, playerNonactive);
+			LOGGER.trace("{} determinePlayerPrioritised() -> {}", this, playerNonactive);
 			setPlayerPrioritized(playerNonactive);
 			return;
 		}
 
 		if (!playerActive.getFlagPassedPriority() && !playerActive.isPaying()) {
-			LOGGER.debug("{} determinePlayerPrioritised() -> {}", this, playerActive);
+			LOGGER.trace("{} determinePlayerPrioritised() -> {}", this, playerActive);
 			setPlayerPrioritized(playerActive);
 			return;
 		} else if (!playerNonactive.getFlagPassedPriority() && !playerNonactive.isPaying()) {
-			LOGGER.debug("{} determinePlayerPrioritised() -> {}", this, playerNonactive);
+			LOGGER.trace("{} determinePlayerPrioritised() -> {}", this, playerNonactive);
 			setPlayerPrioritized(playerNonactive);
 			return;
 		}
@@ -738,10 +697,6 @@ public final class Match {
 
 	Phase getCurrentPhase() {
 		return propertyCurrentPhase().get();
-	}
-
-	boolean getFlagNeedPlayerInput() {
-		return propertyFlagNeedPlayerInput().get();
 	}
 
 	List<Attack> getListAttacks() {
@@ -846,11 +801,6 @@ public final class Match {
 	void setFlagIsMatchRunning(boolean flagIsMatchRunning) {
 		LOGGER.trace("{} setFlagIsMatchRunning() -> {}", this, flagIsMatchRunning);
 		this.propertyMatchRunning.set(flagIsMatchRunning);
-	}
-
-	void setFlagNeedPlayerInput(boolean flagNeedPlayerInput, String caller) {
-		LOGGER.debug("{} setFlagNeedPlayerInput({}, {})", this, flagNeedPlayerInput, caller);
-		this.propertyNeedPlayerInput.set(flagNeedPlayerInput);
 	}
 
 	void skipStepCombatDamage() {

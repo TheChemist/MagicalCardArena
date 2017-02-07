@@ -11,6 +11,7 @@ import de.mca.model.enums.ColorType;
 import de.mca.model.enums.PlayerState;
 import de.mca.model.enums.PlayerType;
 import de.mca.model.enums.ZoneType;
+import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.ObjectProperty;
 
@@ -24,14 +25,6 @@ public interface IsPlayer extends IsAttackTarget {
 	public void addAllCards(List<MagicCard> cardList, ZoneType zoneType);
 
 	public void addCard(MagicCard magicCard, ZoneType zoneType);
-
-	/**
-	 * Die Lebenspunkte des Spielers werden um n erhöht.
-	 *
-	 * @param lifepoints
-	 *            Anzahl, um welche die Lebenspunkte des Spielers erhöht werden.
-	 */
-	public void addLife(int lifepoints);
 
 	/**
 	 * Erhöht den Manavorrat der Farbe x um den Betrag n.
@@ -68,6 +61,8 @@ public interface IsPlayer extends IsAttackTarget {
 	 * @return true, wenn der Spieler noch Verteidiger deklariert.
 	 */
 	public boolean getFlagDeclaringBlockers();
+
+	public boolean getFlagNeedInput();
 
 	public boolean getFlagPassedPriority();
 
@@ -160,6 +155,8 @@ public interface IsPlayer extends IsAttackTarget {
 
 	public IntegerProperty propertyDeckSize();
 
+	public BooleanProperty propertyFlagNeedInput();
+
 	public IntegerProperty propertyGraveSize();
 
 	public IntegerProperty propertyHandSize();
@@ -171,15 +168,6 @@ public interface IsPlayer extends IsAttackTarget {
 	public void removeAllCards(ZoneType zoneType);
 
 	public void removeCard(MagicCard magicCard, ZoneType zoneType);
-
-	/**
-	 * Die Lebenspunkte des Spielers werden um n erniedrigt.
-	 *
-	 * @param lifepoints
-	 *            Anzahl, um welche die Lebenspunkte des Spielers erniedrigt
-	 *            werden.
-	 */
-	public void removeLife(int life);
 
 	/**
 	 * Erniedrigt den Manavorrat der Farbe x um den Betrag n.
@@ -203,6 +191,8 @@ public interface IsPlayer extends IsAttackTarget {
 	public void setFlagDeclareAttackers(boolean flagDeclareAttackers);
 
 	public void setFlagDeclareBlockers(boolean flagDeclareBlockers);
+
+	public void setFlagNeedInput(boolean flagNeedInput);
 
 	public void setFlagPassedPriority(boolean flagPassedPriority);
 
