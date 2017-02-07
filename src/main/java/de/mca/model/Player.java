@@ -253,6 +253,7 @@ public final class Player implements IsPlayer {
 		return propertyFlagPlayedLand.get();
 	}
 
+	@Override
 	public int getLife() {
 		return propertyLife.get();
 	}

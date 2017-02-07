@@ -660,7 +660,7 @@ public final class Match {
 	}
 
 	void declareBlocker(int attackIndex, MagicPermanent blocker) {
-		propertyListAttacks.get(attackIndex).blockerAdd(blocker);
+		propertyListAttacks.get(attackIndex).addBlocker(blocker);
 	}
 
 	/**

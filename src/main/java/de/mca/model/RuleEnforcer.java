@@ -19,6 +19,7 @@ import de.mca.model.enums.PlayerType;
 import de.mca.model.enums.StateBasedActionType;
 import de.mca.model.enums.ZoneType;
 import de.mca.model.interfaces.IsAttackTarget;
+import de.mca.model.interfaces.IsCombatant;
 import de.mca.model.interfaces.IsManaMap;
 import de.mca.model.interfaces.IsPlayer;
 import de.mca.model.interfaces.IsStackable;
@@ -919,19 +920,17 @@ public class RuleEnforcer {
 	private void tb_combatDamageAssignment(Step currentStep) {
 		LOGGER.debug("{} tb_combatDamageAssignment({})", this, currentStep);
 		for (final Attack attack : match.getListAttacks()) {
-			final MagicPermanent attacker = attack.getSource();
-			final IsAttackTarget attackTarget = attack.getTarget();
+			final IsCombatant attacker = attack.getAttacker();
+			final IsAttackTarget attackTarget = attack.getAttackTarget();
 			final int attackerPower = attacker.getPower();
 
 			if (attacker.isFlagBlocked()) {
 				// Angreifer ist geblockt.
 
-				for (final MagicPermanent blocker : attack.propertyListBlockersSorted()) {
-					final int blockerPower = blocker.getPower();
-
-					attacker.setDamage(blockerPower);
+				attack.propertyListBlockers().forEach(blocker -> {
+					attacker.setDamage(blocker.getPower());
 					blocker.setDamage(attackerPower);
-				}
+				});
 			} else {
 				// Angreifer ist ungeblockt.
 
@@ -955,10 +954,11 @@ public class RuleEnforcer {
 	private void tb_combatDamageDealing() {
 		LOGGER.debug("{} tb_combatDamageDealing()", this);
 		for (final Attack attack : match.getListAttacks()) {
-			for (final MagicPermanent creature : attack.getCombatants()) {
+			for (final IsCombatant creature : attack.getCombatants()) {
 				creature.applyCombatDamage();
 				if (creature.getToughness() <= 0) {
-					addStateBasedAction(new SBACreatureToughnessZero(creature, creature.getPlayerControlling()));
+					addStateBasedAction(new SBACreatureToughnessZero((MagicPermanent) creature,
+							((MagicPermanent) creature).getPlayerControlling()));
 				}
 			}
 		}
@@ -988,8 +988,8 @@ public class RuleEnforcer {
 		player.setPlayerState(PlayerState.ASSINGING_DAMAGE_ORDER_ATTACKER);
 
 		for (final Attack attack : match.getListAttacks()) {
-			final List<MagicPermanent> blockers = attack.propertyListBlockers();
-			if (attack.getSource().isFlagBlocked() && blockers.size() > 1) {
+			final List<IsCombatant> blockers = attack.propertyListBlockers();
+			if (attack.getAttacker().isFlagBlocked() && blockers.size() > 1) {
 				// TODO MID Entscheidung: Schadensreihenfolge
 				attack.setBlockers(attack.propertyListBlockers());
 			}

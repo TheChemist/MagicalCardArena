@@ -3,6 +3,7 @@ package de.mca.model;
 import java.util.List;
 
 import de.mca.model.interfaces.IsAttackTarget;
+import de.mca.model.interfaces.IsCombatant;
 import javafx.beans.property.ListProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleListProperty;
@@ -18,36 +19,48 @@ import javafx.collections.ObservableList;
  */
 public class Attack {
 
-	/**
-	 * Speichert die unsortierten Verteidiger.
-	 */
-	private final ListProperty<MagicPermanent> listBlockers;
-	/**
-	 * Speichert die vom aktiven Spieler sortierten Verteidiger.
-	 */
-	private final ListProperty<MagicPermanent> listBlockersSorted;
+	// /**
+	// * Speichert die vom aktiven Spieler sortierten Verteidiger.
+	// */
+	// TODO MID Wieder verfügbar machen.
+	// private final ListProperty<IsCombatant> listBlockersSorted;
 	/**
 	 * Speichert die Kreatur von der der Angriff ausgeht.
 	 */
-	private final ObjectProperty<MagicPermanent> source;
+	private final ObjectProperty<IsCombatant> attacker;
 	/**
 	 * Speichert das Angriffziel.
 	 */
-	private final ObjectProperty<IsAttackTarget> target;
+	private final ObjectProperty<IsAttackTarget> attackTarget;
+	/**
+	 * Speichert die unsortierten Verteidiger.
+	 */
+	private final ListProperty<IsCombatant> listBlockers;
 
 	public Attack(MagicPermanent source, IsAttackTarget target) {
-		this.source = new SimpleObjectProperty<>(source);
-		this.target = new SimpleObjectProperty<>(target);
-		source.setFlagTapped(true);
-		source.setFlagAttacking(true);
-		listBlockers = new SimpleListProperty<>();
-		listBlockersSorted = new SimpleListProperty<>();
+		this.attacker = new SimpleObjectProperty<>(source);
+		this.attackTarget = new SimpleObjectProperty<>(target);
+		listBlockers = new SimpleListProperty<>(FXCollections.observableArrayList());
+		// listBlockersSorted = new
+		// SimpleListProperty<>(FXCollections.observableArrayList());
+
+		// TODO HIGH Besseren Ort für die flags suchen?
+		getAttacker().setFlagTapped(true);
+		getAttacker().setFlagAttacking(true);
 	}
 
-	public void blockerAdd(MagicPermanent blocker) {
-		blocker.setFlagBlocking(true);
-		getSource().setFlagBlocked(true);
-		listBlockers.add(blocker);
+	public void addBlocker(IsCombatant combatant) {
+		combatant.setFlagBlocking(true);
+		getAttacker().setFlagBlocking(true);
+		propertyListBlockers().add(combatant);
+	}
+
+	public IsCombatant getAttacker() {
+		return propertyAttacker().get();
+	}
+
+	public IsAttackTarget getAttackTarget() {
+		return attackTarget.get();
 	}
 
 	/**
@@ -55,45 +68,37 @@ public class Attack {
 	 *
 	 * @return Eine Liste, die Angreifer und ihm zugeteilte Blocker enthält.
 	 */
-	public ObservableList<MagicPermanent> getCombatants() {
-		final ObservableList<MagicPermanent> result = FXCollections.observableArrayList();
-		result.add(getSource());
+	public ObservableList<IsCombatant> getCombatants() {
+		final ObservableList<IsCombatant> result = FXCollections.observableArrayList();
+		result.add(getAttacker());
 		result.addAll(propertyListBlockers());
 		return result;
 	}
 
-	public MagicPermanent getSource() {
-		return source.get();
+	public ObjectProperty<IsCombatant> propertyAttacker() {
+		return attacker;
 	}
 
-	public IsAttackTarget getTarget() {
-		return target.get();
+	// public ObservableList<IsCombatant> propertyListBlockersSorted() {
+	// return listBlockersSorted;
+	// }
+
+	public ObjectProperty<IsAttackTarget> propertyAttackTarget() {
+		return attackTarget;
 	}
 
-	public ObservableList<MagicPermanent> propertyListBlockers() {
+	public ObservableList<IsCombatant> propertyListBlockers() {
 		return listBlockers;
 	}
 
-	public ObservableList<MagicPermanent> propertyListBlockersSorted() {
-		return listBlockersSorted;
-	}
-
-	public ObjectProperty<MagicPermanent> propertySource() {
-		return source;
-	}
-
-	public ObjectProperty<IsAttackTarget> propertyTarget() {
-		return target;
-	}
-
-	public void setBlockers(List<MagicPermanent> blockersSorted) {
-		this.listBlockersSorted.addAll(blockersSorted);
+	public void setBlockers(List<IsCombatant> listBlocker) {
+		propertyListBlockers().addAll(listBlocker);
 	}
 
 	@Override
 	public String toString() {
-		return new StringBuilder("[Attack s=[").append(source.get().toString()).append("] t=[").append(target.get().toString())
-				.append("]]").toString();
+		return new StringBuilder("[Attack a=[").append(attacker.get().toString()).append("] at=[")
+				.append(attackTarget.get().toString()).append("]]").toString();
 	}
 
 }

@@ -34,8 +34,8 @@ public interface IsInput {
 		if (magicPermanent.getFlagIsInteractable()) {
 			// Führe Aktion aus.
 
-			getRuleEnforcer().i_activatePermanentStart(getPlayer(), magicPermanent);
 			getPlayer().setFlagNeedInput(false);
+			getRuleEnforcer().i_activatePermanentStart(getPlayer(), magicPermanent);
 		} else {
 			System.out.println("Nope");
 			// Kann Aktion nicht ausführen.
@@ -57,8 +57,8 @@ public interface IsInput {
 		if (magicCard.getFlagIsInteractable()) {
 			// Führe Aktion aus.
 
-			getRuleEnforcer().i_castSpellStart(getPlayer(), magicCard);
 			getPlayer().setFlagNeedInput(false);
+			getRuleEnforcer().i_castSpellStart(getPlayer(), magicCard);
 		} else {
 			System.out.println("Nope");
 			// Kann Aktion nicht ausführen.
@@ -73,8 +73,8 @@ public interface IsInput {
 	 * Informiert das Spiel über eine Spielerhandlung: Der Spieler gibt auf.
 	 */
 	public default void inputConcede() {
-		getRuleEnforcer().i_concede(getPlayer());
 		getPlayer().setFlagNeedInput(false);
+		getRuleEnforcer().i_concede(getPlayer());
 	}
 
 	/**
@@ -88,8 +88,8 @@ public interface IsInput {
 		if (magicPermanent.getFlagIsInteractable()) {
 			// Führe Aktion aus.
 
-			getRuleEnforcer().i_declareAttacker(getPlayer(), magicPermanent);
 			getPlayer().setFlagNeedInput(false);
+			getRuleEnforcer().i_declareAttacker(getPlayer(), magicPermanent);
 		} else {
 			System.out.println("Nope");
 			// Kann Aktion nicht ausführen.
@@ -113,8 +113,8 @@ public interface IsInput {
 		if (magicPermanent.getFlagIsInteractable()) {
 			// Führe Aktion aus.
 
-			getRuleEnforcer().i_declareBlocker(getPlayer(), magicPermanent);
 			getPlayer().setFlagNeedInput(false);
+			getRuleEnforcer().i_declareBlocker(getPlayer(), magicPermanent);
 		} else {
 			System.out.println("Nope");
 			// Kann Aktion nicht ausführen.
@@ -133,8 +133,8 @@ public interface IsInput {
 	 *            die abgeworfene Karte.
 	 */
 	public default void inputDiscard(MagicCard magicCard) {
-		getRuleEnforcer().i_discard(getPlayer(), magicCard);
 		getPlayer().setFlagNeedInput(false);
+		getRuleEnforcer().i_discard(getPlayer(), magicCard);
 	}
 
 	/**
@@ -142,8 +142,8 @@ public interface IsInput {
 	 * keine weiteren Angreifer deklarieren.
 	 */
 	public default void inputEndDeclareAttackers() {
-		getRuleEnforcer().i_declareAttackersStop(getPlayer());
 		getPlayer().setFlagNeedInput(false);
+		getRuleEnforcer().i_declareAttackersStop(getPlayer());
 	}
 
 	/**
@@ -151,8 +151,8 @@ public interface IsInput {
 	 * weiteren Blocker deklarieren.
 	 */
 	public default void inputEndDeclareBlockers() {
-		getRuleEnforcer().i_declareBlockersStop(getPlayer());
 		getPlayer().setFlagNeedInput(false);
+		getRuleEnforcer().i_declareBlockersStop(getPlayer());
 	}
 
 	/**
@@ -160,8 +160,8 @@ public interface IsInput {
 	 * Priorität ab.
 	 */
 	public default void inputPassPriority() {
-		getRuleEnforcer().i_passPriority(getPlayer());
 		getPlayer().setFlagNeedInput(false);
+		getRuleEnforcer().i_passPriority(getPlayer());
 	}
 
 	/**
@@ -173,8 +173,8 @@ public interface IsInput {
 	 */
 	public default void inputPlayLand(MagicCard magicCard) {
 		if (magicCard.getFlagIsInteractable()) {
-			getRuleEnforcer().i_playLand(getPlayer(), magicCard);
 			getPlayer().setFlagNeedInput(false);
+			getRuleEnforcer().i_playLand(getPlayer(), magicCard);
 		} else {
 			System.out.println("Nope");
 			// Kann Aktion nicht ausführen.

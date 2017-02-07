@@ -29,6 +29,12 @@ public interface IsCombatant {
 	 */
 	public int getDamage();
 
+	public int getPower();
+
+	public int getToughness();
+
+	public boolean isFlagBlocked();
+
 	/**
 	 * Liefert die Schaden-Eigenschaft.
 	 *
@@ -48,5 +54,11 @@ public interface IsCombatant {
 	 *            der Schaden.
 	 */
 	public void setDamage(int damage);
+
+	public void setFlagAttacking(boolean b);
+
+	public void setFlagBlocking(boolean b);
+
+	public void setFlagTapped(boolean b);
 
 }
