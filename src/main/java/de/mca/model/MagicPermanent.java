@@ -176,6 +176,7 @@ public class MagicPermanent extends MagicCard implements IsCombatant {
 		return flagAttackingAlone.get();
 	}
 
+	@Override
 	public boolean isFlagBlocked() {
 		return flagBlocked.get();
 	}
@@ -215,6 +216,7 @@ public class MagicPermanent extends MagicCard implements IsCombatant {
 		propertyDamage().set(damage > 0 ? damage : 0);
 	}
 
+	@Override
 	public void setFlagAttacking(boolean flagAttacking) {
 		this.flagAttacking.set(flagAttacking);
 	}
@@ -227,6 +229,7 @@ public class MagicPermanent extends MagicCard implements IsCombatant {
 		this.flagBlocked.set(flagBlocked);
 	}
 
+	@Override
 	public void setFlagBlocking(boolean flagBlocking) {
 		this.flagBlocking.set(flagBlocking);
 	}
@@ -252,6 +255,7 @@ public class MagicPermanent extends MagicCard implements IsCombatant {
 		this.flagSummoningSickness.set(flagHasSummoningSickness);
 	}
 
+	@Override
 	public void setFlagTapped(boolean flagTapped) {
 		this.flagTapped.set(flagTapped);
 	}
