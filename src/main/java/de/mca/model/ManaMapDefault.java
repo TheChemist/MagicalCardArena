@@ -113,6 +113,7 @@ public class ManaMapDefault implements IsManaMap {
 		return getTotalColoredMana() + get(ColorType.NONE);
 	}
 
+	@Override
 	public Set<ColorType> getTrueColorKeySet() {
 		return EnumSet.of(ColorType.BLACK, ColorType.BLUE, ColorType.GREEN, ColorType.RED, ColorType.WHITE);
 	}
