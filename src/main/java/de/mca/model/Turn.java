@@ -97,7 +97,7 @@ public class Turn {
 		final Step combatDamage = stepFactory.create(parent.getRuleEnforcer(), StepType.COMBAT_DAMAGE_STEP,
 				EnumSet.of(TurnBasedActionType.DECLARE_DAMAGE_ASSIGNMENT_ORDER_ATTACKER));
 		final Step endOfCombat = stepFactory.create(parent.getRuleEnforcer(), StepType.END_OF_COMBAT,
-				EnumSet.noneOf(TurnBasedActionType.class));
+				EnumSet.of(TurnBasedActionType.END_OF_COMBAT));
 		final Phase combat = phaseFactory.create(PhaseType.COMBAT_PHASE,
 				ImmutableList.of(beginningOfCombat, declareAttackers, declareBlockers, combatDamage, endOfCombat),
 				parent);

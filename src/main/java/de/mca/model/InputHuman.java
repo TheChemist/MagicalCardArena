@@ -69,11 +69,16 @@ public class InputHuman implements IsInput {
 			}
 		} else if (zoneType.equals(ZoneType.BATTLEFIELD)) {
 			// Karte auf Spielfeld geklickt
+
 			MagicPermanent magicPermanent = (MagicPermanent) object;
-			if (getPlayer().isAttacking()) {
-				// Angreifer deklarieren
+			if (getPlayer().isAttacking() && getPlayer().getFlagDeclaringAttackers()) {
+				// Angreifer deklarieren.
 
 				inputDeclareAttacker(magicPermanent);
+			} else if (getPlayer().isDefending() && getPlayer().getFlagDeclaringBlockers()) {
+				// Blocker deklarieren.
+
+				inputDeclareBlocker(magicPermanent);
 			} else {
 				// Permanent aktivieren
 

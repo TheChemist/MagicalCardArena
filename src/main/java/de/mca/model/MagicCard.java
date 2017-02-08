@@ -6,7 +6,6 @@ import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import de.mca.factories.IsInteractable;
 import de.mca.model.enums.ColorType;
 import de.mca.model.enums.ObjectType;
 import de.mca.model.enums.PlayerType;
@@ -14,6 +13,7 @@ import de.mca.model.enums.RarityType;
 import de.mca.model.enums.SubType;
 import de.mca.model.enums.SuperType;
 import de.mca.model.enums.ZoneType;
+import de.mca.model.interfaces.IsInteractable;
 import de.mca.model.interfaces.IsManaMap;
 import de.mca.model.interfaces.IsObject;
 import javafx.beans.property.IntegerProperty;
@@ -50,7 +50,7 @@ public class MagicCard implements IsObject, IsInteractable {
 	/**
 	 * Speichert den Logger.
 	 */
-	private final static Logger LOGGER = LoggerFactory.getLogger("MagicCard");
+	protected final static Logger LOGGER = LoggerFactory.getLogger("MagicCard");
 	/**
 	 * Speichert den Namen, so wie er auf der Karte zu lesen ist.
 	 */
@@ -137,14 +137,14 @@ public class MagicCard implements IsObject, IsInteractable {
 		propertyListCostMaps = new SimpleListProperty<>(FXCollections.observableArrayList());
 		propertyListEffects = new SimpleListProperty<>(FXCollections.observableArrayList());
 		propertyListZonesVisited = new SimpleListProperty<>(FXCollections.observableArrayList());
-		propertyLoyalty = new SimpleIntegerProperty();
-		propertyPlayerOwning = new SimpleObjectProperty<>();
-		propertyPower = new SimpleIntegerProperty();
-		propertySetColorType = new SimpleSetProperty<>();
-		propertySetObjectTypes = new SimpleSetProperty<>();
-		propertySetSubTypes = new SimpleSetProperty<>();
-		propertySetSuperTypes = new SimpleSetProperty<>();
-		propertyToughness = new SimpleIntegerProperty();
+		propertyLoyalty = new SimpleIntegerProperty(0);
+		propertyPlayerOwning = new SimpleObjectProperty<>(PlayerType.NONE);
+		propertyPower = new SimpleIntegerProperty(0);
+		propertySetColorType = new SimpleSetProperty<>(FXCollections.observableSet());
+		propertySetObjectTypes = new SimpleSetProperty<>(FXCollections.observableSet());
+		propertySetSubTypes = new SimpleSetProperty<>(FXCollections.observableSet());
+		propertySetSuperTypes = new SimpleSetProperty<>(FXCollections.observableSet());
+		propertyToughness = new SimpleIntegerProperty(0);
 		rarity = RarityType.BASIC;
 	}
 
@@ -152,18 +152,18 @@ public class MagicCard implements IsObject, IsInteractable {
 		this(magicPermanent.getId());
 		setDisplayName(magicPermanent.getDisplayName());
 		setFileName(magicPermanent.getFileName());
-		setListCharacteristicAbilities(magicPermanent.propertyListAbilities());
+		setListActivatedAbilities(magicPermanent.propertyListAbilities());
 		setListCostMaps(magicPermanent.propertyListCostMaps());
 		setListEffects(magicPermanent.propertyListEffects());
 		setListZonesVisited(magicPermanent.propertyListZonesVisited());
 		setLoyalty(magicPermanent.getLoyalty());
 		setPlayerOwning(magicPermanent.getPlayerOwning());
-		setPower(magicPermanent.getPower());
+		setPower(magicPermanent.getBasePower());
 		setSetColorTypes(magicPermanent.propertySetColorTypes());
 		setSetObjectTypes(magicPermanent.propertySetObjectTypes());
 		setSetSubTypes(magicPermanent.propertySetSubTypes());
 		setSetSuperTypes(magicPermanent.propertySetSuperTypes());
-		setToughness(magicPermanent.getToughness());
+		setToughness(magicPermanent.getBaseToughness());
 	}
 
 	@Override
@@ -498,12 +498,12 @@ public class MagicCard implements IsObject, IsInteractable {
 	}
 
 	@Override
-	public void setFlagIsInteractable(boolean flagIsInteractable) {
-		LOGGER.trace("{} setFlagIsInteractable({})", this, flagIsInteractable);
-		this.flagIsInteractable = flagIsInteractable;
+	public void setFlagInteractable(boolean flagInteractable) {
+		LOGGER.trace("{} setFlagInteractable({})", this, flagInteractable);
+		this.flagIsInteractable = flagInteractable;
 	}
 
-	public void setListCharacteristicAbilities(ObservableList<ActivatedAbility> listAbilities) {
+	public void setListActivatedAbilities(ObservableList<ActivatedAbility> listAbilities) {
 		propertyListAbilities.set(listAbilities);
 		propertyListAbilities().forEach(element -> {
 			element.setSource(this);
@@ -561,6 +561,7 @@ public class MagicCard implements IsObject, IsInteractable {
 	}
 
 	public void setToughness(int toughness) {
+		LOGGER.debug("{} setToughness({})", this, toughness);
 		propertyToughness().set(toughness);
 	}
 

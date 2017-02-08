@@ -76,7 +76,7 @@ public class ActivatedAbility implements IsStackable {
 		this.propertySource = new SimpleObjectProperty<>(source);
 		this.propertyListCostMaps = new SimpleListProperty<>(listCostMaps);
 		propertyListEffects = new SimpleListProperty<>(FXCollections.observableArrayList(new ArrayList<>()));
-		propertyPlayerControlling = new SimpleObjectProperty<>(PlayerType.NONE);
+		propertyPlayerControlling = new SimpleObjectProperty<>();
 
 		for (int i = 0; i < effectObject.size(); i++) {
 			add(magicParser.parseEffect(this, effectObject.get(i).getAsJsonObject()));

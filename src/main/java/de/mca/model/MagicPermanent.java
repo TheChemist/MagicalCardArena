@@ -19,6 +19,7 @@ import javafx.beans.property.SimpleObjectProperty;
  */
 public class MagicPermanent extends MagicCard implements IsCombatant {
 
+	private final int basePower;
 	/**
 	 * Speichert die Grundverteidigung der Kreatur, so wie sie auf der Karte
 	 * steht.
@@ -75,10 +76,11 @@ public class MagicPermanent extends MagicCard implements IsCombatant {
 	 */
 	private final IntegerProperty propertyDamage;
 
-	private MagicPermanent(int id, PlayerType playerControlling) {
+	private MagicPermanent(int id, int basePower, int baseToughness) {
 		super(id);
-		this.playerControlling = new SimpleObjectProperty<>(playerControlling);
-		baseToughness = getToughness();
+		this.basePower = basePower;
+		this.baseToughness = baseToughness;
+		this.playerControlling = new SimpleObjectProperty<>();
 		propertyDamage = new SimpleIntegerProperty(0);
 		flagAttacking = new SimpleBooleanProperty(false);
 		flagAttackingAlone = new SimpleBooleanProperty(false);
@@ -94,14 +96,15 @@ public class MagicPermanent extends MagicCard implements IsCombatant {
 
 	@Inject
 	MagicPermanent(@Assisted MagicCard magicCard) {
-		this(magicCard.getId(), magicCard.getPlayerOwning());
+		this(magicCard.getId(), magicCard.getPower(), magicCard.getToughness());
 		setDisplayName(magicCard.getDisplayName());
 		setFileName(magicCard.getFileName());
-		setListCharacteristicAbilities(magicCard.propertyListAbilities());
+		setListActivatedAbilities(magicCard.propertyListAbilities());
 		setListCostMaps(magicCard.propertyListCostMaps());
 		setListEffects(magicCard.propertyListEffects());
 		setListZonesVisited(magicCard.propertyListZonesVisited());
 		setLoyalty(magicCard.getLoyalty());
+		setPlayerControlling(magicCard.getPlayerOwning());
 		setPlayerOwning(magicCard.getPlayerOwning());
 		setPower(magicCard.getPower());
 		setRarity(magicCard.getRarity());
@@ -130,7 +133,7 @@ public class MagicPermanent extends MagicCard implements IsCombatant {
 	 * @return true, wenn die Kreatur angreifen kann.
 	 */
 	public boolean checkCanAttack() {
-		return !getFlagIsTapped() && !getFlagHasSummoningSickness();
+		return !getFlagTapped() && !getFlagHasSummoningSickness();
 	}
 
 	/**
@@ -140,7 +143,12 @@ public class MagicPermanent extends MagicCard implements IsCombatant {
 	 * @return true, wenn die Kreatur verteidigen kann.
 	 */
 	public boolean checkCanBlock() {
-		return !getFlagIsTapped();
+		return !getFlagTapped();
+	}
+
+	@Override
+	public int getBasePower() {
+		return basePower;
 	}
 
 	public int getBaseToughness() {
@@ -152,11 +160,16 @@ public class MagicPermanent extends MagicCard implements IsCombatant {
 		return propertyDamage().get();
 	}
 
+	@Override
+	public boolean getFlagBlocked() {
+		return flagBlocked.get();
+	}
+
 	public boolean getFlagHasSummoningSickness() {
 		return flagSummoningSickness.get();
 	}
 
-	public boolean getFlagIsTapped() {
+	public boolean getFlagTapped() {
 		return flagTapped.get();
 	}
 
@@ -174,11 +187,6 @@ public class MagicPermanent extends MagicCard implements IsCombatant {
 
 	public boolean isFlagAttackingAlone() {
 		return flagAttackingAlone.get();
-	}
-
-	@Override
-	public boolean isFlagBlocked() {
-		return flagBlocked.get();
 	}
 
 	public boolean isFlagBlocking() {
@@ -213,6 +221,7 @@ public class MagicPermanent extends MagicCard implements IsCombatant {
 
 	@Override
 	public void setDamage(int damage) {
+		LOGGER.debug("{} setDamage({})", this, damage);
 		propertyDamage().set(damage > 0 ? damage : 0);
 	}
 
@@ -261,12 +270,8 @@ public class MagicPermanent extends MagicCard implements IsCombatant {
 	}
 
 	public void setPlayerControlling(PlayerType playerControlling) {
+		LOGGER.trace("{} setPlayerControlling({})", this, playerControlling);
 		this.playerControlling.set(playerControlling);
-	}
-
-	@Override
-	public void setToughness(int toughness) {
-		super.setToughness(toughness);
 	}
 
 }

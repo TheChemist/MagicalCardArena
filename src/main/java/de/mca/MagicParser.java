@@ -158,7 +158,7 @@ public class MagicParser {
 			for (int i = 0; i < cardAbilities.size(); i++) {
 				listAbilities.add(parseAbility(card, cardAbilities.get(i).getAsJsonObject()));
 			}
-			card.setListCharacteristicAbilities(listAbilities);
+			card.setListActivatedAbilities(listAbilities);
 		}
 		return card;
 	}

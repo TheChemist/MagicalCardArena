@@ -22,6 +22,10 @@ public interface IsCombatant {
 	 */
 	public void assignCombatDamage(int combatDamage);
 
+	public int getBasePower();
+
+	public int getBaseToughness();
+
 	/**
 	 * Liefert den aktuellen Schaden des Angriffsziels.
 	 *
@@ -29,11 +33,11 @@ public interface IsCombatant {
 	 */
 	public int getDamage();
 
+	public boolean getFlagBlocked();
+
 	public int getPower();
 
 	public int getToughness();
-
-	public boolean isFlagBlocked();
 
 	/**
 	 * Liefert die Schaden-Eigenschaft.
@@ -56,6 +60,8 @@ public interface IsCombatant {
 	public void setDamage(int damage);
 
 	public void setFlagAttacking(boolean b);
+
+	public void setFlagBlocked(boolean b);
 
 	public void setFlagBlocking(boolean b);
 

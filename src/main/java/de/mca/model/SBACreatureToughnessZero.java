@@ -11,14 +11,12 @@ import de.mca.model.enums.StateBasedActionType;
 @SuppressWarnings("serial")
 public class SBACreatureToughnessZero extends StateBasedAction {
 
-	private PlayerType playerControlling;
-
-	public SBACreatureToughnessZero(MagicPermanent source, PlayerType playerControlling) {
+	public SBACreatureToughnessZero(MagicPermanent source) {
 		super(source, StateBasedActionType.CREATURE_TOUGHNESS_ZERO);
 	}
 
 	public PlayerType getPlayerControlling() {
-		return playerControlling;
+		return ((MagicPermanent) getSource()).getPlayerControlling();
 	}
 
 }

@@ -309,7 +309,7 @@ public class MatchPresenter extends AnimationTimer implements Initializable, IsS
 		canvasHumanGraveyard = new CanvasZoneDefault(paneHumanGraveyard, inputHuman, spriteListHumanGraveyard,
 				ZoneType.GRAVEYARD, imageViewCardZoom);
 		paneHumanGraveyard.getChildren().add(canvasHumanGraveyard);
-		tabHumanGraveyard.setContent(paneComputerGraveyard);
+		tabHumanGraveyard.setContent(paneHumanGraveyard);
 		tabHumanGraveyard.setGraphic(new AdaptableImageView(ResourceManager.getIcon("grave.png"),
 				new SimpleDoubleProperty(16.0), new SimpleDoubleProperty(16.0)));
 

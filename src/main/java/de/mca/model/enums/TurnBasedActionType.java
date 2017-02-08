@@ -14,8 +14,8 @@ public enum TurnBasedActionType {
 							"Blocker deklarieren"), DECLARE_DAMAGE_ASSIGNMENT_ORDER_ATTACKER(
 									"Schadensreihefolge des Angreifers deklarieren"), DECLARE_DAMAGE_ASSIGNMENT_ORDER_BLOCKER(
 											"Schadensreihenfolge des Blockers deklarieren"), DISCARD(
-													"Handkarten abwerfen"), DRAW(
-															"Ziehen"), PHASING("Phasing"), UNTAP("Enttappen");
+													"Handkarten abwerfen"), DRAW("Ziehen"), PHASING("Phasing"), UNTAP(
+															"Enttappen"), END_OF_COMBAT("Abschließen Kampfphase");
 
 	private final String displayName;
 

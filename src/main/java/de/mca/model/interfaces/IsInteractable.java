@@ -1,4 +1,4 @@
-package de.mca.factories;
+package de.mca.model.interfaces;
 
 /**
  *
@@ -9,6 +9,6 @@ public interface IsInteractable {
 
 	public boolean getFlagIsInteractable();
 
-	public void setFlagIsInteractable(boolean flagIsInteractable);
+	public void setFlagInteractable(boolean flagIsInteractable);
 
 }

@@ -59,7 +59,7 @@ public class RuleEnforcer {
 	 * Sammelts StateBasedActions. Diese werden zu bestimmten Zeitpunkten
 	 * abgearbeitet.
 	 */
-	private final SetProperty<StateBasedAction> setStateBasedActions;
+	private final SetProperty<StateBasedAction> propertySetStateBasedActions;
 
 	@Inject
 	RuleEnforcer(EventBus eventBus, FactoryMagicPermanent factoryMagicPermanent, FactoryMagicSpell factoryMagicSpell) {
@@ -67,12 +67,12 @@ public class RuleEnforcer {
 		this.factoryMagicPermanent = factoryMagicPermanent;
 		this.factoryMagicSpell = factoryMagicSpell;
 
-		setStateBasedActions = new SimpleSetProperty<>(FXCollections.observableSet());
+		propertySetStateBasedActions = new SimpleSetProperty<>(FXCollections.observableSet());
 	}
 
 	public void addStateBasedAction(StateBasedAction stateBasedAction) {
 		LOGGER.debug("{} addStateBasedAction({})", this, stateBasedAction);
-		setStateBasedActions.add(stateBasedAction);
+		propertySetStateBasedActions.add(stateBasedAction);
 	}
 
 	public void examineEffectProduceMana(EffectProduceMana effectProduceMana) {
@@ -139,7 +139,26 @@ public class RuleEnforcer {
 			break;
 		case PHASING:
 			break;
+		case END_OF_COMBAT:
+			tb_combatCleanup();
+			break;
+		default:
+			break;
 		}
+	}
+
+	private void tb_combatCleanup() {
+		LOGGER.debug("{} tb_combatCleanup()", this);
+
+		for(final Attack attack: match.getListAttacks()) {
+			for(final IsCombatant combatant: attack.getCombatants()) {
+				combatant.setFlagAttacking(false);
+				combatant.setFlagBlocking(false);
+				combatant.setFlagBlocked(false);
+			}
+		}
+
+		match.resetListAttacks();
 	}
 
 	/**
@@ -368,12 +387,12 @@ public class RuleEnforcer {
 	public void i_deriveInteractionStatus(IsPlayer player) {
 		LOGGER.debug("{} i_deriveInteractionStatus({})", this, player);
 		for (final MagicCard magicCard : player.getZoneHand().getAll()) {
-			magicCard.setFlagIsInteractable(
+			magicCard.setFlagInteractable(
 					checkCanPlayLand(player, magicCard) || checkCanCast(player, magicCard) ? true : false);
 		}
 
 		for (final MagicPermanent magicPermanent : match.getZoneBattlefield().getAll()) {
-			magicPermanent.setFlagIsInteractable(checkCanActivatePermanent(player, magicPermanent)
+			magicPermanent.setFlagInteractable(checkCanActivatePermanent(player, magicPermanent)
 					|| checkCanAttack(player, magicPermanent) || checkCanBlock(player, magicPermanent) ? true : false);
 		}
 	}
@@ -452,7 +471,9 @@ public class RuleEnforcer {
 			 **/
 			// activatedAbility.generateEffects();
 			activatedAbility.propertyListEffects().forEach(effect -> {
-				if (effect.getPlayerType() == null || effect.getPlayerType().equals(PlayerType.NONE)) {
+				if (effect.getPlayerType() == null
+				// || effect.getPlayerType().equals(PlayerType.NONE)
+				) {
 					throw new NullPointerException("Effekt wird von keinem Spieler kontrolliert!");
 				}
 
@@ -657,7 +678,7 @@ public class RuleEnforcer {
 		}
 
 		final boolean isControlling = player.equals(magicPermanent.getPlayerControlling());
-		final boolean isUntapped = !magicPermanent.getFlagIsTapped();
+		final boolean isUntapped = !magicPermanent.getFlagTapped();
 		final boolean isPrioritized = player.isPrioritised();
 		final boolean isCastingSpell = player.isCastingSpell() || player.isPaying();
 		final boolean isActivatingAbility = player.isActivatingAbility();
@@ -686,7 +707,7 @@ public class RuleEnforcer {
 		}
 
 		final boolean isControlling = player.equals(magicPermanent.getPlayerControlling());
-		final boolean isUnapped = !magicPermanent.getFlagIsTapped();
+		final boolean isUnapped = !magicPermanent.getFlagTapped();
 		final boolean hasSummoningSickness = magicPermanent.getFlagHasSummoningSickness();
 		final boolean hasFlagDeclaringAttackers = player.getFlagDeclaringAttackers();
 
@@ -712,10 +733,11 @@ public class RuleEnforcer {
 		}
 
 		final boolean isControlling = player.equals(magicPermanent.getPlayerControlling());
-		final boolean isUntapped = !magicPermanent.getFlagIsTapped();
+		final boolean isUntapped = !magicPermanent.getFlagTapped();
+		final boolean isBlocking = magicPermanent.isFlagBlocking();
 		final boolean hasFlagDeclaringBlockers = player.getFlagDeclaringBlockers();
 
-		final boolean result = isControlling && isUntapped && hasFlagDeclaringBlockers;
+		final boolean result = isControlling && isUntapped && !isBlocking && hasFlagDeclaringBlockers;
 		LOGGER.trace("{} checkCanBlock({}, {}) = {}", this, player, magicPermanent, result);
 		return result;
 	}
@@ -906,9 +928,6 @@ public class RuleEnforcer {
 		for (final IsAttackTarget attackTarget : match.getListAttackTargets()) {
 			attackTarget.resetDamage();
 		}
-
-		// Leere Liste mit Angriffen.
-		match.resetListAttacks();
 	}
 
 	private void tb_clearManaPools(final IsPlayer playerActive, final IsPlayer playerNonactive) {
@@ -924,7 +943,7 @@ public class RuleEnforcer {
 			final IsAttackTarget attackTarget = attack.getAttackTarget();
 			final int attackerPower = attacker.getPower();
 
-			if (attacker.isFlagBlocked()) {
+			if (attacker.getFlagBlocked()) {
 				// Angreifer ist geblockt.
 
 				attack.propertyListBlockers().forEach(blocker -> {
@@ -957,8 +976,7 @@ public class RuleEnforcer {
 			for (final IsCombatant creature : attack.getCombatants()) {
 				creature.applyCombatDamage();
 				if (creature.getToughness() <= 0) {
-					addStateBasedAction(new SBACreatureToughnessZero((MagicPermanent) creature,
-							((MagicPermanent) creature).getPlayerControlling()));
+					addStateBasedAction(new SBACreatureToughnessZero((MagicPermanent) creature));
 				}
 			}
 		}
@@ -989,7 +1007,7 @@ public class RuleEnforcer {
 
 		for (final Attack attack : match.getListAttacks()) {
 			final List<IsCombatant> blockers = attack.propertyListBlockers();
-			if (attack.getAttacker().isFlagBlocked() && blockers.size() > 1) {
+			if (attack.getAttacker().getFlagBlocked() && blockers.size() > 1) {
 				// TODO MID Entscheidung: Schadensreihenfolge
 				attack.setBlockers(attack.propertyListBlockers());
 			}
@@ -1190,11 +1208,12 @@ public class RuleEnforcer {
 	 */
 	void processStateBasedActions() {
 		LOGGER.debug("{} processStateBasedActions()", this);
-		for (final StateBasedAction sba : setStateBasedActions) {
-			switch (sba.getStateBasedActionType()) {
+		for (final StateBasedAction stateBasedAction : propertySetStateBasedActions) {
+			switch (stateBasedAction.getStateBasedActionType()) {
 			case CREATURE_TOUGHNESS_ZERO:
-				final SBACreatureToughnessZero sbactz = (SBACreatureToughnessZero) sba;
-				actionBury(match.getPlayer(sbactz.getPlayerControlling()), (MagicPermanent) sba.getSource());
+				final SBACreatureToughnessZero sbactz = (SBACreatureToughnessZero) stateBasedAction;
+				actionBury(match.getPlayer(sbactz.getPlayerControlling()),
+						(MagicPermanent) stateBasedAction.getSource());
 				break;
 			case PLAYER_CANT_DRAW:
 				match.setFlagIsMatchRunning(false);
@@ -1206,6 +1225,7 @@ public class RuleEnforcer {
 				break;
 			}
 		}
+		propertySetStateBasedActions.clear();
 	}
 
 	void setMatch(Match match) {

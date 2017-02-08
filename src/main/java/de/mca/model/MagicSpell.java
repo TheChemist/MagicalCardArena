@@ -30,7 +30,7 @@ public class MagicSpell extends MagicCard implements IsStackable {
 		this.playerControlling = new SimpleObjectProperty<>(playerControlling);
 		setDisplayName(magicCard.getDisplayName());
 		setFileName(magicCard.getFileName());
-		setListCharacteristicAbilities(magicCard.propertyListAbilities());
+		setListActivatedAbilities(magicCard.propertyListAbilities());
 		setListCostMaps(magicCard.propertyListCostMaps());
 		setListEffects(magicCard.propertyListEffects());
 		setListZonesVisited(magicCard.propertyListZonesVisited());

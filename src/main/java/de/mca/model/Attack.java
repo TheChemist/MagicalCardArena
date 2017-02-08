@@ -51,7 +51,7 @@ public class Attack {
 
 	public void addBlocker(IsCombatant combatant) {
 		combatant.setFlagBlocking(true);
-		getAttacker().setFlagBlocking(true);
+		getAttacker().setFlagBlocked(true);
 		propertyListBlockers().add(combatant);
 	}
 
