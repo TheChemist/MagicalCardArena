@@ -4,7 +4,6 @@ import java.util.HashMap;
 
 import com.airhacks.afterburner.injection.Injector;
 import com.airhacks.afterburner.views.FXMLView;
-import com.google.inject.Guice;
 
 import de.mca.io.FileManager;
 import de.mca.io.ResourceManager;
@@ -108,25 +107,6 @@ public class Main extends Application {
 
 	@Override
 	public void start(Stage primaryStage) {
-		final com.google.inject.Injector injector = Guice.createInjector(new MainModule());
-		Injector.setInstanceSupplier(new Injector.InstanceProvider() {
-
-			@Override
-			public Object instantiate(Class<?> c) {
-				return injector.getInstance(c);
-			}
-
-			@Override
-			public boolean isInjectionAware() {
-				return true;
-			}
-
-			@Override
-			public boolean isScopeAware() {
-				return true;
-			}
-		});
-
 		addScreen("main", new MainView());
 		addScreen("match", new MatchView());
 

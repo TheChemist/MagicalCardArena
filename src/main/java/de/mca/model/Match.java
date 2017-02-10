@@ -7,13 +7,7 @@ import java.util.Random;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.inject.Inject;
-import com.google.inject.assistedinject.Assisted;
-
 import de.mca.Constants;
-import de.mca.factories.FactoryMagicPermanent;
-import de.mca.factories.FactoryTurn;
-import de.mca.factories.FactoryZone;
 import de.mca.model.enums.PlayerState;
 import de.mca.model.enums.PlayerType;
 import de.mca.model.enums.ZoneType;
@@ -44,10 +38,6 @@ public final class Match {
 	 * Speichert den Logger.
 	 */
 	private final static Logger LOGGER = LoggerFactory.getLogger("Match");
-	/**
-	 * Speichert die PermanentFactory zum Erstellen bleibender Karten.
-	 */
-	private final FactoryMagicPermanent factoryMagicPermanent;
 	/**
 	 * Speichert den geteilten Stack.
 	 */
@@ -114,27 +104,11 @@ public final class Match {
 	 */
 	private final ZoneDefault<MagicCard> zoneExile;
 
-	@Inject
-	private Match(FactoryMagicPermanent magicPermanentFactory, FactoryTurn turnFactory, FactoryZone zoneFactory,
-			MagicStack magicStack, RuleEnforcer ruleEnforcer, @Assisted("playerHuman") IsPlayer playerHuman,
-			@Assisted("playerComputer") IsPlayer playerComputer, @Assisted("nameHuman") String nameHuman,
-			@Assisted("nameComputer") String nameComputer, @Assisted("deckHuman") Deck deckHuman,
-			@Assisted("deckComputer") Deck deckComputer, ZoneDefault<MagicPermanent> zoneBattlefield) {
-		playerComputer.setDisplayName(nameComputer);
-		playerComputer.setDeck(deckComputer);
-		playerComputer.setMatch(this);
-		playerHuman.setDisplayName(nameHuman);
-		playerHuman.setDeck(deckHuman);
-		playerHuman.setMatch(this);
-
-		ruleEnforcer.setMatch(this);
-
-		this.factoryMagicPermanent = magicPermanentFactory;
-		this.magicStack = magicStack;
+	public Match(RuleEnforcer ruleEnforcer, IsPlayer playerHuman, IsPlayer playerComputer) {
 		this.ruleEnforcer = ruleEnforcer;
-		this.zoneBattlefield = zoneBattlefield;
-		this.zoneExile = zoneFactory.create(PlayerType.NONE, ZoneType.EXILE);
+		this.ruleEnforcer.setMatch(this);
 
+		magicStack = new MagicStack();
 		propertyBattlefieldSize = new SimpleIntegerProperty(0);
 		propertyCurrentPhase = new SimpleObjectProperty<>(null);
 		propertyCurrentStep = new SimpleObjectProperty<>(null);
@@ -147,15 +121,21 @@ public final class Match {
 		propertyPlayerActive = new SimpleObjectProperty<>(playerComputer);
 		propertyPlayerPrioritized = new SimpleObjectProperty<>(playerComputer);
 		propertyStackSize = new SimpleIntegerProperty(0);
+		zoneBattlefield = new ZoneDefault<>(PlayerType.NONE, ZoneType.BATTLEFIELD);
+		zoneExile = new ZoneDefault<>(PlayerType.NONE, ZoneType.EXILE);
 
 		propertyListAttackTargets.add(playerComputer);
 		propertyListAttackTargets.add(playerHuman);
 
-		setCurrentTurn(turnFactory.create(playerComputer, playerHuman, this));
+		setCurrentTurn(new Turn(this, playerComputer, playerHuman));
 	}
 
 	public IsPlayer getPlayer(PlayerType playerType) {
 		return getCurrentTurn().getPlayer(playerType);
+	}
+
+	public RuleEnforcer getRuleEnforcer() {
+		return ruleEnforcer;
 	}
 
 	public ZoneDefault<MagicPermanent> getZoneBattlefield() {
@@ -185,10 +165,6 @@ public final class Match {
 	public IntegerProperty propertyExileSize() {
 		return propertyExileSize;
 	}
-
-	// public BooleanProperty propertyFlagNeedPlayerInput() {
-	// return propertyNeedPlayerInput;
-	// }
 
 	public ObjectProperty<IsPlayer> propertyPlayerActive() {
 		return propertyPlayerActive;
@@ -651,7 +627,7 @@ public final class Match {
 
 	void addCard(MagicCard magicCard, ZoneType zoneType) {
 		if (zoneType.equals(ZoneType.BATTLEFIELD)) {
-			getZoneBattlefield().add(factoryMagicPermanent.create(magicCard));
+			getZoneBattlefield().add(new MagicPermanent(magicCard));
 			propertyBattlefieldSize().set(getZoneBattlefield().getSize());
 		} else if (zoneType.equals(ZoneType.EXILE)) {
 			getZoneExile().add(magicCard);
@@ -725,10 +701,6 @@ public final class Match {
 		return getCurrentTurn().getPlayerOpponent(getPlayerActive().getPlayerType());
 	}
 
-	RuleEnforcer getRuleEnforcer() {
-		return ruleEnforcer;
-	}
-
 	int getTotalAttackers() {
 		return propertyListAttacks.size();
 	}
@@ -752,7 +724,7 @@ public final class Match {
 		if (zoneType.equals(ZoneType.BATTLEFIELD)) {
 			// Karte vom Spielfeld entfernen.
 
-			getZoneBattlefield().remove(factoryMagicPermanent.create(magicCard));
+			getZoneBattlefield().remove(new MagicPermanent(magicCard));
 			propertyBattlefieldSize().set(getZoneBattlefield().getSize());
 
 		} else if (zoneType.equals(ZoneType.EXILE)) {

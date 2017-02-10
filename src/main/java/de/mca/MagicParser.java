@@ -10,16 +10,14 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import com.google.inject.Inject;
 
-import de.mca.factories.FactoryAbility;
-import de.mca.factories.FactoryEffect;
 import de.mca.io.FileManager;
 import de.mca.io.ResourceManager;
 import de.mca.io.ResourceReadingException;
 import de.mca.model.ActivatedAbility;
 import de.mca.model.Deck;
 import de.mca.model.Effect;
+import de.mca.model.EffectProduceMana;
 import de.mca.model.MagicCard;
 import de.mca.model.ManaMapDefault;
 import de.mca.model.enums.AbilityType;
@@ -46,16 +44,8 @@ public class MagicParser {
 
 	private static int ID = 0;
 	private static final Logger LOGGER = LoggerFactory.getLogger("MagicParser");
-	private final FactoryAbility abilityFactory;
-	private final FactoryEffect factoryEffect;
 
-	@Inject
-	private MagicParser(FactoryAbility abilityFactory, FactoryEffect mEffectFactory) {
-		this.abilityFactory = abilityFactory;
-		this.factoryEffect = mEffectFactory;
-	}
-
-	public MagicCard parseCardFromPath(Path cardPath) throws ResourceReadingException {
+	public static MagicCard parseCardFromPath(Path cardPath) throws ResourceReadingException {
 		final JsonObject cardObject = new JsonParser().parse(ResourceManager.readFromPath(cardPath)).getAsJsonObject();
 		final JsonElement elementColors = cardObject.get("colors");
 		final JsonElement elementSupertypes = cardObject.get("supertypes");
@@ -163,7 +153,7 @@ public class MagicParser {
 		return card;
 	}
 
-	public Deck parseDeckFromPath(Path deckPath) throws ResourceReadingException {
+	public static Deck parseDeckFromPath(Path deckPath) throws ResourceReadingException {
 		final JsonObject deckObject = new JsonParser().parse(ResourceManager.readFromPath(deckPath)).getAsJsonObject();
 		final String deckName = deckObject.get("name").getAsString();
 		final String deckDescription = deckObject.get("description").getAsString();
@@ -185,7 +175,7 @@ public class MagicParser {
 		return deck;
 	}
 
-	public Effect parseEffect(ActivatedAbility source, JsonObject effectObject) {
+	public static Effect parseEffect(ActivatedAbility source, JsonObject effectObject) {
 		switch (EffectType.valueOf(effectObject.get("effecttype").getAsString())) {
 		case PRODUCE_MANA:
 			final JsonArray produceArray = effectObject.get("produce").getAsJsonArray();
@@ -197,13 +187,13 @@ public class MagicParser {
 				tempMap.put(manaColor, howMuch);
 			}
 
-			return factoryEffect.create(source, new ManaMapDefault(tempMap));
+			return new EffectProduceMana(source, new ManaMapDefault(tempMap));
 		}
 		return null;
 	}
 
 	// TODO HIGH Karten überprüfen, Abilities haben auch CostMaps
-	private ActivatedAbility parseAbility(MagicCard card, JsonObject abilityObject) {
+	private static ActivatedAbility parseAbility(MagicCard card, JsonObject abilityObject) {
 		final AbilityType abilityType = AbilityType.valueOf(abilityObject.get("abilitytype").getAsString());
 		final ObservableList<IsManaMap> listCostMaps = new SimpleListProperty<>(FXCollections.emptyObservableList());
 		final JsonElement additionalCostElement = abilityObject.get("additionalcost");
@@ -213,7 +203,7 @@ public class MagicParser {
 		}
 		final JsonArray effectArray = abilityObject.get("effects").getAsJsonArray();
 
-		return abilityFactory.create(card, abilityType, additionalCostType, effectArray, listCostMaps);
+		return new ActivatedAbility(card, abilityType, additionalCostType, effectArray, listCostMaps);
 	}
 
 }

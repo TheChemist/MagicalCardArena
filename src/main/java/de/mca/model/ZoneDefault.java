@@ -6,9 +6,6 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
-import com.google.inject.Inject;
-import com.google.inject.assistedinject.Assisted;
-
 import de.mca.model.enums.AbilityType;
 import de.mca.model.enums.ColorType;
 import de.mca.model.enums.EffectType;
@@ -43,8 +40,7 @@ public final class ZoneDefault<E extends MagicCard> implements IsZone<E> {
 	 */
 	private final ZoneType zoneType;
 
-	@Inject
-	public ZoneDefault(@Assisted PlayerType playerType, @Assisted ZoneType zoneType) {
+	ZoneDefault(PlayerType playerType, ZoneType zoneType) {
 		this.playerType = playerType;
 		this.zoneType = zoneType;
 		propertyCardList = new SimpleListProperty<>(FXCollections.observableArrayList());

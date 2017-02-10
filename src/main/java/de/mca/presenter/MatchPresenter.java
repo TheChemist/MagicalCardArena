@@ -8,12 +8,9 @@ import java.util.function.Consumer;
 
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
-import com.google.inject.Inject;
 
 import de.mca.MagicParser;
 import de.mca.Main;
-import de.mca.factories.FactoryMatch;
-import de.mca.factories.FactoryPlayer;
 import de.mca.io.FileManager;
 import de.mca.io.ResourceManager;
 import de.mca.model.InputComputer;
@@ -22,6 +19,8 @@ import de.mca.model.MagicCard;
 import de.mca.model.MagicPermanent;
 import de.mca.model.MagicStack;
 import de.mca.model.Match;
+import de.mca.model.Player;
+import de.mca.model.RuleEnforcer;
 import de.mca.model.enums.ColorType;
 import de.mca.model.enums.PlayerType;
 import de.mca.model.enums.ZoneType;
@@ -61,10 +60,7 @@ public class MatchPresenter extends AnimationTimer implements Initializable, IsS
 	private CanvasZoneDefault canvasHumanGraveyard;
 	private CanvasZoneDefault canvasHumanHand;
 	private CanvasZoneStack canvasStack;
-	@Inject
-	private FactoryMatch factoryMatch;
-	@Inject
-	private FactoryPlayer factoryPlayer;
+	private final EventBus eventBus = new EventBus();
 	@FXML
 	private Label fpsLabel;
 	private Consumer<Integer> fpsReporter;
@@ -72,9 +68,6 @@ public class MatchPresenter extends AnimationTimer implements Initializable, IsS
 	@FXML
 	private GridPane gridPaneCenter;
 	private ImageView imageViewCardZoom;
-	@Inject
-	private InputComputer inputComputer;
-	@Inject
 	private InputHuman inputHuman;
 	@FXML
 	private Label labelComputerAvatar;
@@ -146,8 +139,6 @@ public class MatchPresenter extends AnimationTimer implements Initializable, IsS
 	private Label labelPlayerActive;
 	@FXML
 	private Label labelTurnNumber;
-	@Inject
-	private MagicParser magicParser;
 	private Match matchActive;
 	private Runnable matchUpdater;
 	@FXML
@@ -207,10 +198,9 @@ public class MatchPresenter extends AnimationTimer implements Initializable, IsS
 	@FXML
 	private Tab tabStack;
 
-	@Inject
-	public MatchPresenter(EventBus eventBus) {
+	public MatchPresenter() {
 		// TODO LOW Threading?
-		eventBus.register(this);
+		getEventBus().register(this);
 
 		spriteListBattlefield = new ArrayList<>();
 		spriteListComputerGraveyard = new ArrayList<>();
@@ -268,7 +258,7 @@ public class MatchPresenter extends AnimationTimer implements Initializable, IsS
 	@Override
 	public void initialize(URL location, ResourceBundle resources) {
 		// Left Pane
-		canvasStack = new CanvasZoneStack(paneStack, spriteListStack);
+		canvasStack = new CanvasZoneStack(paneStack);
 		paneStack.getChildren().add(canvasStack);
 		tabStack.setContent(paneStack);
 
@@ -283,38 +273,35 @@ public class MatchPresenter extends AnimationTimer implements Initializable, IsS
 		});
 
 		// Center Pane
-		canvasBattlefield = new CanvasZoneBattlefield(paneBattlefield, inputHuman, spriteListBattlefield,
-				ZoneType.BATTLEFIELD, imageViewCardZoom);
+		canvasBattlefield = new CanvasZoneBattlefield(paneBattlefield, inputHuman, imageViewCardZoom);
 		paneBattlefield.getChildren().add(canvasBattlefield);
 		tabBattlefield.setContent(paneBattlefield);
 
-		canvasComputerGraveyard = new CanvasZoneDefault(paneComputerGraveyard, inputHuman, spriteListComputerGraveyard,
-				ZoneType.GRAVEYARD, imageViewCardZoom);
+		canvasComputerGraveyard = new CanvasZoneDefault(paneComputerGraveyard, inputHuman, ZoneType.GRAVEYARD,
+				imageViewCardZoom);
 		paneComputerGraveyard.getChildren().add(canvasComputerGraveyard);
 		tabComputerGraveyard.setContent(paneComputerGraveyard);
 		tabComputerGraveyard.setGraphic(new AdaptableImageView(ResourceManager.getIcon("grave.png"),
 				new SimpleDoubleProperty(16.0), new SimpleDoubleProperty(16.0)));
 
-		canvasComputerHand = new CanvasZoneDefault(paneComputerHand, inputHuman, spriteListComputerHand, ZoneType.HAND,
-				imageViewCardZoom);
+		canvasComputerHand = new CanvasZoneDefault(paneComputerHand, inputHuman, ZoneType.HAND, imageViewCardZoom);
 		paneComputerHand.getChildren().add(canvasComputerHand);
 		tabComputerHand.setContent(paneComputerHand);
 		tabComputerHand.setGraphic(new AdaptableImageView(ResourceManager.getIcon("hand.png"),
 				new SimpleDoubleProperty(16.0), new SimpleDoubleProperty(16.0)));
 
-		canvasExile = new CanvasZoneDefault(paneExile, inputHuman, spriteListExile, ZoneType.EXILE, imageViewCardZoom);
+		canvasExile = new CanvasZoneDefault(paneExile, inputHuman, ZoneType.EXILE, imageViewCardZoom);
 		paneExile.getChildren().add(canvasExile);
 		tabExile.setContent(paneExile);
 
-		canvasHumanGraveyard = new CanvasZoneDefault(paneHumanGraveyard, inputHuman, spriteListHumanGraveyard,
-				ZoneType.GRAVEYARD, imageViewCardZoom);
+		canvasHumanGraveyard = new CanvasZoneDefault(paneHumanGraveyard, inputHuman, ZoneType.GRAVEYARD,
+				imageViewCardZoom);
 		paneHumanGraveyard.getChildren().add(canvasHumanGraveyard);
 		tabHumanGraveyard.setContent(paneHumanGraveyard);
 		tabHumanGraveyard.setGraphic(new AdaptableImageView(ResourceManager.getIcon("grave.png"),
 				new SimpleDoubleProperty(16.0), new SimpleDoubleProperty(16.0)));
 
-		canvasHumanHand = new CanvasZoneDefault(paneHumanHand, inputHuman, spriteListHumanHand, ZoneType.HAND,
-				imageViewCardZoom);
+		canvasHumanHand = new CanvasZoneDefault(paneHumanHand, inputHuman, ZoneType.HAND, imageViewCardZoom);
 		paneHumanHand.getChildren().add(canvasHumanHand);
 		tabHumanHand.setContent(paneHumanHand);
 		tabHumanHand.setGraphic(new AdaptableImageView(ResourceManager.getIcon("hand.png"),
@@ -335,16 +322,18 @@ public class MatchPresenter extends AnimationTimer implements Initializable, IsS
 		Image avatarComputer = FileManager.getAvatarImages().get(0);
 		Image avatarHuman = FileManager.getAvatarImages().get(1);
 
-		// Match erstellen
-		Match matchActive = createMatch(nameComputer, nameHuman, deckHuman, deckComputer, avatarComputer, avatarHuman);
-		IsPlayer playerComputer = matchActive.getPlayer(PlayerType.COMPUTER);
-		IsPlayer playerHuman = matchActive.getPlayer(PlayerType.HUMAN);
-		setMatchActive(matchActive);
+		// Erstelle Spielobjekte
+		RuleEnforcer ruleEnforcer = new RuleEnforcer(getEventBus());
+		IsPlayer playerComputer = new Player(ruleEnforcer, PlayerType.COMPUTER, nameComputer,
+				MagicParser.parseDeckFromPath(FileManager.getDeckPath(deckComputer)));
+		IsPlayer playerHuman = new Player(ruleEnforcer, PlayerType.HUMAN, nameHuman,
+				MagicParser.parseDeckFromPath(FileManager.getDeckPath(deckHuman)));
 
-		inputComputer.setMatchPresenter(this);
-		inputHuman.setMatchPresenter(this);
+		matchActive = new Match(ruleEnforcer, playerHuman, playerComputer);
+		new InputComputer(this, matchActive, playerComputer);
+		inputHuman = new InputHuman(this, matchActive, playerHuman);
 
-		// Game Loop
+		// Erstelle Game Loop
 		matchUpdater = () -> matchActive.update();
 		rendererBattlefield = () -> canvasBattlefield.draw();
 		rendererComputerGraveyard = () -> canvasComputerGraveyard.draw();
@@ -354,6 +343,25 @@ public class MatchPresenter extends AnimationTimer implements Initializable, IsS
 		rendererHumanHand = () -> canvasHumanHand.draw();
 		rendererStack = () -> canvasStack.draw();
 		fpsReporter = fps -> fpsLabel.setText(String.format("FPS: %d", fps));
+
+		/**
+		 * ListSprites
+		 */
+		spriteListBattlefield.clear();
+		spriteListComputerGraveyard.clear();
+		spriteListComputerHand.clear();
+		spriteListExile.clear();
+		spriteListHumanGraveyard.clear();
+		spriteListHumanHand.clear();
+		spriteListStack.clear();
+
+		canvasBattlefield.setListSprites(spriteListBattlefield);
+		canvasComputerGraveyard.setListSprites(spriteListComputerGraveyard);
+		canvasComputerHand.setListSprites(spriteListComputerHand);
+		canvasExile.setListSprites(spriteListExile);
+		canvasHumanGraveyard.setListSprites(spriteListHumanGraveyard);
+		canvasHumanHand.setListSprites(spriteListHumanHand);
+		canvasStack.setListSprites(spriteListStack);
 
 		/**
 		 * Linkes Panel
@@ -417,11 +425,9 @@ public class MatchPresenter extends AnimationTimer implements Initializable, IsS
 		labelCurrentPhase.textProperty().bind(matchActive.propertyCurrentPhase().asString());
 		labelCurrentStep.textProperty().bind(matchActive.propertyCurrentStep().asString());
 		labelPlayerActive.textProperty().bind(matchActive.propertyPlayerActive().asString());
-
 		labelHint.textProperty().bind(playerHuman.propertyPlayerState().asString());
 
 		// Starten
-		setMatchActive(matchActive);
 		this.start();
 	}
 
@@ -562,21 +568,6 @@ public class MatchPresenter extends AnimationTimer implements Initializable, IsS
 		});
 	}
 
-	private Match createMatch(String nameComputer, String nameHuman, String deckComputer, String deckHuman,
-			Image avatarComputer, Image avatarHuman) {
-		// Erstelle Spieler
-		IsPlayer playerComputer = factoryPlayer.create(PlayerType.COMPUTER);
-		IsPlayer playerHuman = factoryPlayer.create(PlayerType.HUMAN);
-
-		// Binde Spieler an ihren Input
-		inputComputer.setPlayer(playerComputer);
-		inputHuman.setPlayer(playerHuman);
-
-		return factoryMatch.create(playerComputer, playerHuman, nameHuman, nameComputer,
-				magicParser.parseDeckFromPath(FileManager.getDeckPath(deckHuman)),
-				magicParser.parseDeckFromPath(FileManager.getDeckPath(deckComputer)));
-	}
-
 	private StringExpression createTabBinding(PlayerType playerType, ZoneType zoneType) {
 		if (zoneType.equals(ZoneType.BATTLEFIELD)) {
 			return Bindings.concat("(").concat(matchActive.propertyBattlefieldSize().asString())
@@ -596,6 +587,10 @@ public class MatchPresenter extends AnimationTimer implements Initializable, IsS
 		} else {
 			throw new IllegalArgumentException();
 		}
+	}
+
+	private EventBus getEventBus() {
+		return eventBus;
 	}
 
 	private void initializeIconLabel(Image icon, Label label) {

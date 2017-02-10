@@ -6,11 +6,7 @@ import java.util.List;
 import java.util.ListIterator;
 
 import com.google.common.collect.ImmutableList;
-import com.google.inject.Inject;
-import com.google.inject.assistedinject.Assisted;
 
-import de.mca.factories.FactoryPhase;
-import de.mca.factories.FactoryStep;
 import de.mca.model.enums.PhaseType;
 import de.mca.model.enums.PlayerType;
 import de.mca.model.enums.StepType;
@@ -41,7 +37,7 @@ public class Turn {
 	/**
 	 * Speichert eine Referenz auf das Match.
 	 */
-	private Match parent;
+	private Match match;
 	/**
 	 * Speichert den computergesteuerten Spieler.
 	 */
@@ -63,10 +59,8 @@ public class Turn {
 	 */
 	private final IntegerProperty propertyTurnNumber;
 
-	@Inject
-	Turn(FactoryPhase phaseFactory, FactoryStep stepFactory, @Assisted("playerComputer") IsPlayer playerComputer,
-			@Assisted("playerHuman") IsPlayer playerHuman, @Assisted Match parent) {
-		this.parent = parent;
+	Turn(Match match, IsPlayer playerComputer, IsPlayer playerHuman) {
+		this.match = match;
 		this.playerComputer = playerComputer;
 		this.playerHuman = playerHuman;
 
@@ -75,42 +69,37 @@ public class Turn {
 		propertyFlagTurnSkipped = new SimpleBooleanProperty(false);
 		propertyTurnNumber = new SimpleIntegerProperty(0);
 
-		final Step untap = stepFactory.create(parent.getRuleEnforcer(), StepType.UNTAP_STEP,
+		final Step untap = new Step(match.getRuleEnforcer(), StepType.UNTAP_STEP,
 				EnumSet.of(TurnBasedActionType.UNTAP));
-		final Step upkeep = stepFactory.create(parent.getRuleEnforcer(), StepType.UPKEEP_STEP,
+		final Step upkeep = new Step(match.getRuleEnforcer(), StepType.UPKEEP_STEP,
 				EnumSet.noneOf(TurnBasedActionType.class));
-		final Step draw = stepFactory.create(parent.getRuleEnforcer(), StepType.DRAW_STEP,
-				EnumSet.of(TurnBasedActionType.DRAW));
-		final Phase beginning = phaseFactory.create(PhaseType.BEGINNING_PHASE, ImmutableList.of(untap, upkeep, draw),
-				parent);
+		final Step draw = new Step(match.getRuleEnforcer(), StepType.DRAW_STEP, EnumSet.of(TurnBasedActionType.DRAW));
+		final Phase beginning = new Phase(match, PhaseType.BEGINNING_PHASE, ImmutableList.of(untap, upkeep, draw));
 
-		final Phase precombatMain = phaseFactory.create(PhaseType.PRECOMBAT_MAIN_PHASE, ImmutableList.of(
-				stepFactory.create(parent.getRuleEnforcer(), StepType.NONE, EnumSet.noneOf(TurnBasedActionType.class))),
-				parent);
+		final Phase precombatMain = new Phase(match, PhaseType.PRECOMBAT_MAIN_PHASE, ImmutableList
+				.of(new Step(match.getRuleEnforcer(), StepType.NONE, EnumSet.noneOf(TurnBasedActionType.class))));
 
-		final Step beginningOfCombat = stepFactory.create(parent.getRuleEnforcer(), StepType.BEGINNING_OF_COMBAT_STEP,
+		final Step beginningOfCombat = new Step(match.getRuleEnforcer(), StepType.BEGINNING_OF_COMBAT_STEP,
 				EnumSet.of(TurnBasedActionType.BEGINNING_OF_COMBAT_STEP));
-		final Step declareAttackers = stepFactory.create(parent.getRuleEnforcer(), StepType.DECLARE_ATTACKERS,
+		final Step declareAttackers = new Step(match.getRuleEnforcer(), StepType.DECLARE_ATTACKERS,
 				EnumSet.of(TurnBasedActionType.DECLARE_ATTACKER));
-		final Step declareBlockers = stepFactory.create(parent.getRuleEnforcer(), StepType.DECLARE_BLOCKERS,
+		final Step declareBlockers = new Step(match.getRuleEnforcer(), StepType.DECLARE_BLOCKERS,
 				EnumSet.of(TurnBasedActionType.DECLARE_BLOCKER));
-		final Step combatDamage = stepFactory.create(parent.getRuleEnforcer(), StepType.COMBAT_DAMAGE_STEP,
+		final Step combatDamage = new Step(match.getRuleEnforcer(), StepType.COMBAT_DAMAGE_STEP,
 				EnumSet.of(TurnBasedActionType.DECLARE_DAMAGE_ASSIGNMENT_ORDER_ATTACKER));
-		final Step endOfCombat = stepFactory.create(parent.getRuleEnforcer(), StepType.END_OF_COMBAT,
+		final Step endOfCombat = new Step(match.getRuleEnforcer(), StepType.END_OF_COMBAT,
 				EnumSet.of(TurnBasedActionType.END_OF_COMBAT));
-		final Phase combat = phaseFactory.create(PhaseType.COMBAT_PHASE,
-				ImmutableList.of(beginningOfCombat, declareAttackers, declareBlockers, combatDamage, endOfCombat),
-				parent);
+		final Phase combat = new Phase(match, PhaseType.COMBAT_PHASE,
+				ImmutableList.of(beginningOfCombat, declareAttackers, declareBlockers, combatDamage, endOfCombat));
 
-		final Phase postcombatMain = phaseFactory.create(PhaseType.POSTCOMBAT_MAIN_PHASE, ImmutableList.of(
-				stepFactory.create(parent.getRuleEnforcer(), StepType.NONE, EnumSet.noneOf(TurnBasedActionType.class))),
-				parent);
+		final Phase postcombatMain = new Phase(match, PhaseType.POSTCOMBAT_MAIN_PHASE, ImmutableList
+				.of(new Step(match.getRuleEnforcer(), StepType.NONE, EnumSet.noneOf(TurnBasedActionType.class))));
 
-		final Step end = stepFactory.create(parent.getRuleEnforcer(), StepType.END_STEP,
+		final Step end = new Step(match.getRuleEnforcer(), StepType.END_STEP,
 				EnumSet.noneOf(TurnBasedActionType.class));
-		final Step cleanup = stepFactory.create(parent.getRuleEnforcer(), StepType.CLEANUP_STEP,
+		final Step cleanup = new Step(match.getRuleEnforcer(), StepType.CLEANUP_STEP,
 				EnumSet.of(TurnBasedActionType.DISCARD, TurnBasedActionType.CLEANUP));
-		final Phase ending = phaseFactory.create(PhaseType.ENDING_PHASE, ImmutableList.of(end, cleanup), parent);
+		final Phase ending = new Phase(match, PhaseType.ENDING_PHASE, ImmutableList.of(end, cleanup));
 
 		listPhases.add(beginning);
 		listPhases.add(precombatMain);
@@ -119,11 +108,11 @@ public class Turn {
 		listPhases.add(ending);
 
 		iteratorPhases = listPhases.listIterator();
-		parent.propertyCurrentPhase().set(beginning);
+		match.propertyCurrentPhase().set(beginning);
 	}
 
-	Turn(Turn turn, Match parent) {
-		this.parent = parent;
+	Turn(Turn turn, Match match) {
+		this.match = match;
 		playerComputer = turn.getPlayerComputer();
 		playerHuman = turn.getPlayerHuman();
 
@@ -133,7 +122,7 @@ public class Turn {
 		propertyTurnNumber = turn.propertyTurnNumber();
 
 		iteratorPhases = listPhases.listIterator();
-		parent.propertyCurrentPhase().set(listPhases.get(0));
+		match.propertyCurrentPhase().set(listPhases.get(0));
 	}
 
 	private List<Phase> getListPhases() {
@@ -213,15 +202,15 @@ public class Turn {
 	}
 
 	void phaseBegin() {
-		parent.getCurrentPhase().phaseBegin();
+		match.getCurrentPhase().phaseBegin();
 	}
 
 	void phaseEnd() {
-		if (parent.getCurrentPhase().isMain()) {
+		if (match.getCurrentPhase().isMain()) {
 			getPlayerHuman().setFlagPassedPriority(false);
 			getPlayerComputer().setFlagPassedPriority(false);
 		}
-		parent.getCurrentPhase().phaseEnd();
+		match.getCurrentPhase().phaseEnd();
 	}
 
 	BooleanProperty propertyFlagTurnRunning() {
@@ -237,11 +226,11 @@ public class Turn {
 	}
 
 	void setCurrentPhase() {
-		parent.propertyCurrentPhase().set(iteratorPhases.next());
+		match.propertyCurrentPhase().set(iteratorPhases.next());
 	}
 
 	void setCurrentStep() {
-		parent.getCurrentPhase().setCurrentStep();
+		match.getCurrentPhase().setCurrentStep();
 	}
 
 	void skipStepCombatDamage() {
@@ -261,13 +250,13 @@ public class Turn {
 	}
 
 	void stepBegin() {
-		parent.getCurrentPhase().stepBegin();
+		match.getCurrentPhase().stepBegin();
 	}
 
 	void stepEnd() {
 		getPlayerHuman().setFlagPassedPriority(false);
 		getPlayerComputer().setFlagPassedPriority(false);
-		parent.getCurrentPhase().stepEnd();
+		match.getCurrentPhase().stepEnd();
 	}
 
 	void turnBegin() {
@@ -277,7 +266,7 @@ public class Turn {
 
 	void turnEnd() {
 		setFlagTurnRunning(false);
-		parent.getPlayerActive().setFlagPlayedLand(false);
+		match.getPlayerActive().setFlagPlayedLand(false);
 	}
 
 }

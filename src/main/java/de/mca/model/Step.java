@@ -2,9 +2,6 @@ package de.mca.model;
 
 import java.util.Set;
 
-import com.google.inject.Inject;
-import com.google.inject.assistedinject.Assisted;
-
 import de.mca.model.enums.StepType;
 import de.mca.model.enums.TurnBasedActionType;
 import javafx.beans.property.BooleanProperty;
@@ -48,9 +45,7 @@ public class Step {
 	 */
 	private final StepType stepType;
 
-	@Inject
-	Step(@Assisted RuleEnforcer ruleEnforcer, @Assisted StepType stepType,
-			@Assisted Set<TurnBasedActionType> setStartTBAs) {
+	Step(RuleEnforcer ruleEnforcer, StepType stepType, Set<TurnBasedActionType> setStartTBAs) {
 		this.ruleEnforcer = ruleEnforcer;
 		this.stepType = stepType;
 		this.setStartTBAs = setStartTBAs;

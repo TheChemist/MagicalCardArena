@@ -1,8 +1,5 @@
 package de.mca.model;
 
-import com.google.inject.Inject;
-import com.google.inject.assistedinject.Assisted;
-
 import de.mca.model.enums.PlayerType;
 import de.mca.model.interfaces.IsStackable;
 import javafx.beans.property.ObjectProperty;
@@ -24,8 +21,7 @@ public class MagicSpell extends MagicCard implements IsStackable {
 	 */
 	private final ObjectProperty<PlayerType> playerControlling;
 
-	@Inject
-	MagicSpell(@Assisted MagicCard magicCard, @Assisted PlayerType playerControlling) {
+	MagicSpell(MagicCard magicCard, PlayerType playerControlling) {
 		super(magicCard.getId());
 		this.playerControlling = new SimpleObjectProperty<>(playerControlling);
 		setDisplayName(magicCard.getDisplayName());

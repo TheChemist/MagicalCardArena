@@ -1,8 +1,5 @@
 package de.mca.model;
 
-import com.google.inject.Inject;
-import com.google.inject.assistedinject.Assisted;
-
 import de.mca.model.enums.EffectType;
 import de.mca.model.interfaces.IsManaMap;
 import javafx.beans.property.ObjectProperty;
@@ -21,8 +18,7 @@ final public class EffectProduceMana extends Effect {
 	 */
 	private ObjectProperty<IsManaMap> produceMap;
 
-	@Inject
-	EffectProduceMana(@Assisted ActivatedAbility source, @Assisted IsManaMap produceMap) {
+	public EffectProduceMana(ActivatedAbility source, IsManaMap produceMap) {
 		super(source, EffectType.PRODUCE_MANA);
 		this.produceMap = new SimpleObjectProperty<>(produceMap);
 	}

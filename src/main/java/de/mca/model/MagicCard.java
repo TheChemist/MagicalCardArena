@@ -148,7 +148,7 @@ public class MagicCard implements IsObject, IsInteractable {
 		rarity = RarityType.BASIC;
 	}
 
-	public MagicCard(MagicPermanent magicPermanent) {
+	MagicCard(MagicPermanent magicPermanent) {
 		this(magicPermanent.getId());
 		setDisplayName(magicPermanent.getDisplayName());
 		setFileName(magicPermanent.getFileName());

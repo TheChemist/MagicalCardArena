@@ -1,8 +1,5 @@
 package de.mca.model;
 
-import com.google.inject.Inject;
-import com.google.inject.assistedinject.Assisted;
-
 import de.mca.model.enums.PlayerType;
 import de.mca.model.interfaces.IsCombatant;
 import javafx.beans.property.BooleanProperty;
@@ -94,8 +91,7 @@ public class MagicPermanent extends MagicCard implements IsCombatant {
 		flagTapped = new SimpleBooleanProperty(false);
 	}
 
-	@Inject
-	MagicPermanent(@Assisted MagicCard magicCard) {
+	MagicPermanent(MagicCard magicCard) {
 		this(magicCard.getId(), magicCard.getPower(), magicCard.getToughness());
 		setDisplayName(magicCard.getDisplayName());
 		setFileName(magicCard.getFileName());
@@ -151,6 +147,7 @@ public class MagicPermanent extends MagicCard implements IsCombatant {
 		return basePower;
 	}
 
+	@Override
 	public int getBaseToughness() {
 		return baseToughness;
 	}
@@ -234,6 +231,7 @@ public class MagicPermanent extends MagicCard implements IsCombatant {
 		this.flagAttackingAlone.set(flagAttackingAlone);
 	}
 
+	@Override
 	public void setFlagBlocked(boolean flagBlocked) {
 		this.flagBlocked.set(flagBlocked);
 	}

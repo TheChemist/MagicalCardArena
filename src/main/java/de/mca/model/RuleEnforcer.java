@@ -8,11 +8,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.eventbus.EventBus;
-import com.google.inject.Inject;
 
 import de.mca.Constants;
-import de.mca.factories.FactoryMagicPermanent;
-import de.mca.factories.FactoryMagicSpell;
 import de.mca.model.enums.ColorType;
 import de.mca.model.enums.PlayerState;
 import de.mca.model.enums.PlayerType;
@@ -43,14 +40,14 @@ public class RuleEnforcer {
 	 * Speichert den EventBus.
 	 */
 	private EventBus eventBus;
-	/**
-	 * Speichert die PermanentFactory zum Erstellen bleibender Karten.
-	 */
-	private final FactoryMagicPermanent factoryMagicPermanent;
-	/**
-	 * Speichert die SpellFactory zum Erstellen von Zaubersprüchen.
-	 */
-	private final FactoryMagicSpell factoryMagicSpell;
+	// /**
+	// * Speichert die PermanentFactory zum Erstellen bleibender Karten.
+	// */
+	// private final FactoryMagicPermanent factoryMagicPermanent;
+	// /**
+	// * Speichert die SpellFactory zum Erstellen von Zaubersprüchen.
+	// */
+	// private final FactoryMagicSpell factoryMagicSpell;
 	/**
 	 * Speichert eine Referenz auf das Match.
 	 */
@@ -61,11 +58,8 @@ public class RuleEnforcer {
 	 */
 	private final SetProperty<StateBasedAction> propertySetStateBasedActions;
 
-	@Inject
-	RuleEnforcer(EventBus eventBus, FactoryMagicPermanent factoryMagicPermanent, FactoryMagicSpell factoryMagicSpell) {
+	public RuleEnforcer(EventBus eventBus) {
 		this.eventBus = eventBus;
-		this.factoryMagicPermanent = factoryMagicPermanent;
-		this.factoryMagicSpell = factoryMagicSpell;
 
 		propertySetStateBasedActions = new SimpleSetProperty<>(FXCollections.observableSet());
 	}
@@ -147,20 +141,6 @@ public class RuleEnforcer {
 		}
 	}
 
-	private void tb_combatCleanup() {
-		LOGGER.debug("{} tb_combatCleanup()", this);
-
-		for(final Attack attack: match.getListAttacks()) {
-			for(final IsCombatant combatant: attack.getCombatants()) {
-				combatant.setFlagAttacking(false);
-				combatant.setFlagBlocking(false);
-				combatant.setFlagBlocked(false);
-			}
-		}
-
-		match.resetListAttacks();
-	}
-
 	/**
 	 * Wird aufgerufen, wenn der Spieler eine bleibende Karte aktiviert. Sind
 	 * alle Voraussetzungen erfüllt, wird die zu aktivierende Fähigkeit bestimmt
@@ -202,7 +182,7 @@ public class RuleEnforcer {
 	public void i_castSpellStart(IsPlayer player, MagicCard magicCard) {
 		LOGGER.debug("{} i_castSpellStart({}, {})", this, player, magicCard);
 
-		final MagicSpell spell = factoryMagicSpell.create(magicCard, player.getPlayerType());
+		final MagicSpell spell = new MagicSpell(magicCard, player.getPlayerType());
 
 		// Neuen Spielerstatus setzen.
 		player.setPlayerState(PlayerState.CASTING_SPELL);
@@ -437,7 +417,7 @@ public class RuleEnforcer {
 
 		// Bewege Karten
 		player.removeCard(magicCard, ZoneType.HAND);
-		match.addCard(factoryMagicPermanent.create(magicCard), ZoneType.BATTLEFIELD);
+		match.addCard(new MagicPermanent(magicCard), ZoneType.BATTLEFIELD);
 
 		// Setze Status und flags.
 		player.setPlayerState(PlayerState.PRIORITIZED);
@@ -936,6 +916,20 @@ public class RuleEnforcer {
 		playerNonactive.removeManaAll();
 	}
 
+	private void tb_combatCleanup() {
+		LOGGER.debug("{} tb_combatCleanup()", this);
+
+		for (final Attack attack : match.getListAttacks()) {
+			for (final IsCombatant combatant : attack.getCombatants()) {
+				combatant.setFlagAttacking(false);
+				combatant.setFlagBlocking(false);
+				combatant.setFlagBlocked(false);
+			}
+		}
+
+		match.resetListAttacks();
+	}
+
 	private void tb_combatDamageAssignment(Step currentStep) {
 		LOGGER.debug("{} tb_combatDamageAssignment({})", this, currentStep);
 		for (final Attack attack : match.getListAttacks()) {
@@ -1189,7 +1183,7 @@ public class RuleEnforcer {
 		for (int i = 0; i < match.getZoneStack().getSize(); i++) {
 			final IsStackable stackable = match.getZoneStack().peek();
 			if (stackable.isPermanentSpell()) {
-				match.addCard(factoryMagicPermanent.create((MagicSpell) stackable), ZoneType.BATTLEFIELD);
+				match.addCard(new MagicPermanent((MagicSpell) stackable), ZoneType.BATTLEFIELD);
 			} else {
 				stackable.propertyListEffects().forEach(effect -> examineEffectProduceMana((EffectProduceMana) effect));
 			}

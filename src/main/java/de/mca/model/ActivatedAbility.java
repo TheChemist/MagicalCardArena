@@ -4,8 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.google.gson.JsonArray;
-import com.google.inject.Inject;
-import com.google.inject.assistedinject.Assisted;
 
 import de.mca.MagicParser;
 import de.mca.model.enums.AbilityType;
@@ -45,10 +43,6 @@ public class ActivatedAbility implements IsStackable {
 	 */
 	private final JsonArray effectObject;
 	/**
-	 * Speichert den MagicParser, um den Effekt zu parsen.
-	 */
-	private final MagicParser magicParser;
-	/**
 	 * Speichert die verschiedenen Darstellungen der Kosten.
 	 */
 	private final ListProperty<IsManaMap> propertyListCostMaps;
@@ -65,11 +59,8 @@ public class ActivatedAbility implements IsStackable {
 	 */
 	private final ObjectProperty<IsObject> propertySource;
 
-	@Inject
-	ActivatedAbility(MagicParser magicParser, @Assisted IsObject source, @Assisted AbilityType abilityType,
-			@Assisted AdditionalCostType additionalCostType, @Assisted JsonArray effectObject,
-			@Assisted ObservableList<IsManaMap> listCostMaps) {
-		this.magicParser = magicParser;
+	public ActivatedAbility(IsObject source, AbilityType abilityType, AdditionalCostType additionalCostType,
+			JsonArray effectObject, ObservableList<IsManaMap> listCostMaps) {
 		this.abilityType = abilityType;
 		this.additionalCostType = additionalCostType;
 		this.effectObject = effectObject;
@@ -79,7 +70,7 @@ public class ActivatedAbility implements IsStackable {
 		propertyPlayerControlling = new SimpleObjectProperty<>();
 
 		for (int i = 0; i < effectObject.size(); i++) {
-			add(magicParser.parseEffect(this, effectObject.get(i).getAsJsonObject()));
+			add(MagicParser.parseEffect(this, effectObject.get(i).getAsJsonObject()));
 		}
 	}
 
@@ -113,10 +104,6 @@ public class ActivatedAbility implements IsStackable {
 
 	public List<Effect> getListEffects() {
 		return propertyListEffects().get();
-	}
-
-	public MagicParser getMagicParser() {
-		return magicParser;
 	}
 
 	@Override

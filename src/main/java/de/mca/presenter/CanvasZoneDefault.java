@@ -19,20 +19,20 @@ import javafx.scene.layout.Pane;
  * @author Maximilian Werling
  *
  */
-final class CanvasZoneDefault extends AdaptableCanvas {
+final class CanvasZoneDefault extends AdaptableCanvas<SpriteMagicCard> {
 
 	private static final double X_OFFSET = 1.1;
 	private static final double Y_OFFSET = 10.0;
 
-	private final List<SpriteMagicCard> spriteList;
+	private final InputHuman inputHuman;
+	private final ZoneType zoneType;
+	private final ImageView zoomView;
 
-	CanvasZoneDefault(Pane parent, InputHuman input, List<SpriteMagicCard> spriteList, ZoneType zoneType,
-			ImageView zoomView) {
+	CanvasZoneDefault(Pane parent, InputHuman inputHuman, ZoneType zoneType, ImageView zoomView) {
 		super(parent);
-		this.spriteList = spriteList;
-
-		initializeMouseClicked(input, spriteList, zoneType);
-		initializeMouseMoved(spriteList, zoomView);
+		this.inputHuman = inputHuman;
+		this.zoneType = zoneType;
+		this.zoomView = zoomView;
 	}
 
 	@Override
@@ -41,15 +41,15 @@ final class CanvasZoneDefault extends AdaptableCanvas {
 
 		gc.clearRect(0, 0, getWidth(), getHeight());
 
-		for (int i = 0; i < spriteList.size(); i++) {
-			SpriteMagicCard sprite = spriteList.get(i);
+		for (int i = 0; i < getListSprites().size(); i++) {
+			Sprite sprite = getListSprites().get(i);
 			double positionX = 0;
 			double positionY = 0;
 
 			DoubleBinding heightBoundSpriteHeight = heightProperty().subtract(Y_OFFSET);
 			DoubleBinding heightBoundSpriteWidth = heightBoundSpriteHeight.multiply(Constants.CARD_RATIO);
 
-			DoubleBinding widthBoundSpriteWidth = widthProperty().divide(spriteList.size()).divide(X_OFFSET);
+			DoubleBinding widthBoundSpriteWidth = widthProperty().divide(getListSprites().size()).divide(X_OFFSET);
 			DoubleBinding widthBoundSpriteHeight = widthBoundSpriteWidth.divide(Constants.CARD_RATIO);
 
 			if (heightBoundSpriteWidth.multiply(X_OFFSET).greaterThan(widthBoundSpriteWidth).get()) {
@@ -69,24 +69,24 @@ final class CanvasZoneDefault extends AdaptableCanvas {
 		}
 	}
 
-	private void initializeMouseClicked(InputHuman input, List<SpriteMagicCard> spriteList, ZoneType zoneType) {
+	private void initializeMouseClicked() {
 		addEventHandler(MouseEvent.MOUSE_CLICKED, (mouseEvent) -> {
 			int zCoordinate = -1;
 			List<MagicCard> listClicked = new ArrayList<>();
-			for (SpriteMagicCard sprite : spriteList) {
+			for (SpriteMagicCard sprite : getListSprites()) {
 				if (sprite.getBoundary().contains(new Point2D(mouseEvent.getX(), mouseEvent.getY()))) {
 					listClicked.add(sprite.getMagicObject());
 					zCoordinate++;
 				}
 			}
-			input.input(listClicked.get(zCoordinate), zoneType);
+			inputHuman.input(listClicked.get(zCoordinate), zoneType);
 		});
 	}
 
-	private void initializeMouseMoved(List<SpriteMagicCard> spriteList, ImageView zoomView) {
+	private void initializeMouseMoved() {
 		addEventHandler(MouseEvent.MOUSE_MOVED, (mouseEvent) -> {
 			SpriteMagicCard mouseOverSprite = null;
-			for (SpriteMagicCard sprite : spriteList) {
+			for (SpriteMagicCard sprite : getListSprites()) {
 				if (sprite.getBoundary().contains(new Point2D(mouseEvent.getX(), mouseEvent.getY()))) {
 					mouseOverSprite = sprite;
 					break;
@@ -99,5 +99,13 @@ final class CanvasZoneDefault extends AdaptableCanvas {
 				zoomView.setImage(null);
 			}
 		});
+	}
+
+	@Override
+	void setListSprites(List<SpriteMagicCard> listSprites) {
+		super.setListSprites(listSprites);
+
+		initializeMouseClicked();
+		initializeMouseMoved();
 	}
 }

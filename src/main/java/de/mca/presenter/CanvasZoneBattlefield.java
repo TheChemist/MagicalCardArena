@@ -17,7 +17,7 @@ import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Pane;
 
-class CanvasZoneBattlefield extends AdaptableCanvas {
+class CanvasZoneBattlefield extends AdaptableCanvas<SpriteMagicPermanent> {
 
 	private final static double HEIGHT_DEFAULT = 75;
 	private final static double X_OFFSET = 1.1;
@@ -27,19 +27,19 @@ class CanvasZoneBattlefield extends AdaptableCanvas {
 	private int indexComputerRowTwo;
 	private int indexHumanRowOne;
 	private int indexHumanRowTwo;
-	private final List<SpriteMagicPermanent> spriteList;
 
-	CanvasZoneBattlefield(Pane parent, InputHuman input, List<SpriteMagicPermanent> spriteList, ZoneType zoneType,
-			ImageView zoomView) {
+	private final InputHuman inputHuman;
+	private final ImageView zoomView;
+
+	CanvasZoneBattlefield(Pane parent, InputHuman inputHuman, ImageView zoomView) {
 		super(parent);
-		this.spriteList = spriteList;
+		this.inputHuman = inputHuman;
+		this.zoomView = zoomView;
+
 		indexComputerRowOne = 0;
 		indexComputerRowTwo = 0;
 		indexHumanRowOne = 0;
 		indexHumanRowTwo = 0;
-
-		initializeMouseClicked(input, spriteList, zoneType);
-		initializeMouseMoved(spriteList, zoomView);
 	}
 
 	@Override
@@ -50,7 +50,7 @@ class CanvasZoneBattlefield extends AdaptableCanvas {
 		gc.clearRect(0, 0, getWidth(), getHeight());
 
 		// Karten zeichnen
-		spriteList.forEach(sprite -> drawCard(sprite, gc));
+		getListSprites().forEach(sprite -> drawCard(sprite, gc));
 
 		// Hilfsindizes zurücksetzen
 		indexComputerRowOne = 0;
@@ -116,24 +116,24 @@ class CanvasZoneBattlefield extends AdaptableCanvas {
 		sprite.render(gc);
 	}
 
-	private void initializeMouseClicked(InputHuman input, List<SpriteMagicPermanent> spriteList, ZoneType zoneType) {
+	private void initializeMouseClicked() {
 		addEventHandler(MouseEvent.MOUSE_CLICKED, (mouseEvent) -> {
 			int zCoordinate = -1;
 			List<MagicPermanent> listClicked = new ArrayList<>();
-			for (SpriteMagicPermanent sprite : spriteList) {
+			for (SpriteMagicPermanent sprite : getListSprites()) {
 				if (sprite.getBoundary().contains(new Point2D(mouseEvent.getX(), mouseEvent.getY()))) {
 					listClicked.add(sprite.getMagicPermanent());
 					zCoordinate++;
 				}
 			}
-			input.input(listClicked.get(zCoordinate), zoneType);
+			inputHuman.input(listClicked.get(zCoordinate), ZoneType.BATTLEFIELD);
 		});
 	}
 
-	private void initializeMouseMoved(List<SpriteMagicPermanent> spriteList, ImageView zoomView) {
+	private void initializeMouseMoved() {
 		addEventHandler(MouseEvent.MOUSE_MOVED, (mouseEvent) -> {
 			SpriteMagicPermanent mouseOverSprite = null;
-			for (SpriteMagicPermanent sprite : spriteList) {
+			for (SpriteMagicPermanent sprite : getListSprites()) {
 				if (sprite.getBoundary().contains(new Point2D(mouseEvent.getX(), mouseEvent.getY()))) {
 					mouseOverSprite = sprite;
 					break;
@@ -146,6 +146,14 @@ class CanvasZoneBattlefield extends AdaptableCanvas {
 				zoomView.setImage(null);
 			}
 		});
+	}
+
+	@Override
+	void setListSprites(List<SpriteMagicPermanent> listSprites) {
+		super.setListSprites(listSprites);
+
+		initializeMouseClicked();
+		initializeMouseMoved();
 	}
 
 }

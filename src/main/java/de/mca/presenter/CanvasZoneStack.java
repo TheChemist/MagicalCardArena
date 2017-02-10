@@ -1,7 +1,5 @@
 package de.mca.presenter;
 
-import java.util.List;
-
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.layout.Pane;
 
@@ -10,13 +8,10 @@ import javafx.scene.layout.Pane;
  * @author Maximilian Werling
  *
  */
-final class CanvasZoneStack extends AdaptableCanvas {
+final class CanvasZoneStack extends AdaptableCanvas<SpriteStackable> {
 
-	private List<SpriteStackable> spriteList;
-
-	CanvasZoneStack(Pane parent, List<SpriteStackable> spriteList) {
+	CanvasZoneStack(Pane parent) {
 		super(parent);
-		this.spriteList = spriteList;
 	}
 
 	@Override
@@ -25,8 +20,8 @@ final class CanvasZoneStack extends AdaptableCanvas {
 
 		gc.clearRect(0, 0, getWidth(), getHeight());
 
-		for (int i = 0; i < spriteList.size(); i++) {
-			SpriteStackable sprite = spriteList.get(i);
+		for (int i = 0; i < getListSprites().size(); i++) {
+			Sprite sprite = getListSprites().get(i);
 
 			sprite.propertyHeight().set(50);
 			sprite.propertyWidth().bind(widthProperty());

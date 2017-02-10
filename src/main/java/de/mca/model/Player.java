@@ -5,10 +5,6 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.inject.Inject;
-import com.google.inject.assistedinject.Assisted;
-
-import de.mca.factories.FactoryZone;
 import de.mca.model.enums.ColorType;
 import de.mca.model.enums.PlayerState;
 import de.mca.model.enums.PlayerType;
@@ -49,10 +45,6 @@ public final class Player implements IsPlayer {
 	 * Speichert den Manapool des Spielers.
 	 */
 	private final IsManaMap manaPool;
-	/**
-	 * Speichert eine Referenz auf das aktuelle Match.
-	 */
-	private Match match;
 	/**
 	 * Speichert den Spielertyp. Dient zur Identifikation.
 	 */
@@ -107,26 +99,27 @@ public final class Player implements IsPlayer {
 	 * Speichert den aktuellen Spielerstatus.
 	 */
 	private final ObjectProperty<PlayerState> propertyPlayerState;
+	private final RuleEnforcer ruleEnforcer;
 	/**
 	 * Speichert den Friedhof des Spielers.
 	 */
-	private final ZoneDefault<MagicCard> zoneGraveyard;
+	private final IsZone<MagicCard> zoneGraveyard;
 	/**
 	 * Speichert die Hand des Spielers.
 	 */
-	private final ZoneDefault<MagicCard> zoneHand;
+	private final IsZone<MagicCard> zoneHand;
 	/**
 	 * Speichert die Bibliothek des Spielers.
 	 */
-	private final ZoneDefault<MagicCard> zoneLibrary;
+	private final IsZone<MagicCard> zoneLibrary;
 
-	@Inject
-	public Player(FactoryZone zoneFactory, @Assisted PlayerType playerType) {
+	public Player(RuleEnforcer ruleEnforcer, PlayerType playerType, String displayName, Deck deck) {
 		this.playerType = playerType;
+		this.ruleEnforcer = ruleEnforcer;
 
 		propertyDamage = new SimpleIntegerProperty(0);
 		propertyDeckSize = new SimpleIntegerProperty(0);
-		propertyDisplayName = new SimpleStringProperty("");
+		propertyDisplayName = new SimpleStringProperty(displayName);
 		propertyFlagDeclaringAttackers = new SimpleBooleanProperty(false);
 		propertyFlagDeclaringBlockers = new SimpleBooleanProperty(false);
 		propertyFlagPassedPriority = new SimpleBooleanProperty(false);
@@ -136,14 +129,21 @@ public final class Player implements IsPlayer {
 		propertyHandSize = new SimpleIntegerProperty(0);
 		propertyLife = new SimpleIntegerProperty(20);
 		propertyPlayerState = new SimpleObjectProperty<>(PlayerState.NONACTIVE);
+		zoneGraveyard = new ZoneDefault<>(playerType, ZoneType.GRAVEYARD);
+		zoneHand = new ZoneDefault<>(playerType, ZoneType.HAND);
+		zoneLibrary = new ZoneDefault<>(playerType, ZoneType.LIBRARY);
 
 		manaPool = new ManaMapDefault();
 		manaCostAlreadyPaid = new ManaMapDefault();
 		manaCostGoal = new ManaMapDefault();
 
-		zoneGraveyard = zoneFactory.create(playerType, ZoneType.GRAVEYARD);
-		zoneHand = zoneFactory.create(playerType, ZoneType.HAND);
-		zoneLibrary = zoneFactory.create(playerType, ZoneType.LIBRARY);
+		addAllCards(deck.getCardsList(), ZoneType.LIBRARY);
+
+		// Setze den Eigentümer jeder Karte
+		getZoneLibrary().propertyListZoneCards().forEach(card -> card.setPlayerOwning(getPlayerType()));
+
+		// Mische
+		getZoneLibrary().shuffle();
 	}
 
 	@Override
@@ -273,10 +273,10 @@ public final class Player implements IsPlayer {
 		return manaPool;
 	}
 
-	@Override
-	public Match getMatch() {
-		return match;
-	}
+	// @Override
+	// public Match getMatch() {
+	// return match;
+	// }
 
 	@Override
 	public PlayerState getPlayerState() {
@@ -295,7 +295,7 @@ public final class Player implements IsPlayer {
 
 	@Override
 	public RuleEnforcer getRuleEnforcer() {
-		return getMatch().getRuleEnforcer();
+		return ruleEnforcer;
 	}
 
 	@Override
@@ -304,12 +304,12 @@ public final class Player implements IsPlayer {
 	}
 
 	@Override
-	public ZoneDefault<MagicCard> getZoneHand() {
+	public IsZone<MagicCard> getZoneHand() {
 		return zoneHand;
 	}
 
 	@Override
-	public ZoneDefault<MagicCard> getZoneLibrary() {
+	public IsZone<MagicCard> getZoneLibrary() {
 		return zoneLibrary;
 	}
 
@@ -464,24 +464,6 @@ public final class Player implements IsPlayer {
 	}
 
 	@Override
-	public void setDeck(Deck deck) {
-		LOGGER.trace("{} setDeck({})", this, deck);
-		addAllCards(deck.getCardsList(), ZoneType.LIBRARY);
-
-		// Setze den Eigentümer jeder Karte
-		getZoneLibrary().propertyListZoneCards().forEach(card -> card.setPlayerOwning(getPlayerType()));
-
-		// Mische
-		getZoneLibrary().shuffle();
-	}
-
-	@Override
-	public void setDisplayName(String displayName) {
-		LOGGER.trace("{} setDisplayName({})", this, displayName);
-		this.propertyDisplayName.set(displayName);
-	}
-
-	@Override
 	public void setFlagDeclareAttackers(boolean flagDeclareAttackers) {
 		LOGGER.trace("{} setFlagDeclareAttackers({})", this, flagDeclareAttackers);
 		this.propertyFlagDeclaringAttackers.set(flagDeclareAttackers);
@@ -532,10 +514,10 @@ public final class Player implements IsPlayer {
 		this.manaCostGoal = manaCostGoal;
 	}
 
-	@Override
-	public void setMatch(Match match) {
-		this.match = match;
-	}
+	// @Override
+	// public void setMatch(Match match) {
+	// this.match = match;
+	// }
 
 	@Override
 	public void setPlayerState(PlayerState playerState) {

@@ -2,10 +2,8 @@ package de.mca.model.interfaces;
 
 import java.util.List;
 
-import de.mca.model.Deck;
 import de.mca.model.MagicCard;
 import de.mca.model.ManaMapDefault;
-import de.mca.model.Match;
 import de.mca.model.RuleEnforcer;
 import de.mca.model.enums.ColorType;
 import de.mca.model.enums.PlayerState;
@@ -73,8 +71,6 @@ public interface IsPlayer extends IsAttackTarget {
 	public IsManaMap getManaCostGoal();
 
 	public IsManaMap getManaPool();
-
-	public Match getMatch();
 
 	public PlayerState getPlayerState();
 
@@ -184,10 +180,6 @@ public interface IsPlayer extends IsAttackTarget {
 	 */
 	public void removeManaAll();
 
-	public void setDeck(Deck deckComputer);
-
-	public void setDisplayName(String nameComputer);
-
 	public void setFlagDeclareAttackers(boolean flagDeclareAttackers);
 
 	public void setFlagDeclareBlockers(boolean flagDeclareBlockers);
@@ -201,8 +193,6 @@ public interface IsPlayer extends IsAttackTarget {
 	public void setManaCostAlreadyPaid(ManaMapDefault manaMapDefault);
 
 	public void setManaCostGoal(IsManaMap manaCostGoal);
-
-	public void setMatch(Match match);
 
 	public void setPlayerState(PlayerState ps);
 

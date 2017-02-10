@@ -3,9 +3,6 @@ package de.mca.model;
 import java.util.List;
 import java.util.ListIterator;
 
-import com.google.inject.Inject;
-import com.google.inject.assistedinject.Assisted;
-
 import de.mca.model.enums.PhaseType;
 import de.mca.model.enums.StepType;
 import de.mca.model.enums.TurnBasedActionType;
@@ -30,7 +27,7 @@ public class Phase {
 	/**
 	 * Speichert eine Referenz auf das Match.
 	 */
-	private Match parent;
+	private Match match;
 	/**
 	 * Speichert den Phasentyp.
 	 */
@@ -48,18 +45,17 @@ public class Phase {
 	 */
 	private final BooleanProperty propertyFlagPhaseSkipped;
 
-	@Inject
-	Phase(@Assisted PhaseType phaseType, @Assisted List<Step> listSteps, @Assisted Match parent) {
+	Phase(Match match, PhaseType phaseType, List<Step> listSteps) {
 		this.listSteps = listSteps;
-		this.parent = parent;
+		this.match = match;
 		this.phaseType = phaseType;
 
 		propertyFlagPhaseRepeated = new SimpleBooleanProperty(false);
 		propertyFlagPhaseRunning = new SimpleBooleanProperty(false);
 		propertyFlagPhaseSkipped = new SimpleBooleanProperty(false);
 
-		iteratorSteps = this.listSteps.listIterator();
-		parent.propertyCurrentStep().set(listSteps.get(0));
+		iteratorSteps = listSteps.listIterator();
+		match.propertyCurrentStep().set(listSteps.get(0));
 	}
 
 	public boolean isMain() {
@@ -72,8 +68,7 @@ public class Phase {
 	}
 
 	private void fireEndTBA() {
-		parent.getRuleEnforcer()
-				.examineTurnBasedAction(new TurnBasedAction(this, TurnBasedActionType.CLEAR_MANA_POOLS));
+		match.getRuleEnforcer().examineTurnBasedAction(new TurnBasedAction(this, TurnBasedActionType.CLEAR_MANA_POOLS));
 	}
 
 	boolean equals(PhaseType phaseType) {
@@ -81,7 +76,7 @@ public class Phase {
 	}
 
 	Step getCurrentStep() {
-		return parent.propertyCurrentStep().get();
+		return match.propertyCurrentStep().get();
 	}
 
 	boolean getFlagPhaseRunning() {
@@ -107,7 +102,7 @@ public class Phase {
 	void phaseBegin() {
 		setFlagPhaseRunning(true);
 		iteratorSteps = listSteps.listIterator();
-		parent.propertyCurrentStep().set(listSteps.get(0));
+		match.propertyCurrentStep().set(listSteps.get(0));
 	}
 
 	void phaseEnd() {
@@ -118,7 +113,7 @@ public class Phase {
 	}
 
 	void setCurrentStep() {
-		parent.propertyCurrentStep().set(iteratorSteps.next());
+		match.propertyCurrentStep().set(iteratorSteps.next());
 	}
 
 	void setFlagPhaseRunning(boolean flagRunning) {

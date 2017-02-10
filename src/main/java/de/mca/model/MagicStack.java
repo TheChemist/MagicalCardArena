@@ -23,7 +23,7 @@ public class MagicStack {
 	 */
 	private final ZoneType zoneType;
 
-	public MagicStack() {
+	MagicStack() {
 		this.zoneType = ZoneType.STACK;
 		stack = FXCollections.observableArrayList();
 	}

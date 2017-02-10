@@ -21,6 +21,7 @@ public class InputHuman implements IsInput {
 	 * Speichert den Logger.
 	 */
 	private final static Logger LOGGER = LoggerFactory.getLogger("Input");
+	private Match match;
 	/**
 	 * Speichert den MatchPresenter
 	 */
@@ -30,13 +31,29 @@ public class InputHuman implements IsInput {
 	 */
 	private IsPlayer player;
 
-	InputHuman() {
+	public InputHuman(MatchPresenter matchPresenter, Match match, IsPlayer player) {
+		this.matchPresenter = matchPresenter;
+		this.match = match;
+		this.player = player;
 
+		// Erstelle Binding zur flagNeedInput.
+		this.player.propertyFlagNeedInput().addListener(new ChangeListener<Boolean>() {
+
+			@Override
+			public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
+				LOGGER.trace("{} changed({}, {})", player, oldValue, newValue);
+
+				if (newValue) {
+					getPlayer().getRuleEnforcer().i_deriveInteractionStatus(getPlayer());
+				}
+			}
+
+		});
 	}
 
 	@Override
 	public Match getMatch() {
-		return getPlayer().getMatch();
+		return match;
 	}
 
 	@Override
@@ -119,34 +136,11 @@ public class InputHuman implements IsInput {
 	}
 
 	@Override
-	public void setMatchPresenter(MatchPresenter matchPresenter) {
-		this.matchPresenter = matchPresenter;
-	}
-
-	@Override
-	public void setPlayer(IsPlayer player) {
-		this.player = player;
-
-		// Erstelle Binding zur flagNeedInput.
-		this.player.propertyFlagNeedInput().addListener(new ChangeListener<Boolean>() {
-
-			@Override
-			public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
-				LOGGER.trace("{} changed({}, {})", player, oldValue, newValue);
-
-				if (newValue) {
-					getPlayer().getRuleEnforcer().i_deriveInteractionStatus(getPlayer());
-				}
-			}
-
-		});
-	}
-
-	@Override
 	public String toString() {
 		if (getPlayer() == null) {
 			return "Noch kein Spieler gesetzt.";
 		}
 		return getPlayer().toString();
 	}
+
 }

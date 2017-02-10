@@ -24,6 +24,7 @@ public class InputComputer implements IsInput {
 	 * Speichert den Logger.
 	 */
 	private final static Logger LOGGER = LoggerFactory.getLogger("Input");
+	private Match match;
 	/**
 	 * Speichert den MatchPresenter.
 	 */
@@ -33,36 +34,9 @@ public class InputComputer implements IsInput {
 	 */
 	private IsPlayer player;
 
-	InputComputer() {
-	}
-
-	@Override
-	public Match getMatch() {
-		return getPlayer().getMatch();
-	}
-
-	@Override
-	public MatchPresenter getMatchPresenter() {
-		return matchPresenter;
-	}
-
-	@Override
-	public IsPlayer getPlayer() {
-		return player;
-	}
-
-	@Override
-	public RuleEnforcer getRuleEnforcer() {
-		return getPlayer().getRuleEnforcer();
-	}
-
-	@Override
-	public void setMatchPresenter(MatchPresenter matchPresenter) {
+	public InputComputer(MatchPresenter matchPresenter, Match match, IsPlayer player) {
 		this.matchPresenter = matchPresenter;
-	}
-
-	@Override
-	public void setPlayer(IsPlayer player) {
+		this.match = match;
 		this.player = player;
 
 		this.player.propertyFlagNeedInput().addListener(new ChangeListener<Boolean>() {
@@ -146,6 +120,26 @@ public class InputComputer implements IsInput {
 			}
 
 		});
+	}
+
+	@Override
+	public Match getMatch() {
+		return match;
+	}
+
+	@Override
+	public MatchPresenter getMatchPresenter() {
+		return matchPresenter;
+	}
+
+	@Override
+	public IsPlayer getPlayer() {
+		return player;
+	}
+
+	@Override
+	public RuleEnforcer getRuleEnforcer() {
+		return getPlayer().getRuleEnforcer();
 	}
 
 	@Override

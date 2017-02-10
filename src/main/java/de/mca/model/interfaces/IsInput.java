@@ -189,8 +189,4 @@ public interface IsInput {
 		// TODO MID Fertig implementieren.
 	}
 
-	public void setMatchPresenter(MatchPresenter matchPresenter);
-
-	public void setPlayer(IsPlayer player);
-
 }
