@@ -24,13 +24,12 @@ final class CanvasZoneDefault extends AdaptableCanvas<SpriteMagicCard> {
 	private static final double X_OFFSET = 1.1;
 	private static final double Y_OFFSET = 10.0;
 
-	private final InputHuman inputHuman;
+	private InputHuman inputHuman;
 	private final ZoneType zoneType;
 	private final ImageView zoomView;
 
-	CanvasZoneDefault(Pane parent, InputHuman inputHuman, ZoneType zoneType, ImageView zoomView) {
+	CanvasZoneDefault(Pane parent, ZoneType zoneType, ImageView zoomView) {
 		super(parent);
-		this.inputHuman = inputHuman;
 		this.zoneType = zoneType;
 		this.zoomView = zoomView;
 	}
@@ -67,6 +66,10 @@ final class CanvasZoneDefault extends AdaptableCanvas<SpriteMagicCard> {
 
 			sprite.render(gc);
 		}
+	}
+
+	public void setInput(InputHuman inputHuman) {
+		this.inputHuman = inputHuman;
 	}
 
 	private void initializeMouseClicked() {

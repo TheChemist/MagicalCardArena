@@ -218,7 +218,7 @@ public class MagicPermanent extends MagicCard implements IsCombatant {
 
 	@Override
 	public void setDamage(int damage) {
-		LOGGER.debug("{} setDamage({})", this, damage);
+		LOGGER.trace("{} setDamage({})", this, damage);
 		propertyDamage().set(damage > 0 ? damage : 0);
 	}
 

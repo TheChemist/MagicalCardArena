@@ -561,7 +561,7 @@ public class MagicCard implements IsObject, IsInteractable {
 	}
 
 	public void setToughness(int toughness) {
-		LOGGER.debug("{} setToughness({})", this, toughness);
+		LOGGER.trace("{} setToughness({})", this, toughness);
 		propertyToughness().set(toughness);
 	}
 

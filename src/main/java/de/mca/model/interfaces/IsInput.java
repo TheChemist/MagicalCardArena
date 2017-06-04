@@ -126,15 +126,15 @@ public interface IsInput {
 	}
 
 	/**
-	 * Informiert das Spiel über eine Spielerhandlung: Der Spieler wirft eine
-	 * Karte ab.
+	 * Informiert das Spiel über eine Spielerhandlung: Der Spieler wirft N
+	 * zufällige Karten ab.
 	 *
-	 * @param magicCard
-	 *            die abgeworfene Karte.
+	 * @param howMany
+	 *            Anzahl abzuwerfender Karten.
 	 */
-	public default void inputDiscard(MagicCard magicCard) {
+	public default void inputDiscardRandom(int howMany) {
 		getPlayer().setFlagNeedInput(false);
-		getRuleEnforcer().i_discard(getPlayer(), magicCard);
+		getRuleEnforcer().i_discardRandom(getPlayer(), howMany);
 	}
 
 	/**

@@ -5,6 +5,7 @@ import java.util.Random;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import de.mca.Constants;
 import de.mca.model.enums.ObjectType;
 import de.mca.model.interfaces.IsInput;
 import de.mca.model.interfaces.IsPlayer;
@@ -83,7 +84,8 @@ public class InputComputer implements IsInput {
 						break;
 					case DISCARDING:
 						IsZone<MagicCard> zoneHand = getPlayer().getZoneHand();
-						inputDiscard(zoneHand.get(new Random().nextInt(zoneHand.getSize())));
+						final int originalHandSize = player.propertyHandSize().get();
+						inputDiscardRandom(originalHandSize - Constants.HAND_SIZE);
 						break;
 					case PRIORITIZED:
 						// Spiele zufälliges Land

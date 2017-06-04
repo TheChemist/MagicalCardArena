@@ -3,6 +3,7 @@ package de.mca.model;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import de.mca.model.enums.PlayerState;
 import de.mca.model.enums.ZoneType;
 import de.mca.model.interfaces.IsInput;
 import de.mca.model.interfaces.IsPlayer;
@@ -37,6 +38,7 @@ public class InputHuman implements IsInput {
 		this.player = player;
 
 		// Erstelle Binding zur flagNeedInput.
+		// Setze hier die Trigger zum Öffnen der Dialoge
 		this.player.propertyFlagNeedInput().addListener(new ChangeListener<Boolean>() {
 
 			@Override
@@ -44,7 +46,11 @@ public class InputHuman implements IsInput {
 				LOGGER.trace("{} changed({}, {})", player, oldValue, newValue);
 
 				if (newValue) {
-					getPlayer().getRuleEnforcer().i_deriveInteractionStatus(getPlayer());
+					if (player.getPlayerState().equals(PlayerState.DISCARDING)) {
+						getMatchPresenter().examineDiscard(new ActionDiscard(getRuleEnforcer(), player));
+					} else {
+						getPlayer().getRuleEnforcer().i_deriveInteractionStatus(getPlayer());
+					}
 				}
 			}
 
@@ -76,7 +82,8 @@ public class InputHuman implements IsInput {
 			// Karte in Hand geklickt
 			MagicCard magicCard = object;
 			if (getPlayer().isDiscarding()) {
-				inputDiscard(magicCard);
+				// TODO HIGH Hier die Karte erfragen?
+				// inputDiscard(magicCard);
 			} else {
 				if (magicCard.isLand()) {
 					inputPlayLand(magicCard);

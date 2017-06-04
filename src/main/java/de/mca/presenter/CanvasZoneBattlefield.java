@@ -28,10 +28,10 @@ class CanvasZoneBattlefield extends AdaptableCanvas<SpriteMagicPermanent> {
 	private int indexHumanRowOne;
 	private int indexHumanRowTwo;
 
-	private final InputHuman inputHuman;
+	private InputHuman inputHuman;
 	private final ImageView zoomView;
 
-	CanvasZoneBattlefield(Pane parent, InputHuman inputHuman, ImageView zoomView) {
+	CanvasZoneBattlefield(Pane parent, ImageView zoomView) {
 		super(parent);
 		this.inputHuman = inputHuman;
 		this.zoomView = zoomView;
@@ -57,6 +57,10 @@ class CanvasZoneBattlefield extends AdaptableCanvas<SpriteMagicPermanent> {
 		indexComputerRowTwo = 0;
 		indexHumanRowOne = 0;
 		indexHumanRowTwo = 0;
+	}
+
+	public void setInput(InputHuman inputHuman) {
+		this.inputHuman = inputHuman;
 	}
 
 	private void drawCard(SpriteMagicPermanent sprite, GraphicsContext gc) {

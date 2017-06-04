@@ -3,6 +3,7 @@ package de.mca.presenter;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.function.Consumer;
 
@@ -13,6 +14,7 @@ import de.mca.MagicParser;
 import de.mca.Main;
 import de.mca.io.FileManager;
 import de.mca.io.ResourceManager;
+import de.mca.model.ActionDiscard;
 import de.mca.model.InputComputer;
 import de.mca.model.InputHuman;
 import de.mca.model.MagicCard;
@@ -35,7 +37,10 @@ import javafx.collections.ListChangeListener;
 import javafx.collections.MapChangeListener;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.Label;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.Tab;
@@ -216,6 +221,33 @@ public class MatchPresenter extends AnimationTimer implements Initializable, IsS
 		buttonProgress.setText(progressNameChange.getName());
 	}
 
+	@Subscribe
+	public void examineDiscard(ActionDiscard actionDiscard) {
+		Alert alert = new Alert(AlertType.CONFIRMATION);
+		alert.setTitle("Discard");
+		alert.setHeaderText("Look, a Confirmation Dialog with Custom Actions");
+		alert.setContentText("Choose which Card you discard!");
+
+		IsPlayer player = actionDiscard.getPlayer();
+
+		for (MagicCard magicCard : player.getZoneHand().getAll()) {
+			alert.getButtonTypes().add(new ButtonType(magicCard.toString()));
+		}
+
+		Optional<ButtonType> result = alert.showAndWait();
+		MagicCard discard = null;
+
+		for (MagicCard magicCard : player.getZoneHand().getAll()) {
+			if (result.get().getText().equals(magicCard.toString())) {
+				discard = magicCard;
+			}
+		}
+
+		final RuleEnforcer ruleEnforcer = (RuleEnforcer) actionDiscard.getSource();
+		ruleEnforcer.i_discard(player, discard);
+		ruleEnforcer.tb_discardStop(player);
+	}
+
 	public Match getMatchActive() {
 		return matchActive;
 	}
@@ -273,35 +305,33 @@ public class MatchPresenter extends AnimationTimer implements Initializable, IsS
 		});
 
 		// Center Pane
-		canvasBattlefield = new CanvasZoneBattlefield(paneBattlefield, inputHuman, imageViewCardZoom);
+		canvasBattlefield = new CanvasZoneBattlefield(paneBattlefield, imageViewCardZoom);
 		paneBattlefield.getChildren().add(canvasBattlefield);
 		tabBattlefield.setContent(paneBattlefield);
 
-		canvasComputerGraveyard = new CanvasZoneDefault(paneComputerGraveyard, inputHuman, ZoneType.GRAVEYARD,
-				imageViewCardZoom);
+		canvasComputerGraveyard = new CanvasZoneDefault(paneComputerGraveyard, ZoneType.GRAVEYARD, imageViewCardZoom);
 		paneComputerGraveyard.getChildren().add(canvasComputerGraveyard);
 		tabComputerGraveyard.setContent(paneComputerGraveyard);
 		tabComputerGraveyard.setGraphic(new AdaptableImageView(ResourceManager.getIcon("grave.png"),
 				new SimpleDoubleProperty(16.0), new SimpleDoubleProperty(16.0)));
 
-		canvasComputerHand = new CanvasZoneDefault(paneComputerHand, inputHuman, ZoneType.HAND, imageViewCardZoom);
+		canvasComputerHand = new CanvasZoneDefault(paneComputerHand, ZoneType.HAND, imageViewCardZoom);
 		paneComputerHand.getChildren().add(canvasComputerHand);
 		tabComputerHand.setContent(paneComputerHand);
 		tabComputerHand.setGraphic(new AdaptableImageView(ResourceManager.getIcon("hand.png"),
 				new SimpleDoubleProperty(16.0), new SimpleDoubleProperty(16.0)));
 
-		canvasExile = new CanvasZoneDefault(paneExile, inputHuman, ZoneType.EXILE, imageViewCardZoom);
+		canvasExile = new CanvasZoneDefault(paneExile, ZoneType.EXILE, imageViewCardZoom);
 		paneExile.getChildren().add(canvasExile);
 		tabExile.setContent(paneExile);
 
-		canvasHumanGraveyard = new CanvasZoneDefault(paneHumanGraveyard, inputHuman, ZoneType.GRAVEYARD,
-				imageViewCardZoom);
+		canvasHumanGraveyard = new CanvasZoneDefault(paneHumanGraveyard, ZoneType.GRAVEYARD, imageViewCardZoom);
 		paneHumanGraveyard.getChildren().add(canvasHumanGraveyard);
 		tabHumanGraveyard.setContent(paneHumanGraveyard);
 		tabHumanGraveyard.setGraphic(new AdaptableImageView(ResourceManager.getIcon("grave.png"),
 				new SimpleDoubleProperty(16.0), new SimpleDoubleProperty(16.0)));
 
-		canvasHumanHand = new CanvasZoneDefault(paneHumanHand, inputHuman, ZoneType.HAND, imageViewCardZoom);
+		canvasHumanHand = new CanvasZoneDefault(paneHumanHand, ZoneType.HAND, imageViewCardZoom);
 		paneHumanHand.getChildren().add(canvasHumanHand);
 		tabHumanHand.setContent(paneHumanHand);
 		tabHumanHand.setGraphic(new AdaptableImageView(ResourceManager.getIcon("hand.png"),
@@ -347,20 +377,24 @@ public class MatchPresenter extends AnimationTimer implements Initializable, IsS
 		/**
 		 * ListSprites
 		 */
-		spriteListBattlefield.clear();
-		spriteListComputerGraveyard.clear();
-		spriteListComputerHand.clear();
-		spriteListExile.clear();
-		spriteListHumanGraveyard.clear();
-		spriteListHumanHand.clear();
-		spriteListStack.clear();
-
 		canvasBattlefield.setListSprites(spriteListBattlefield);
+		canvasBattlefield.setInput(inputHuman);
+
 		canvasComputerGraveyard.setListSprites(spriteListComputerGraveyard);
+		canvasComputerGraveyard.setInput(inputHuman);
+
 		canvasComputerHand.setListSprites(spriteListComputerHand);
+		canvasComputerHand.setInput(inputHuman);
+
 		canvasExile.setListSprites(spriteListExile);
+		canvasExile.setInput(inputHuman);
+
 		canvasHumanGraveyard.setListSprites(spriteListHumanGraveyard);
+		canvasHumanGraveyard.setInput(inputHuman);
+
 		canvasHumanHand.setListSprites(spriteListHumanHand);
+		canvasHumanHand.setInput(inputHuman);
+
 		canvasStack.setListSprites(spriteListStack);
 
 		/**
@@ -438,6 +472,14 @@ public class MatchPresenter extends AnimationTimer implements Initializable, IsS
 
 	@Override
 	public void stop() {
+		spriteListBattlefield.clear();
+		spriteListComputerGraveyard.clear();
+		spriteListComputerHand.clear();
+		spriteListExile.clear();
+		spriteListHumanGraveyard.clear();
+		spriteListHumanHand.clear();
+		spriteListStack.clear();
+
 		previousTime = 0;
 		secondsElapsedSinceLastFpsUpdate = 0f;
 		framesSinceLastFpsUpdate = 0;
@@ -595,10 +637,6 @@ public class MatchPresenter extends AnimationTimer implements Initializable, IsS
 
 	private void initializeIconLabel(Image icon, Label label) {
 		label.setGraphic(new AdaptableImageView(icon, label.heightProperty(), label.widthProperty()));
-	}
-
-	private void setMatchActive(Match matchActive) {
-		this.matchActive = matchActive;
 	}
 
 }

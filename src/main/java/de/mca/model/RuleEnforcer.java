@@ -40,14 +40,6 @@ public class RuleEnforcer {
 	 * Speichert den EventBus.
 	 */
 	private EventBus eventBus;
-	// /**
-	// * Speichert die PermanentFactory zum Erstellen bleibender Karten.
-	// */
-	// private final FactoryMagicPermanent factoryMagicPermanent;
-	// /**
-	// * Speichert die SpellFactory zum Erstellen von Zaubersprüchen.
-	// */
-	// private final FactoryMagicSpell factoryMagicSpell;
 	/**
 	 * Speichert eine Referenz auf das Match.
 	 */
@@ -392,6 +384,27 @@ public class RuleEnforcer {
 	}
 
 	/**
+	 * Wird aufgerufen, wenn ein Spieler zufällig mehrere Karten abwirft. Es
+	 * wird geprüft, ob genügend Karten abgeworfen werden können. Können nicht,
+	 * werden alle Karten abgeworfen.
+	 *
+	 * @param player
+	 *            der Spieler.
+	 * @param howMany
+	 *            die Anzahl zufällig abgeworfener Karten.
+	 */
+	public void i_discardRandom(IsPlayer player, int howMany) {
+		LOGGER.debug("{} actionDiscardRandom({}, {})", this, player, howMany);
+		if (checkCanDiscard(player, howMany)) {
+			for (int i = 0; i < howMany; i++) {
+				actionDiscardRandom(player);
+			}
+		} else {
+			actionDiscardAll(player);
+		}
+	}
+
+	/**
 	 * Wird aufgerufen, wenn ein Spieler die Priorität abgibt.
 	 *
 	 * @param player
@@ -515,27 +528,6 @@ public class RuleEnforcer {
 		LOGGER.debug("{} actionDiscardRandom({})", this, player);
 		final List<MagicCard> zoneHand = player.getZoneHand().getAll();
 		i_discard(player, zoneHand.get(new Random().nextInt(zoneHand.size())));
-	}
-
-	/**
-	 * Wird aufgerufen, wenn ein Spieler zufällig mehrere Karten abwirft. Es
-	 * wird geprüft, ob genügend Karten abgeworfen werden können. Können nicht,
-	 * werden alle Karten abgeworfen.
-	 *
-	 * @param player
-	 *            der Spieler.
-	 * @param howMany
-	 *            die Anzahl zufällig abgeworfener Karten.
-	 */
-	private void actionDiscardRandom(IsPlayer player, int howMany) {
-		LOGGER.debug("{} actionDiscardRandom({}, {})", this, player, howMany);
-		if (checkCanDiscard(player, howMany)) {
-			for (int i = 0; i < howMany; i++) {
-				actionDiscardRandom(player);
-			}
-		} else {
-			actionDiscardAll(player);
-		}
 	}
 
 	/**
@@ -893,6 +885,12 @@ public class RuleEnforcer {
 		return result;
 	}
 
+	private boolean checkMustDiscard(IsPlayer player) {
+		final boolean result = player.getZoneHand().getSize() > Constants.HAND_SIZE;
+		LOGGER.trace("{} checkMustDiscard({}) = {}", this, player, result);
+		return result;
+	}
+
 	private EventBus getEventBus() {
 		return eventBus;
 	}
@@ -930,6 +928,15 @@ public class RuleEnforcer {
 		match.resetListAttacks();
 	}
 
+	// private void requestInput(IsPlayer player, PlayerActionType
+	// playerActionType, MagicSpell spell) {
+	// switch (playerActionType) {
+	// case SELECT_COST_MAP:
+	// player.fireSelectCostMap(spell);
+	// break;
+	// }
+	// }
+
 	private void tb_combatDamageAssignment(Step currentStep) {
 		LOGGER.debug("{} tb_combatDamageAssignment({})", this, currentStep);
 		for (final Attack attack : match.getListAttacks()) {
@@ -954,15 +961,6 @@ public class RuleEnforcer {
 		// Hier wird die nächste TBA abgefeuert.
 		currentStep.fireCombatDamageDealing();
 	}
-
-	// private void requestInput(IsPlayer player, PlayerActionType
-	// playerActionType, MagicSpell spell) {
-	// switch (playerActionType) {
-	// case SELECT_COST_MAP:
-	// player.fireSelectCostMap(spell);
-	// break;
-	// }
-	// }
 
 	private void tb_combatDamageDealing() {
 		LOGGER.debug("{} tb_combatDamageDealing()", this);
@@ -1076,24 +1074,6 @@ public class RuleEnforcer {
 		player.setFlagNeedInput(true);
 	}
 
-	/**
-	 * Setzt die flagDeclareBlockers auf true und verlangt vom Spieler eine
-	 * Reaktion (flagNeedPlayerInput = true).
-	 *
-	 * @param player
-	 *            der nichtaktive Spieler.
-	 */
-	private void tb_declareBlockersStart(IsPlayer player) {
-		LOGGER.debug("{} tb_declareBlockersStart({})", this, player);
-		if (player.equals(PlayerType.HUMAN)) {
-			getEventBus().post(new ProgressNameChange(this, "Finish"));
-		}
-
-		// Setze Status und flags.
-		player.setFlagDeclareBlockers(true);
-		player.setFlagNeedInput(true);
-	}
-
 	// TODO MID Prüfung ausweiten und wieder reinnehmen.
 	// /**
 	// * Prüft, ob die Kosten eines Permanents oder einer Fähigkeit bezahlt
@@ -1121,15 +1101,43 @@ public class RuleEnforcer {
 	// }
 	// }
 
+	/**
+	 * Setzt die flagDeclareBlockers auf true und verlangt vom Spieler eine
+	 * Reaktion (flagNeedPlayerInput = true).
+	 *
+	 * @param player
+	 *            der nichtaktive Spieler.
+	 */
+	private void tb_declareBlockersStart(IsPlayer player) {
+		LOGGER.debug("{} tb_declareBlockersStart({})", this, player);
+		if (player.equals(PlayerType.HUMAN)) {
+			getEventBus().post(new ProgressNameChange(this, "Finish"));
+		}
+
+		// Setze Status und flags.
+		player.setFlagDeclareBlockers(true);
+		player.setFlagNeedInput(true);
+	}
+
 	private void tb_discardStart(IsPlayer player) {
 		LOGGER.debug("{} tb_discardStart({})", this, player);
-		final int originalHandSize = player.propertyHandSize().get();
 
 		// TODO HIGH Spieler muss abwerfen.
 		// TODO HIGH Button muss ausgegraut werde.
-		player.setPlayerState(PlayerState.DISCARDING);
-		for (int i = 0; i < (originalHandSize - Constants.HAND_SIZE); i++) {
+		if (checkMustDiscard(player)) {
+			player.setPlayerState(PlayerState.DISCARDING);
 			player.setFlagNeedInput(true);
+		}
+	}
+
+	public void tb_discardStop(IsPlayer player) {
+		LOGGER.debug("{} tb_discardStop({})", this, player);
+
+		if (checkMustDiscard(player)) {
+			tb_discardStart(player);
+		} else {
+			match.resetPlayerState(player);
+			player.setFlagNeedInput(false);
 		}
 	}
 

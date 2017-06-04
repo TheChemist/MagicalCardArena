@@ -44,7 +44,6 @@ public class Attack {
 		// listBlockersSorted = new
 		// SimpleListProperty<>(FXCollections.observableArrayList());
 
-		// TODO HIGH Besseren Ort für die flags suchen?
 		getAttacker().setFlagTapped(true);
 		getAttacker().setFlagAttacking(true);
 	}

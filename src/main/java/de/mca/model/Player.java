@@ -459,7 +459,7 @@ public final class Player implements IsPlayer {
 
 	@Override
 	public void setDamage(int damage) {
-		LOGGER.debug("{} setDamage({})", this, damage);
+		LOGGER.trace("{} setDamage({})", this, damage);
 		propertyDamage().set(damage > 0 ? damage : 0);
 	}
 
@@ -477,7 +477,7 @@ public final class Player implements IsPlayer {
 
 	@Override
 	public void setFlagNeedInput(boolean flagNeedInput) {
-		LOGGER.debug("{} setFlagNeedInput({})", this, flagNeedInput);
+		LOGGER.trace("{} setFlagNeedInput({})", this, flagNeedInput);
 		propertyFlagNeedInput().set(flagNeedInput);
 	}
 
@@ -514,14 +514,9 @@ public final class Player implements IsPlayer {
 		this.manaCostGoal = manaCostGoal;
 	}
 
-	// @Override
-	// public void setMatch(Match match) {
-	// this.match = match;
-	// }
-
 	@Override
 	public void setPlayerState(PlayerState playerState) {
-		LOGGER.debug("{} setPlayerState({})", this, playerState);
+		LOGGER.trace("{} setPlayerState({})", this, playerState);
 		propertyPlayerState().set(playerState);
 	}
 
