@@ -215,11 +215,10 @@ public final class Match {
 			} else {
 				// Es gibt keine weiteren Phasen in dieser Runde.
 				/**
-				 * Hier darf eine Runde nicht beendet werden. Immer wenn eine
-				 * neue Phase begonnen werden kann gibt es mindestens einen
-				 * Schritt, der noch gespielt werden kann. Ist das nicht der
-				 * Fall, handelt es sich um eine Hauptphase. Dann muss die Phase
-				 * erst ausgespielt werden.
+				 * Hier darf eine Runde nicht beendet werden. Immer wenn eine neue Phase
+				 * begonnen werden kann gibt es mindestens einen Schritt, der noch gespielt
+				 * werden kann. Ist das nicht der Fall, handelt es sich um eine Hauptphase. Dann
+				 * muss die Phase erst ausgespielt werden.
 				 */
 			}
 		}
@@ -227,8 +226,7 @@ public final class Match {
 		if (getCurrentPhase().isMain()) {
 			// Bei der Phase handelt es sich um eine Hauptphase.
 			/**
-			 * Es werden keine Schritte gespielt. Spieler bekommen direkt
-			 * Priorität.
+			 * Es werden keine Schritte gespielt. Spieler bekommen direkt Priorität.
 			 */
 
 			// Spiele Hauptphasen
@@ -271,9 +269,8 @@ public final class Match {
 				} else {
 					// Phase hat keine weiteren Schritte mehr.
 					/**
-					 * An dieser Stelle kann die aktuelle Phase beendet werden.
-					 * Die Phase läuft noch, es gibt aber keine weiteren
-					 * Schritte mehr.
+					 * An dieser Stelle kann die aktuelle Phase beendet werden. Die Phase läuft
+					 * noch, es gibt aber keine weiteren Schritte mehr.
 					 */
 
 					// Beende Phase
@@ -315,7 +312,7 @@ public final class Match {
 		}
 
 		// Beende Runde
-		turnEnd(getCurrentTurn().hasNextPhase(), getCurrentPhase().hasNextStep());
+		turnEnd(getCurrentTurn().hasNextPhase(), getCurrentPhase().hasNextStep(), getPlayerActive().isDiscarding());
 
 		// Beende Match
 		matchEnd(getFlagMatchRunning());
@@ -334,8 +331,7 @@ public final class Match {
 	 * Prüft, ob im aktuellen Spielschritt die Priorität an die Spieler erteilt
 	 * wird.
 	 *
-	 * @return true, wenn Spieler im aktuellen Spielschritt die Priorität
-	 *         erhalten.
+	 * @return true, wenn Spieler im aktuellen Spielschritt die Priorität erhalten.
 	 */
 	private boolean checkPlayersGetPriority() {
 		return getCurrentStep().getFlagPlayersGetPriority();
@@ -458,11 +454,10 @@ public final class Match {
 	/**
 	 * Beendet das Spiel (rule = 104.).
 	 */
-	private void matchEnd(boolean needPlayerInput) {
-		// TODO HIGH Was passiert, wenn ein Match aus ist?
-		if (!needPlayerInput) {
+	private void matchEnd(boolean flagMatchRunning) {
+		if (!flagMatchRunning) {
 			LOGGER.debug("{} matchEnd()", this);
-			setFlagIsMatchRunning(false);
+			getRuleEnforcer().tb_endMatch();
 		}
 	}
 
@@ -547,8 +542,8 @@ public final class Match {
 	}
 
 	/**
-	 * Beginnt den neuen Spielschritt. Es werden alle TurnBasedActions gefeuert,
-	 * die für den Beginn dieses Schrittes vorgesehen sind.
+	 * Beginnt den neuen Spielschritt. Es werden alle TurnBasedActions gefeuert, die
+	 * für den Beginn dieses Schrittes vorgesehen sind.
 	 */
 
 	private void stepBegin(boolean alreadyRunning) {
@@ -561,8 +556,8 @@ public final class Match {
 	/**
 	 * Beendet einen Spielschritt. Die verbleibenden TurnBasedActions werden
 	 * gefeuert und die Prioritäts-Flags der Spieler zurück gesetzt. Ein Schritt
-	 * kann beendet werden, wenn kein Spielerinput mehr benötigt wird. Das wird
-	 * vor allem im letzten Schritt (Aufräumen) relevant.
+	 * kann beendet werden, wenn kein Spielerinput mehr benötigt wird. Das wird vor
+	 * allem im letzten Schritt (Aufräumen) relevant.
 	 */
 
 	private void stepEnd(boolean needPlayerInput) {
@@ -590,15 +585,14 @@ public final class Match {
 	}
 
 	/**
-	 * Beendet die aktuelle Runde. Der Phase- und Step-Iterator wird zurück
-	 * gesetzt und die playedLandThisTurn-Flag für den aktiven Spieler auf false
-	 * gesetzt. Eine Runde kann beendet werden, wenn keine weiteren Phasen (und
-	 * in der letzten Phase keine weiteren Schritte) mehr gespielt werden
-	 * können.
+	 * Beendet die aktuelle Runde. Der Phase- und Step-Iterator wird zurück gesetzt
+	 * und die playedLandThisTurn-Flag für den aktiven Spieler auf false gesetzt.
+	 * Eine Runde kann beendet werden, wenn keine weiteren Phasen (und in der
+	 * letzten Phase keine weiteren Schritte) mehr gespielt werden können.
 	 */
 
-	private void turnEnd(boolean hasNextPhase, boolean hasNextStep) {
-		if (!hasNextPhase && !hasNextStep) {
+	private void turnEnd(boolean hasNextPhase, boolean hasNextStep, boolean playerDiscard) {
+		if (!hasNextPhase && !hasNextStep && !playerDiscard) {
 			LOGGER.debug("{} turnEnd()", this);
 			getCurrentTurn().turnEnd();
 		}
@@ -613,8 +607,8 @@ public final class Match {
 	}
 
 	/**
-	 * Fügt dem Match einen neuen Angriff hinzu, der zu gegebener Zeit
-	 * durchgeführt wird.
+	 * Fügt dem Match einen neuen Angriff hinzu, der zu gegebener Zeit durchgeführt
+	 * wird.
 	 *
 	 * @param attack
 	 *            ein Hilfsobjekt, das alle relevanten Informationen zu einen
@@ -640,9 +634,8 @@ public final class Match {
 	}
 
 	/**
-	 * Bestimmt, welcher Spieler priorisiert wird. Hat ein Spieler im aktuellen
-	 * Step einmal seine Priorität abgegeben, kann er nicht wieder priorisiert
-	 * werden.
+	 * Bestimmt, welcher Spieler priorisiert wird. Hat ein Spieler im aktuellen Step
+	 * einmal seine Priorität abgegeben, kann er nicht wieder priorisiert werden.
 	 */
 	void determinePlayerPrioritised() {
 		final IsPlayer playerActive = getPlayerActive();

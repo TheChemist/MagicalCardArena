@@ -16,7 +16,6 @@ public interface IsInput {
 
 	public Match getMatch();
 
-	// TODO HIGH Wieder request ermöglich, aber über Input.
 	public MatchPresenter getMatchPresenter();
 
 	public IsPlayer getPlayer();
@@ -123,6 +122,19 @@ public interface IsInput {
 			 * System wie die requests erledigt werden.
 			 */
 		}
+	}
+
+	/**
+	 * Informiert das Spiel über eine Spielerhandlung: Der Spieler wirft eine
+	 * bestimmte Karte ab.
+	 *
+	 * @param magicCard
+	 *            Die abzuwerfende Karte.
+	 */
+	public default void inputDiscard(MagicCard magicCard) {
+		getPlayer().setFlagNeedInput(false);
+		getRuleEnforcer().i_discard(getPlayer(), magicCard);
+		getRuleEnforcer().i_discardStop(getPlayer());
 	}
 
 	/**

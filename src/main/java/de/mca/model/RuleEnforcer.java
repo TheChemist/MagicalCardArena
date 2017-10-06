@@ -20,7 +20,7 @@ import de.mca.model.interfaces.IsCombatant;
 import de.mca.model.interfaces.IsManaMap;
 import de.mca.model.interfaces.IsPlayer;
 import de.mca.model.interfaces.IsStackable;
-import de.mca.presenter.ProgressNameChange;
+import de.mca.presenter.GameStatusChange;
 import javafx.beans.property.SetProperty;
 import javafx.beans.property.SimpleSetProperty;
 import javafx.collections.FXCollections;
@@ -134,9 +134,9 @@ public class RuleEnforcer {
 	}
 
 	/**
-	 * Wird aufgerufen, wenn der Spieler eine bleibende Karte aktiviert. Sind
-	 * alle Voraussetzungen erfüllt, wird die zu aktivierende Fähigkeit bestimmt
-	 * und fpr die Aktivierung übergeben.
+	 * Wird aufgerufen, wenn der Spieler eine bleibende Karte aktiviert. Sind alle
+	 * Voraussetzungen erfüllt, wird die zu aktivierende Fähigkeit bestimmt und fpr
+	 * die Aktivierung übergeben.
 	 *
 	 * @param player
 	 *            der priorisierte Spieler.
@@ -203,10 +203,9 @@ public class RuleEnforcer {
 
 		if (spell.hasHybridCost()) {
 			/**
-			 * TODO HIGH Methode unterbrechen und Ergebnis der Abfrage
-			 * zwischenspeichern. Die Spielerabfragen werden dann nicht mehr
-			 * alle in dieser Methode abgefragt, sondern durch einen
-			 * sequenziellen Aufruf der requestInput-Methode dargstellt.
+			 * TODO HIGH Methode unterbrechen und Ergebnis der Abfrage zwischenspeichern.
+			 * Die Spielerabfragen werden dann nicht mehr alle in dieser Methode abgefragt,
+			 * sondern durch einen sequenziellen Aufruf der requestInput-Methode dargstellt.
 			 */
 
 			// requestInput(player, PlayerActionType.SELECT_COST_MAP, spell);
@@ -244,6 +243,7 @@ public class RuleEnforcer {
 	public void i_concede(IsPlayer player) {
 		LOGGER.debug("{} i_concede({})", this, player);
 		match.setFlagIsMatchRunning(false);
+		getEventBus().post(new GameStatusChange(this, "concede", true));
 	}
 
 	/**
@@ -292,7 +292,7 @@ public class RuleEnforcer {
 
 		// Ändere Text des Buttons.
 		if (player.equals(PlayerType.HUMAN)) {
-			getEventBus().post(new ProgressNameChange(this, "Pass"));
+			getEventBus().post(new GameStatusChange(this, "Pass", false));
 		}
 
 		// Setz flags zum Überspringen.
@@ -309,8 +309,8 @@ public class RuleEnforcer {
 	}
 
 	/**
-	 * Wird aufgerufen, wenn der Spieler einen Blocker auswählt. Zunächst wird
-	 * das Blockziel ausgewählt, dann wird der ausgewählte Blocker registriert.
+	 * Wird aufgerufen, wenn der Spieler einen Blocker auswählt. Zunächst wird das
+	 * Blockziel ausgewählt, dann wird der ausgewählte Blocker registriert.
 	 *
 	 * @param player
 	 *            der nichtaktive Spieler.
@@ -346,7 +346,7 @@ public class RuleEnforcer {
 	public void i_declareBlockersStop(IsPlayer player) {
 		LOGGER.debug("{} i_declareBlockersStop({})", this, player);
 		if (player.equals(PlayerType.HUMAN)) {
-			getEventBus().post(new ProgressNameChange(this, "Pass"));
+			getEventBus().post(new GameStatusChange(this, "Pass", false));
 		}
 
 		// Setze flags zurück.
@@ -384,9 +384,9 @@ public class RuleEnforcer {
 	}
 
 	/**
-	 * Wird aufgerufen, wenn ein Spieler zufällig mehrere Karten abwirft. Es
-	 * wird geprüft, ob genügend Karten abgeworfen werden können. Können nicht,
-	 * werden alle Karten abgeworfen.
+	 * Wird aufgerufen, wenn ein Spieler zufällig mehrere Karten abwirft. Es wird
+	 * geprüft, ob genügend Karten abgeworfen werden können. Können nicht, werden
+	 * alle Karten abgeworfen.
 	 *
 	 * @param player
 	 *            der Spieler.
@@ -401,6 +401,18 @@ public class RuleEnforcer {
 			}
 		} else {
 			actionDiscardAll(player);
+		}
+	}
+
+	public void i_discardStop(IsPlayer player) {
+		LOGGER.debug("{} i_discardStop({})", this, player);
+
+		if (checkMustDiscard(player)) {
+			tb_discardStart(player);
+		} else {
+			getEventBus().post(new GameStatusChange(this, "Pass", false));
+			match.resetPlayerState(player);
+			player.setFlagNeedInput(false);
 		}
 	}
 
@@ -459,8 +471,8 @@ public class RuleEnforcer {
 		if (activatedAbility.isManaAbility()) {
 			// Manafertigkeit
 			/**
-			 * Verkürzung für Manafertigkeiten. Effekte werden sofort generiert,
-			 * ohne den Umweg über den Stack.
+			 * Verkürzung für Manafertigkeiten. Effekte werden sofort generiert, ohne den
+			 * Umweg über den Stack.
 			 **/
 			// activatedAbility.generateEffects();
 			activatedAbility.propertyListEffects().forEach(effect -> {
@@ -585,10 +597,10 @@ public class RuleEnforcer {
 	}
 
 	/**
-	 * Setzt den Spielerstatus eines Spielers auf PAYING. Zudem wird dem Spieler
-	 * ein Objekt übergeben, in dem alle Informationen über den aktuellen
-	 * Bezahlvorgang gespeichert sind. Zuletzt wird dem bezahlenden Spieler eine
-	 * Reaktion abverlangt.
+	 * Setzt den Spielerstatus eines Spielers auf PAYING. Zudem wird dem Spieler ein
+	 * Objekt übergeben, in dem alle Informationen über den aktuellen Bezahlvorgang
+	 * gespeichert sind. Zuletzt wird dem bezahlenden Spieler eine Reaktion
+	 * abverlangt.
 	 *
 	 * @param player
 	 *            der bezahlende Spieler.
@@ -633,8 +645,8 @@ public class RuleEnforcer {
 
 	/**
 	 * Prüft, ob die grundlegenden Voraussetzungen für das Aktivieren einer
-	 * bleibenden Karte erfüllt sind (also genauer gesagt für das Aktivieren
-	 * einer beliebigen Fähigkeit des Permanents).
+	 * bleibenden Karte erfüllt sind (also genauer gesagt für das Aktivieren einer
+	 * beliebigen Fähigkeit des Permanents).
 	 *
 	 * @see http://magiccards.info/rule/602-activating-activated-abilities.html
 	 * @param player
@@ -661,16 +673,14 @@ public class RuleEnforcer {
 	}
 
 	/**
-	 * Prüft, ob die grundlegenden Voraussetzungen für einen Angriff erfüllt
-	 * sind.
+	 * Prüft, ob die grundlegenden Voraussetzungen für einen Angriff erfüllt sind.
 	 *
 	 * @see http://magiccards.info/rule/508-declare-attackers-step.html
 	 * @param player
 	 *            der aktive Spieler.
 	 * @param magicPermanent
 	 *            der Angreifer.
-	 * @return true, wenn der designierte Angreifer grundsätzlich angreifen
-	 *         kann.
+	 * @return true, wenn der designierte Angreifer grundsätzlich angreifen kann.
 	 */
 	private boolean checkCanAttack(IsPlayer player, MagicPermanent magicPermanent) {
 		if (!magicPermanent.isCreature()) {
@@ -766,8 +776,7 @@ public class RuleEnforcer {
 	 *            Der Spieler.
 	 * @param howMany
 	 *            Anzahl Karten.
-	 * @return true, wenn eine Anzahl Karten in Höhe howMany abgelegt werden
-	 *         kann.
+	 * @return true, wenn eine Anzahl Karten in Höhe howMany abgelegt werden kann.
 	 */
 	private boolean checkCanDiscard(IsPlayer player, int howMany) {
 		final boolean result = player.propertyHandSize().get() >= howMany;
@@ -815,8 +824,8 @@ public class RuleEnforcer {
 	}
 
 	/**
-	 * Prüft, ob ein Spieler seine aktuellen Bezahlziele vollständig erreicht
-	 * hat. Eventuell vorhandenes Mana im Manapool wird dabei verbracht.
+	 * Prüft, ob ein Spieler seine aktuellen Bezahlziele vollständig erreicht hat.
+	 * Eventuell vorhandenes Mana im Manapool wird dabei verbracht.
 	 *
 	 * @param player
 	 *            ein Spieler.
@@ -928,15 +937,6 @@ public class RuleEnforcer {
 		match.resetListAttacks();
 	}
 
-	// private void requestInput(IsPlayer player, PlayerActionType
-	// playerActionType, MagicSpell spell) {
-	// switch (playerActionType) {
-	// case SELECT_COST_MAP:
-	// player.fireSelectCostMap(spell);
-	// break;
-	// }
-	// }
-
 	private void tb_combatDamageAssignment(Step currentStep) {
 		LOGGER.debug("{} tb_combatDamageAssignment({})", this, currentStep);
 		for (final Attack attack : match.getListAttacks()) {
@@ -985,9 +985,9 @@ public class RuleEnforcer {
 	}
 
 	/**
-	 * Setzt den Spielerstatus auf ASSIGNING_DAMAGE_ORDER_ATTACKER und prüft, ob
-	 * für den Angreifer eine Schadensreihenfolge festgelegt werden muss. Wenn
-	 * ja, wird eine Schadensreihenfolge festgelegt.
+	 * Setzt den Spielerstatus auf ASSIGNING_DAMAGE_ORDER_ATTACKER und prüft, ob für
+	 * den Angreifer eine Schadensreihenfolge festgelegt werden muss. Wenn ja, wird
+	 * eine Schadensreihenfolge festgelegt.
 	 *
 	 * @see http://magiccards.info/rule/510-combat-damage-step.html
 	 * @param player
@@ -1024,9 +1024,9 @@ public class RuleEnforcer {
 	}
 
 	/**
-	 * Setzt den Spielerstatus auf ASSIGNING_DAMAGE_ORDER_BLOCKERS und prüft, ob
-	 * für den Blocker eine Schadensreihenfolge festgelegt werden muss. Wenn ja,
-	 * wird eine Schadenreihenfolge festgelegt.
+	 * Setzt den Spielerstatus auf ASSIGNING_DAMAGE_ORDER_BLOCKERS und prüft, ob für
+	 * den Blocker eine Schadensreihenfolge festgelegt werden muss. Wenn ja, wird
+	 * eine Schadenreihenfolge festgelegt.
 	 *
 	 * @see http://magiccards.info/rule/510-combat-damage-step.html
 	 * @param player
@@ -1054,24 +1054,6 @@ public class RuleEnforcer {
 
 		// Hier wird die nächste TBA abgefeuert.
 		currentStep.fireCombatDamageAssignment();
-	}
-
-	/**
-	 * Setzt die flagDeclareAttackers auf true und verlangt vom Spieler eine
-	 * Reaktion (flagNeedPlayerInput = true).
-	 *
-	 * @param player
-	 *            der aktive Spieler.
-	 */
-	private void tb_declareAttackersStart(IsPlayer player) {
-		LOGGER.debug("{} tb_declareAttackersStart({})", this, player);
-		if (player.equals(PlayerType.HUMAN)) {
-			getEventBus().post(new ProgressNameChange(this, "Finish"));
-		}
-
-		// Setze Status und flags.
-		player.setFlagDeclareAttackers(true);
-		player.setFlagNeedInput(true);
 	}
 
 	// TODO MID Prüfung ausweiten und wieder reinnehmen.
@@ -1102,8 +1084,26 @@ public class RuleEnforcer {
 	// }
 
 	/**
-	 * Setzt die flagDeclareBlockers auf true und verlangt vom Spieler eine
+	 * Setzt die flagDeclareAttackers auf true und verlangt vom Spieler eine
 	 * Reaktion (flagNeedPlayerInput = true).
+	 *
+	 * @param player
+	 *            der aktive Spieler.
+	 */
+	private void tb_declareAttackersStart(IsPlayer player) {
+		LOGGER.debug("{} tb_declareAttackersStart({})", this, player);
+		if (player.equals(PlayerType.HUMAN)) {
+			getEventBus().post(new GameStatusChange(this, "Finish", false));
+		}
+
+		// Setze Status und flags.
+		player.setFlagDeclareAttackers(true);
+		player.setFlagNeedInput(true);
+	}
+
+	/**
+	 * Setzt die flagDeclareBlockers auf true und verlangt vom Spieler eine Reaktion
+	 * (flagNeedPlayerInput = true).
 	 *
 	 * @param player
 	 *            der nichtaktive Spieler.
@@ -1111,7 +1111,7 @@ public class RuleEnforcer {
 	private void tb_declareBlockersStart(IsPlayer player) {
 		LOGGER.debug("{} tb_declareBlockersStart({})", this, player);
 		if (player.equals(PlayerType.HUMAN)) {
-			getEventBus().post(new ProgressNameChange(this, "Finish"));
+			getEventBus().post(new GameStatusChange(this, "Finish", false));
 		}
 
 		// Setze Status und flags.
@@ -1122,22 +1122,10 @@ public class RuleEnforcer {
 	private void tb_discardStart(IsPlayer player) {
 		LOGGER.debug("{} tb_discardStart({})", this, player);
 
-		// TODO HIGH Spieler muss abwerfen.
-		// TODO HIGH Button muss ausgegraut werde.
 		if (checkMustDiscard(player)) {
+			getEventBus().post(new GameStatusChange(this, "Discard", true));
 			player.setPlayerState(PlayerState.DISCARDING);
 			player.setFlagNeedInput(true);
-		}
-	}
-
-	public void tb_discardStop(IsPlayer player) {
-		LOGGER.debug("{} tb_discardStop({})", this, player);
-
-		if (checkMustDiscard(player)) {
-			tb_discardStart(player);
-		} else {
-			match.resetPlayerState(player);
-			player.setFlagNeedInput(false);
 		}
 	}
 
@@ -1182,9 +1170,9 @@ public class RuleEnforcer {
 	}
 
 	/**
-	 * Durchläuft den Stack und ruft für jedes Element resolve(stackable) auf.
-	 * Der Stack wird durchlaufen, jedes mal wenn beide Spieler die Priorität
-	 * abgegeben haben (rule=405.5.)
+	 * Durchläuft den Stack und ruft für jedes Element resolve(stackable) auf. Der
+	 * Stack wird durchlaufen, jedes mal wenn beide Spieler die Priorität abgegeben
+	 * haben (rule=405.5.)
 	 */
 	void processStack() {
 		LOGGER.debug("{} processStack()", this);
@@ -1204,9 +1192,9 @@ public class RuleEnforcer {
 	}
 
 	/**
-	 * Arbeitet die StateBasedActions ab, die sich während der Zeit seit der
-	 * letzten Prüfung angesammelt haben. Wird aufgerufen, bevor die Priorität
-	 * neu bestimmt wird.
+	 * Arbeitet die StateBasedActions ab, die sich während der Zeit seit der letzten
+	 * Prüfung angesammelt haben. Wird aufgerufen, bevor die Priorität neu bestimmt
+	 * wird.
 	 */
 	void processStateBasedActions() {
 		LOGGER.debug("{} processStateBasedActions()", this);
@@ -1232,6 +1220,10 @@ public class RuleEnforcer {
 
 	void setMatch(Match match) {
 		this.match = match;
+	}
+
+	void tb_endMatch() {
+		getEventBus().post(new GameStatusChange(this, "concede", true));
 	}
 
 }

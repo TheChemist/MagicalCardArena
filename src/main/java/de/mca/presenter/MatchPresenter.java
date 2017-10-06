@@ -3,9 +3,11 @@ package de.mca.presenter;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.function.Consumer;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
@@ -14,7 +16,6 @@ import de.mca.MagicParser;
 import de.mca.Main;
 import de.mca.io.FileManager;
 import de.mca.io.ResourceManager;
-import de.mca.model.ActionDiscard;
 import de.mca.model.InputComputer;
 import de.mca.model.InputHuman;
 import de.mca.model.MagicCard;
@@ -37,10 +38,7 @@ import javafx.collections.ListChangeListener;
 import javafx.collections.MapChangeListener;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
-import javafx.scene.control.ButtonType;
 import javafx.scene.control.Label;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.Tab;
@@ -56,6 +54,10 @@ import javafx.scene.layout.GridPane;
  */
 public class MatchPresenter extends AnimationTimer implements Initializable, IsStackableScreen {
 
+	/**
+	 * Speichert den Logger.
+	 */
+	private final static Logger LOGGER = LoggerFactory.getLogger("MatchPresenter");
 	@FXML
 	private Button buttonProgress;
 	private CanvasZoneBattlefield canvasBattlefield;
@@ -176,10 +178,9 @@ public class MatchPresenter extends AnimationTimer implements Initializable, IsS
 	private Runnable rendererHumanGraveyard;
 	private Runnable rendererHumanHand;
 	private Runnable rendererStack;
-	@SuppressWarnings("unused")
 	private Main screenController;
 	private float secondsElapsedSinceLastFpsUpdate = 0f;
-	private List<SpriteMagicPermanent> spriteListBattlefield;
+	private final List<SpriteMagicPermanent> spriteListBattlefield;
 	private final List<SpriteMagicCard> spriteListComputerGraveyard;
 	private final List<SpriteMagicCard> spriteListComputerHand;
 	private final List<SpriteMagicCard> spriteListExile;
@@ -216,36 +217,22 @@ public class MatchPresenter extends AnimationTimer implements Initializable, IsS
 		spriteListStack = new ArrayList<>();
 	}
 
-	@Subscribe
-	public void examineButtonChange(ProgressNameChange progressNameChange) {
-		buttonProgress.setText(progressNameChange.getName());
+	@FXML
+	public void concede() {
+		if (getMatchActive() == null) {
+			return;
+		}
+		getMatchActive().getRuleEnforcer().i_concede(getMatchActive().getPlayer(PlayerType.HUMAN));
 	}
 
 	@Subscribe
-	public void examineDiscard(ActionDiscard actionDiscard) {
-		Alert alert = new Alert(AlertType.CONFIRMATION);
-		alert.setTitle("Discard");
-		alert.setHeaderText("Look, a Confirmation Dialog with Custom Actions");
-		alert.setContentText("Choose which Card you discard!");
-
-		IsPlayer player = actionDiscard.getPlayer();
-
-		for (MagicCard magicCard : player.getZoneHand().getAll()) {
-			alert.getButtonTypes().add(new ButtonType(magicCard.toString()));
+	public void examineButtonChange(GameStatusChange progressNameChange) {
+		if (progressNameChange.getProgressButtonText().equals("concede")) {
+			stopMatch();
+		} else {
+			buttonProgress.setText(progressNameChange.getProgressButtonText());
+			buttonProgress.setDisable(progressNameChange.getDisableProgressButton());
 		}
-
-		Optional<ButtonType> result = alert.showAndWait();
-		MagicCard discard = null;
-
-		for (MagicCard magicCard : player.getZoneHand().getAll()) {
-			if (result.get().getText().equals(magicCard.toString())) {
-				discard = magicCard;
-			}
-		}
-
-		final RuleEnforcer ruleEnforcer = (RuleEnforcer) actionDiscard.getSource();
-		ruleEnforcer.i_discard(player, discard);
-		ruleEnforcer.tb_discardStop(player);
 	}
 
 	public Match getMatchActive() {
@@ -338,10 +325,16 @@ public class MatchPresenter extends AnimationTimer implements Initializable, IsS
 				new SimpleDoubleProperty(16.0), new SimpleDoubleProperty(16.0)));
 	}
 
+	@Override
+	public void setScreenController(Main screenController) {
+		this.screenController = screenController;
+	}
+
 	@FXML
-	public void play() {
+	public void startMatch() {
+		LOGGER.debug("{} play()", this);
 		if (getMatchActive() != null) {
-			stop();
+			stopMatch();
 		}
 
 		// Parameter für Testmatch
@@ -465,13 +458,11 @@ public class MatchPresenter extends AnimationTimer implements Initializable, IsS
 		this.start();
 	}
 
-	@Override
-	public void setScreenController(Main screenController) {
-		this.screenController = screenController;
-	}
+	public void stopMatch() {
+		if (getMatchActive() != null) {
+			matchActive = null;
+		}
 
-	@Override
-	public void stop() {
 		spriteListBattlefield.clear();
 		spriteListComputerGraveyard.clear();
 		spriteListComputerHand.clear();
@@ -480,10 +471,25 @@ public class MatchPresenter extends AnimationTimer implements Initializable, IsS
 		spriteListHumanHand.clear();
 		spriteListStack.clear();
 
+		canvasBattlefield.draw();
+		canvasComputerGraveyard.draw();
+		canvasComputerHand.draw();
+		canvasExile.draw();
+		canvasHumanGraveyard.draw();
+		canvasHumanHand.draw();
+		canvasStack.draw();
+
+		matchUpdater = null;
 		previousTime = 0;
 		secondsElapsedSinceLastFpsUpdate = 0f;
 		framesSinceLastFpsUpdate = 0;
+
 		super.stop();
+	}
+
+	@Override
+	public String toString() {
+		return "MatchPresenter";
 	}
 
 	private void bindLifeLabel(Label statusLabel, IsPlayer player) {
@@ -638,5 +644,4 @@ public class MatchPresenter extends AnimationTimer implements Initializable, IsS
 	private void initializeIconLabel(Image icon, Label label) {
 		label.setGraphic(new AdaptableImageView(icon, label.heightProperty(), label.widthProperty()));
 	}
-
 }

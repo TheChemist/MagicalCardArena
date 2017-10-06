@@ -47,7 +47,7 @@ public class InputHuman implements IsInput {
 
 				if (newValue) {
 					if (player.getPlayerState().equals(PlayerState.DISCARDING)) {
-						getMatchPresenter().examineDiscard(new ActionDiscard(getRuleEnforcer(), player));
+
 					} else {
 						getPlayer().getRuleEnforcer().i_deriveInteractionStatus(getPlayer());
 					}
@@ -77,14 +77,17 @@ public class InputHuman implements IsInput {
 		return getPlayer().getRuleEnforcer();
 	}
 
-	public void input(MagicCard object, ZoneType zoneType) {
+	public void input(MagicCard magicCard, ZoneType zoneType) {
 		if (zoneType.equals(ZoneType.HAND)) {
 			// Karte in Hand geklickt
-			MagicCard magicCard = object;
+
 			if (getPlayer().isDiscarding()) {
-				// TODO HIGH Hier die Karte erfragen?
-				// inputDiscard(magicCard);
+				// Spieler muss abwerfen.
+
+				inputDiscard(magicCard);
 			} else {
+				// Spieler ist in beliebigem anderen Status.
+
 				if (magicCard.isLand()) {
 					inputPlayLand(magicCard);
 				} else {
@@ -94,7 +97,7 @@ public class InputHuman implements IsInput {
 		} else if (zoneType.equals(ZoneType.BATTLEFIELD)) {
 			// Karte auf Spielfeld geklickt
 
-			MagicPermanent magicPermanent = (MagicPermanent) object;
+			MagicPermanent magicPermanent = (MagicPermanent) magicCard;
 			if (getPlayer().isAttacking() && getPlayer().getFlagDeclaringAttackers()) {
 				// Angreifer deklarieren.
 
