@@ -54,19 +54,16 @@ class SpriteMagicPermanent extends Sprite {
 	}
 
 	/**
-	 * Sets the transform for the GraphicsContext to rotate around a pivot
-	 * point.
+	 * Sets the transform for the GraphicsContext to rotate around a pivot point.
 	 *
 	 * @param gc
 	 *            the graphics context the transform to applied to.
 	 * @param angle
 	 *            the angle of rotation.
 	 * @param px
-	 *            the x pivot co-ordinate for the rotation (in canvas
-	 *            co-ordinates).
+	 *            the x pivot co-ordinate for the rotation (in canvas co-ordinates).
 	 * @param py
-	 *            the y pivot co-ordinate for the rotation (in canvas
-	 *            co-ordinates).
+	 *            the y pivot co-ordinate for the rotation (in canvas co-ordinates).
 	 */
 	private void rotate(GraphicsContext gc, double angle, double px, double py) {
 		Rotate r = new Rotate(angle, px, py);
@@ -84,16 +81,27 @@ class SpriteMagicPermanent extends Sprite {
 	@Override
 	void render(GraphicsContext gc) {
 		if (getMagicPermanent().getFlagTapped()) {
+			// Getappt: Zeichne Karte gedreht
+
 			gc.save();
 			rotate(gc, 90, getX() + getWidth() / 2, getY() + getHeight() / 2);
 			gc.drawImage(getImage(), getX(), getY(), getWidth(), getHeight());
+
+			drawGreenBorder(gc);
+
 			gc.restore();
 		} else {
-			gc.drawImage(getImage(), getX(), getY(), getWidth(), getHeight());
-		}
+			// Zeichne Karte normal
 
-		if(getMagicPermanent().getFlagIsInteractable()) {
+			gc.drawImage(getImage(), getX(), getY(), getWidth(), getHeight());
+			drawGreenBorder(gc);
+		}
+	}
+
+	private void drawGreenBorder(GraphicsContext gc) {
+		if (getMagicPermanent().getFlagIsInteractable()) {
 			gc.setStroke(Color.GREEN);
+			gc.setLineWidth(5.0);
 			gc.strokeRect(getX(), getY(), getWidth(), getHeight());
 		}
 	}

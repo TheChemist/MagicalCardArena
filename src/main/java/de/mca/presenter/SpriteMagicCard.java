@@ -64,7 +64,10 @@ class SpriteMagicCard extends Sprite {
 		gc.drawImage(getImage(), getX(), getY(), getWidth(), getHeight());
 
 		if (getMagicObject().getFlagIsInteractable()) {
+			// Zeichne grünen Rand
+
 			gc.setStroke(Color.GREEN);
+			gc.setLineWidth(5.0);
 			gc.strokeRect(getX(), getY(), getWidth(), getHeight());
 		}
 	}
