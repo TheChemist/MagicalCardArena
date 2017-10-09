@@ -53,6 +53,14 @@ class SpriteMagicPermanent extends Sprite {
 		return new StringBuilder(magicPermanent.getDisplayName()).append(" ").append(super.toString()).toString();
 	}
 
+	private void drawGreenBorder(GraphicsContext gc) {
+		if (getMagicPermanent().getFlagIsInteractable()) {
+			gc.setStroke(Color.GREEN);
+			gc.setLineWidth(5.0);
+			gc.strokeRect(getX(), getY(), getWidth(), getHeight());
+		}
+	}
+
 	/**
 	 * Sets the transform for the GraphicsContext to rotate around a pivot point.
 	 *
@@ -95,14 +103,6 @@ class SpriteMagicPermanent extends Sprite {
 
 			gc.drawImage(getImage(), getX(), getY(), getWidth(), getHeight());
 			drawGreenBorder(gc);
-		}
-	}
-
-	private void drawGreenBorder(GraphicsContext gc) {
-		if (getMagicPermanent().getFlagIsInteractable()) {
-			gc.setStroke(Color.GREEN);
-			gc.setLineWidth(5.0);
-			gc.strokeRect(getX(), getY(), getWidth(), getHeight());
 		}
 	}
 

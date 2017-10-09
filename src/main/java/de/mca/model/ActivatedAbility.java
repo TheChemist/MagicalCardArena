@@ -33,15 +33,10 @@ public class ActivatedAbility implements IsStackable {
 	 */
 	private final AbilityType abilityType;
 	/**
-	 * Speichert den Typ der zusätzlichen Kosten. Fallen keine zusätzlichen
-	 * Kosten an wird NO_ADDITIONAL_COST gesetzt.
+	 * Speichert den Typ der zusätzlichen Kosten. Fallen keine zusätzlichen Kosten
+	 * an wird NO_ADDITIONAL_COST gesetzt.
 	 */
 	private final AdditionalCostType additionalCostType;
-	/**
-	 * Speichert alle Informationen zum Effekt in einem JsonArray. Wird der
-	 * Effekt benötigt, wird die Information in Echtzeit geparst.
-	 */
-	private final JsonArray effectObject;
 	/**
 	 * Speichert die verschiedenen Darstellungen der Kosten.
 	 */
@@ -63,7 +58,6 @@ public class ActivatedAbility implements IsStackable {
 			JsonArray effectObject, ObservableList<IsManaMap> listCostMaps) {
 		this.abilityType = abilityType;
 		this.additionalCostType = additionalCostType;
-		this.effectObject = effectObject;
 		this.propertySource = new SimpleObjectProperty<>(source);
 		this.propertyListCostMaps = new SimpleListProperty<>(listCostMaps);
 		propertyListEffects = new SimpleListProperty<>(FXCollections.observableArrayList(new ArrayList<>()));
@@ -90,10 +84,6 @@ public class ActivatedAbility implements IsStackable {
 	@Override
 	public String getDisplayName() {
 		return abilityType.toString();
-	}
-
-	public JsonArray getEffectInformation() {
-		return effectObject;
 	}
 
 	@Override

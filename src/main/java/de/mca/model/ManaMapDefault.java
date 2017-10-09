@@ -185,17 +185,15 @@ public class ManaMapDefault implements IsManaMap {
 	}
 
 	/**
-	 * Prüft, ob in einer ManaMap postive Werte bei den echten Farben
-	 * auftauchen. Ein positiver Wert in einer Differenz, bedeutet, dass für
-	 * diese Farbe nicht genügend Mana zur Verfügung steht. Ein positiver Wert
-	 * bei NONE ist insofern nicht problematisch, da farbiges Mana zur Deckung
-	 * genutzt werden kann.
+	 * Prüft, ob in einer ManaMap postive Werte bei den echten Farben auftauchen.
+	 * Ein positiver Wert in einer Differenz, bedeutet, dass für diese Farbe nicht
+	 * genügend Mana zur Verfügung steht. Ein positiver Wert bei NONE ist insofern
+	 * nicht problematisch, da farbiges Mana zur Deckung genutzt werden kann.
 	 *
 	 * @param difference
 	 *            die Differenz aus zwei ManaMaps. Nur so können negative Werte
 	 *            zustande kommen.
-	 * @return true, wenn ein positiver Wert bei einer echten Farbe entdeckt
-	 *         wurde.
+	 * @return true, wenn ein positiver Wert bei einer echten Farbe entdeckt wurde.
 	 */
 	private boolean hasPositiveTrueColor(IsManaMap difference) {
 		for (final ColorType key : getKeySet()) {
