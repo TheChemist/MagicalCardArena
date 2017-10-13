@@ -7,7 +7,7 @@ package de.mca.model.enums;
  */
 public enum PhaseType {
 
-	BEGINNING_PHASE("Anfangsphase"), COMBAT_PHASE("Kampfphase"), ENDING_PHASE("Ending phase"), POSTCOMBAT_MAIN_PHASE(
+	BEGINNING_PHASE("Anfangsphase"), COMBAT_PHASE("Kampfphase"), ENDING_PHASE("Endphase"), POSTCOMBAT_MAIN_PHASE(
 			"Zweite Hauptphase"), PRECOMBAT_MAIN_PHASE("Erste Hauptphase");
 
 	private final String displayName;
