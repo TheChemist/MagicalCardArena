@@ -1,7 +1,5 @@
 package de.mca.model;
 
-import java.util.Random;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -9,7 +7,6 @@ import de.mca.Constants;
 import de.mca.model.enums.ObjectType;
 import de.mca.model.interfaces.IsInput;
 import de.mca.model.interfaces.IsPlayer;
-import de.mca.model.interfaces.IsZone;
 import de.mca.presenter.MatchPresenter;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -25,7 +22,10 @@ public class InputComputer implements IsInput {
 	 * Speichert den Logger.
 	 */
 	private final static Logger LOGGER = LoggerFactory.getLogger("Input");
-	private Match match;
+	/**
+	 * Speichert das Match.
+	 */
+	private final Match match;
 	/**
 	 * Speichert den MatchPresenter.
 	 */
@@ -51,6 +51,10 @@ public class InputComputer implements IsInput {
 
 					switch (getPlayer().getPlayerState()) {
 					case ATTACKING:
+						if (getPlayer().getInteractionCount() < 1) {
+							inputEndDeclareAttackers();
+						}
+
 						if (getPlayer().getFlagDeclaringAttackers()) {
 							// Auswahlmodus für Angreifer.
 
@@ -66,9 +70,18 @@ public class InputComputer implements IsInput {
 							inputEndDeclareAttackers();
 						}
 						break;
+					case CHOOSING_BLOCK_TARGET:
+						// Blocke ersten Angreifer
+
+						inputDeclareBlockTarget((MagicPermanent) getMatch().getListAttacks().get(0).getAttacker());
+						break;
 					case DEFENDING:
+						if (getPlayer().getInteractionCount() < 1) {
+							inputEndDeclareBlockers();
+						}
+
 						if (getPlayer().getFlagDeclaringBlockers()) {
-							// Auswahlmodus für Blocker.
+							// Auswahlmodus für Blocker
 
 							// Blocke mit allen Kreaturen die erste Kreatur
 							for (final MagicPermanent magicPermanent : getMatch().getZoneBattlefield()
@@ -83,11 +96,14 @@ public class InputComputer implements IsInput {
 						}
 						break;
 					case DISCARDING:
-						IsZone<MagicCard> zoneHand = getPlayer().getZoneHand();
 						final int originalHandSize = player.propertyHandSize().get();
 						inputDiscardRandom(originalHandSize - Constants.HAND_SIZE);
 						break;
 					case PRIORITIZED:
+						if (getPlayer().getInteractionCount() < 1) {
+							inputPassPriority();
+						}
+
 						// Spiele zufälliges Land
 						for (final MagicCard magicCard : player.getZoneHand().getAll(ObjectType.LAND)) {
 							if (magicCard.getFlagIsInteractable() && getMatch().getCurrentPhase().isMain()) {

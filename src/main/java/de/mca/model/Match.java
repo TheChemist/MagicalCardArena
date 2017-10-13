@@ -337,6 +337,11 @@ public final class Match {
 		return getCurrentStep().getFlagPlayersGetPriority();
 	}
 
+	/**
+	 * Prüft, ob der Stack abgearbeitet werden kann.
+	 * 
+	 * @return true, wenn beide Spieler gepasst haben und der Stack nicht leer ist.
+	 */
 	private boolean checkProcessStack() {
 		final boolean playerActivePassed = getPlayerActive().getFlagPassedPriority();
 		final boolean playerNonactivePassed = getPlayerNonactive().getFlagPassedPriority();
@@ -505,6 +510,7 @@ public final class Match {
 	private void setCurrentTurn(Turn turn) {
 		propertyCurrentTurn.set(turn);
 		propertyListTurns.add(turn);
+		LOGGER.trace("{} setCurrentTurn({})", this, turn);
 	}
 
 	private void setPlayerActive(IsPlayer player) {
@@ -526,7 +532,6 @@ public final class Match {
 	/**
 	 * Überspringe eine Phase.
 	 */
-
 	private void skipCurrentPhase() {
 		LOGGER.debug("{} skipCurrentPhase()", this);
 		getCurrentPhase().setFlagSkipped(false);
@@ -535,7 +540,6 @@ public final class Match {
 	/**
 	 * Überspringe einen Spielschritt.
 	 */
-
 	private void skipCurrentStep() {
 		LOGGER.debug("{} skipCurrentStep()", this);
 		getCurrentStep().setFlagSkipped(false);
@@ -545,7 +549,6 @@ public final class Match {
 	 * Beginnt den neuen Spielschritt. Es werden alle TurnBasedActions gefeuert, die
 	 * für den Beginn dieses Schrittes vorgesehen sind.
 	 */
-
 	private void stepBegin(boolean alreadyRunning) {
 		if (!isStepRunning()) {
 			LOGGER.debug("{} stepBegin()", this);
@@ -559,7 +562,6 @@ public final class Match {
 	 * kann beendet werden, wenn kein Spielerinput mehr benötigt wird. Das wird vor
 	 * allem im letzten Schritt (Aufräumen) relevant.
 	 */
-
 	private void stepEnd(boolean needPlayerInput) {
 		if (!needPlayerInput) {
 			LOGGER.debug("{} stepEnd()", this);
@@ -570,7 +572,6 @@ public final class Match {
 	/**
 	 * Beginnt eine neue Runde.
 	 */
-
 	private void turnBegin(boolean alreadyRunning) {
 		if (!alreadyRunning) {
 			LOGGER.debug("{} turnBegin()", this);
@@ -590,7 +591,6 @@ public final class Match {
 	 * Eine Runde kann beendet werden, wenn keine weiteren Phasen (und in der
 	 * letzten Phase keine weiteren Schritte) mehr gespielt werden können.
 	 */
-
 	private void turnEnd(boolean hasNextPhase, boolean hasNextStep, boolean playerDiscard) {
 		if (!hasNextPhase && !hasNextStep && !playerDiscard) {
 			LOGGER.debug("{} turnEnd()", this);
@@ -664,6 +664,16 @@ public final class Match {
 		LOGGER.debug("{} determinePlayerPrioritised() -> Beide Spieler haben schon gepasst", this);
 	}
 
+	Attack getAttackByCombatant(MagicPermanent blockTarget) {
+		for (Attack attack : getListAttacks()) {
+			MagicPermanent attacker = (MagicPermanent) attack.getAttacker();
+			if (attacker.equals(blockTarget)) {
+				return attack;
+			}
+		}
+		throw new IllegalStateException("No Attack found!");
+	}
+
 	Phase getCurrentPhase() {
 		return propertyCurrentPhase().get();
 	}
@@ -674,6 +684,11 @@ public final class Match {
 
 	List<IsAttackTarget> getListAttackTargets() {
 		return propertyListAttackTargets.get();
+	}
+
+	IsPlayer getOppnent(IsPlayer player) {
+		return player.getPlayerType().equals(PlayerType.HUMAN) ? getPlayer(PlayerType.COMPUTER)
+				: getPlayer(PlayerType.HUMAN);
 	}
 
 	/**

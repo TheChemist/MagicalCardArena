@@ -11,6 +11,7 @@ import com.google.common.eventbus.EventBus;
 
 import de.mca.Constants;
 import de.mca.model.enums.ColorType;
+import de.mca.model.enums.EffectType;
 import de.mca.model.enums.PlayerState;
 import de.mca.model.enums.PlayerType;
 import de.mca.model.enums.StateBasedActionType;
@@ -49,6 +50,11 @@ public class RuleEnforcer {
 	 * abgearbeitet.
 	 */
 	private final SetProperty<StateBasedAction> propertySetStateBasedActions;
+	/**
+	 * Speichert vorübergehend den Blocker, während der Spieler das Blockziel
+	 * auswählt.
+	 */
+	private MagicPermanent temporaryBlocker;
 
 	public RuleEnforcer(EventBus eventBus) {
 		this.eventBus = eventBus;
@@ -67,13 +73,6 @@ public class RuleEnforcer {
 		final IsPlayer player = match.getPlayer(effectProduceMana.getPlayerType());
 
 		manaMap.getKeySet().forEach(key -> player.addMana(key, manaMap.get(key)));
-
-		final boolean isPaying = player.isPaying();
-		final boolean isPaid = isPaying ? checkIsPaid(player) : false;
-		if (isPaying && isPaid) {
-			// Spieler hat alles bezahlt
-			actionPaymentStop(player);
-		}
 	}
 
 	public void examineTurnBasedAction(TurnBasedAction turnBasedAction) {
@@ -135,7 +134,7 @@ public class RuleEnforcer {
 
 	/**
 	 * Wird aufgerufen, wenn der Spieler eine bleibende Karte aktiviert. Sind alle
-	 * Voraussetzungen erfüllt, wird die zu aktivierende Fähigkeit bestimmt und fpr
+	 * Voraussetzungen erfüllt, wird die zu aktivierende Fähigkeit bestimmt und für
 	 * die Aktivierung übergeben.
 	 *
 	 * @param player
@@ -309,34 +308,6 @@ public class RuleEnforcer {
 	}
 
 	/**
-	 * Wird aufgerufen, wenn der Spieler einen Blocker auswählt. Zunächst wird das
-	 * Blockziel ausgewählt, dann wird der ausgewählte Blocker registriert.
-	 *
-	 * @param player
-	 *            der nichtaktive Spieler.
-	 * @param magicPermanent
-	 *            der Blocker.
-	 */
-	public void i_declareBlocker(IsPlayer player, MagicPermanent magicPermanent) {
-		LOGGER.debug("{} i_declareBlocker({}, {})", this, player, magicPermanent);
-
-		List<Attack> listAttacks = match.getListAttacks();
-		if (listAttacks.size() <= 0) {
-			// Keine Angriff in Liste - Sollte nicht passieren können
-			throw new IllegalStateException("Keine Angriffe");
-		} else if (listAttacks.size() == 1) {
-			// Wähle einzigen Angreifer automatisch.
-
-			match.declareBlocker(0, magicPermanent);
-		} else {
-			// TODO HIGH Entscheidung: Angreifer auswählen. Übergangslösung
-			match.declareBlocker(0, magicPermanent);
-		}
-
-		player.setFlagNeedInput(true);
-	}
-
-	/**
 	 * Setzt die flagDeclareBlockers auf false. Danach wird die Priorität neu
 	 * bestimmt und eine Eingabe vom priorisierten Spieler erwartet.
 	 *
@@ -356,17 +327,74 @@ public class RuleEnforcer {
 		match.determinePlayerPrioritised();
 	}
 
+	/**
+	 * Wird aufgerufen, wenn der Spieler einen Blocker auswählt. Zunächst wird das
+	 * Blockziel ausgewählt, dann wird der ausgewählte Blocker registriert.
+	 *
+	 * @param player
+	 *            der nichtaktive Spieler.
+	 * @param blocker
+	 *            der Blocker.
+	 */
+	public void i_declareBlockerStart(IsPlayer player, MagicPermanent blocker) {
+		LOGGER.debug("{} i_declareBlockerStart({}, {})", this, player, blocker);
+
+		List<Attack> listAttacks = match.getListAttacks();
+		if (listAttacks.size() <= 0) {
+			// Keine Angriff in Liste - Sollte nicht passieren können.
+
+			throw new IllegalStateException("Keine Angriffe");
+		} else if (listAttacks.size() == 1) {
+			// Wähle einzigen Angreifer automatisch.
+
+			setTemporaryBlocker(blocker);
+			i_declareBlockerStop(player, (MagicPermanent) listAttacks.get(0).getAttacker());
+		} else {
+			// Warte auf Spielereingabe.
+
+			setTemporaryBlocker(blocker);
+
+			player.setPlayerState(PlayerState.CHOOSING_BLOCK_TARGET);
+			player.setFlagNeedInput(true);
+		}
+	}
+
+	public void i_declareBlockerStop(IsPlayer player, MagicPermanent blockTarget) {
+		LOGGER.debug("{} i_declareBlockerStop({}, {})", this, player, blockTarget);
+		player.setPlayerState(PlayerState.DEFENDING);
+
+		List<Attack> listAttacks = match.getListAttacks();
+		match.declareBlocker(listAttacks.indexOf(match.getAttackByCombatant(blockTarget)), getTemporaryBlocker());
+
+		player.setFlagNeedInput(true);
+	}
+
 	public void i_deriveInteractionStatus(IsPlayer player) {
 		LOGGER.debug("{} i_deriveInteractionStatus({})", this, player);
+		int interactionCount = 0;
 		for (final MagicCard magicCard : player.getZoneHand().getAll()) {
-			magicCard.setFlagInteractable(
-					checkCanPlayLand(player, magicCard) || checkCanCast(player, magicCard) ? true : false);
+			final boolean flagInteractable = checkCanPlayLand(player, magicCard) || checkCanCast(player, magicCard)
+					? true
+					: false;
+			magicCard.setFlagInteractable(flagInteractable);
+
+			if (flagInteractable) {
+				interactionCount++;
+			}
 		}
 
 		for (final MagicPermanent magicPermanent : match.getZoneBattlefield().getAll()) {
-			magicPermanent.setFlagInteractable(checkCanActivatePermanent(player, magicPermanent)
-					|| checkCanAttack(player, magicPermanent) || checkCanBlock(player, magicPermanent) ? true : false);
+			final boolean flagInteractable = checkCanActivatePermanent(player, magicPermanent)
+					|| checkCanAttack(player, magicPermanent) || checkCanBlock(player, magicPermanent)
+					|| checkCanBeBlocked(player, magicPermanent) ? true : false;
+			magicPermanent.setFlagInteractable(flagInteractable);
+
+			if (flagInteractable) {
+				interactionCount++;
+			}
 		}
+
+		player.setInteractionCount(interactionCount);
 	}
 
 	/**
@@ -466,6 +494,7 @@ public class RuleEnforcer {
 	 */
 	private void actionActivateAbility(IsPlayer player, ActivatedAbility activatedAbility) {
 		LOGGER.debug("{} actionActivateAbility({}, {})", this, player, activatedAbility);
+		PlayerState playerState = player.getPlayerState();
 		player.setPlayerState(PlayerState.ACTIVATING_ABILITY);
 
 		if (activatedAbility.isManaAbility()) {
@@ -474,7 +503,7 @@ public class RuleEnforcer {
 			 * Verkürzung für Manafertigkeiten. Effekte werden sofort generiert, ohne den
 			 * Umweg über den Stack.
 			 **/
-			// activatedAbility.generateEffects();
+
 			activatedAbility.propertyListEffects().forEach(effect -> {
 				if (effect.getPlayerType() == null
 				// || effect.getPlayerType().equals(PlayerType.NONE)
@@ -493,13 +522,25 @@ public class RuleEnforcer {
 				((MagicPermanent) activatedAbility.getSource()).setFlagTapped(true);
 				break;
 			}
+
+			// Prüfe, ob Kosten bezahlt wurden
+			final boolean isPaid = checkIsPaid(player);
+			if (isPaid) {
+				// Spieler hat alles bezahlt
+
+				actionPaymentStop(player);
+			}
 		} else {
 			// Andere aktivierbare Fähigkeit
 
 		}
 
 		// Setze Status und flag.
-		player.setPlayerState(PlayerState.PRIORITIZED);
+		if (playerState.equals(PlayerState.PAYING)) {
+			player.setPlayerState(PlayerState.PAYING);
+		} else {
+			player.setPlayerState(PlayerState.PRIORITIZED);
+		}
 		player.setFlagNeedInput(true);
 	}
 
@@ -615,6 +656,9 @@ public class RuleEnforcer {
 		player.setPlayerState(PlayerState.PAYING);
 		player.setManaCostGoal(totalCostInformation.getTotalCost());
 
+		// Deaktiviere ProgressButton
+		getEventBus().post(new GameStatusChange(this, "Pass", true));
+
 		if (checkIsPaid(player)) {
 			// Es war ausreichend Mana im Manapool.
 
@@ -638,6 +682,9 @@ public class RuleEnforcer {
 		player.setManaCostAlreadyPaid(new ManaMapDefault());
 		player.setManaCostGoal(new ManaMapDefault());
 
+		// Aktiviere ProgressButton
+		getEventBus().post(new GameStatusChange(this, "Pass", false));
+
 		// Setze Status und flag.
 		player.setPlayerState(PlayerState.PRIORITIZED);
 		player.setFlagNeedInput(true);
@@ -656,7 +703,7 @@ public class RuleEnforcer {
 	 * @return true, wenn die grundlegenden Voraussetzungen erfüllt sind.
 	 */
 	private boolean checkCanActivatePermanent(IsPlayer player, MagicPermanent magicPermanent) {
-		if (!magicPermanent.isActivatable()) {
+		if (!magicPermanent.checkCanActivate()) {
 			// Bleibende Karte hat keine aktivierbaren Fähigkeiten.
 			return false;
 		}
@@ -683,18 +730,32 @@ public class RuleEnforcer {
 	 * @return true, wenn der designierte Angreifer grundsätzlich angreifen kann.
 	 */
 	private boolean checkCanAttack(IsPlayer player, MagicPermanent magicPermanent) {
-		if (!magicPermanent.isCreature()) {
-			// Bleibende Karte ist keine Kreatur.
-			return false;
-		}
-
 		final boolean isControlling = player.equals(magicPermanent.getPlayerControlling());
-		final boolean isUnapped = !magicPermanent.getFlagTapped();
-		final boolean hasSummoningSickness = magicPermanent.getFlagHasSummoningSickness();
 		final boolean hasFlagDeclaringAttackers = player.getFlagDeclaringAttackers();
 
-		final boolean result = isControlling && isUnapped && !hasSummoningSickness && hasFlagDeclaringAttackers;
+		final boolean result = magicPermanent.checkCanAttack() && isControlling && hasFlagDeclaringAttackers;
 		LOGGER.trace("{} checkCanAttack({}, {}) = {}", this, player, magicPermanent, result);
+		return result;
+	}
+
+	/**
+	 * Prüft, ob die grundlegenden Voraussetzungen für das geblockt werden erfüllt
+	 * sind.
+	 *
+	 * @param player
+	 *            der nichtaktive Spieler.
+	 * @param magicPermanent
+	 *            das Blockziel.
+	 * @return true, wenn das Blockziel grundsätzlich geblockt werden kann.
+	 */
+	private boolean checkCanBeBlocked(IsPlayer player, MagicPermanent magicPermanent) {
+		IsPlayer playerActive = match.getOppnent(player);
+		final boolean isChoosingBlockTargets = player.isChoosingBlockTarget();
+		final boolean opponentControlled = magicPermanent.getPlayerControlling().equals(playerActive.getPlayerType());
+
+		final boolean result = magicPermanent.checkCanBeBlocked() && isChoosingBlockTargets && opponentControlled;
+
+		LOGGER.debug("{} checkCanBeBlocked({}, {}) = {}", this, player, magicPermanent, result);
 		return result;
 	}
 
@@ -709,17 +770,12 @@ public class RuleEnforcer {
 	 * @return true, wenn der designierte Blocker grundsätzlich Blocken kann.
 	 */
 	private boolean checkCanBlock(IsPlayer player, MagicPermanent magicPermanent) {
-		if (!magicPermanent.isCreature()) {
-			// Bleibende Karte ist keine Kreatur.
-			return false;
-		}
-
 		final boolean isControlling = player.equals(magicPermanent.getPlayerControlling());
-		final boolean isUntapped = !magicPermanent.getFlagTapped();
-		final boolean isBlocking = magicPermanent.isFlagBlocking();
 		final boolean hasFlagDeclaringBlockers = player.getFlagDeclaringBlockers();
+		final boolean isChoosingBlockTarget = player.isChoosingBlockTarget();
 
-		final boolean result = isControlling && isUntapped && !isBlocking && hasFlagDeclaringBlockers;
+		final boolean result = magicPermanent.checkCanBlock() && isControlling && hasFlagDeclaringBlockers
+				&& !isChoosingBlockTarget;
 		LOGGER.trace("{} checkCanBlock({}, {}) = {}", this, player, magicPermanent, result);
 		return result;
 	}
@@ -745,9 +801,23 @@ public class RuleEnforcer {
 		final boolean isMain = match.getCurrentPhase().isMain();
 		final boolean isStackEmpty = match.getZoneStack().isEmpty();
 
+		// Prüfe, ob das Potenzial besteht, eine Kostendarstellung zu bezahlen.
+		IsManaMap potential = new ManaMapDefault();
+		for (final MagicPermanent magicPermanent : match.getZoneBattlefield()
+				.getAll(match.getPlayerActive().getPlayerType())) {
+			if (magicPermanent.isManaSource() && magicPermanent.checkCanActivate()) {
+				for (Effect effect : magicPermanent.getManaAbility().propertyListEffects()) {
+					if (effect.getEffectType().equals(EffectType.PRODUCE_MANA)) {
+						potential.addAll(((EffectProduceMana) effect).getProduceMap());
+					}
+				}
+			}
+		}
+
 		// Prüfe, ob eine Kostendarstellung der Karte bezahlt werden kann.
 		final IsManaMap availableMana = player.getManaPool();
 		boolean canPay = false;
+		boolean hasPotential = false;
 		for (final IsManaMap costMap : magicCard.getListCostMaps()) {
 			if (costMap.isEmpty()) {
 				// CostMap ist leer, kann bezahlen, verlasse Prüfung
@@ -755,16 +825,15 @@ public class RuleEnforcer {
 				break;
 			} else {
 				canPay = availableMana.contains(costMap) ? true : false;
-				if (canPay) {
+				hasPotential = potential.contains(costMap) ? true : false;
+				if (canPay || hasPotential) {
 					// Kann bezahlen, verlasse Prüfung.
 					break;
 				}
 			}
 		}
 
-		// TODO HIGH Auf potenzielle Manaquellen überprüfen.
-
-		final boolean result = isActivePlayer && isMain && isStackEmpty && canPay;
+		final boolean result = isActivePlayer && isMain && isStackEmpty && (canPay || hasPotential);
 		LOGGER.trace("{} checkCanCast({}, {}) = {}", this, player, magicCard, result);
 		return result;
 	}
@@ -890,7 +959,7 @@ public class RuleEnforcer {
 		}
 
 		final boolean result = manaCostGoal.equals(manaCostAlreadyPaid);
-		LOGGER.trace("{} checkIsPaid({}) = {}", this, player, result);
+		LOGGER.debug("{} checkIsPaid({}) = {}", this, player, result);
 		return result;
 	}
 
@@ -902,6 +971,14 @@ public class RuleEnforcer {
 
 	private EventBus getEventBus() {
 		return eventBus;
+	}
+
+	private MagicPermanent getTemporaryBlocker() {
+		return temporaryBlocker;
+	}
+
+	private void setTemporaryBlocker(MagicPermanent temporaryBlocker) {
+		this.temporaryBlocker = temporaryBlocker;
 	}
 
 	private void tb_cleanup() {
@@ -1056,33 +1133,6 @@ public class RuleEnforcer {
 		currentStep.fireCombatDamageAssignment();
 	}
 
-	// TODO MID Prüfung ausweiten und wieder reinnehmen.
-	// /**
-	// * Prüft, ob die Kosten eines Permanents oder einer Fähigkeit bezahlt
-	// werden
-	// * können. Prüft auf Mana- sowie zusätzlich Kosten.
-	// *
-	// * @param magicPermanent
-	// * das Permanent.
-	// * @param act
-	// * der Typ der zusätzlichen Kosten
-	// * @return true, wenn die zusätzlichen Kosten bezahlt werden können.
-	// */
-	// private boolean checkCanPay(TotalCostInformation totalCostInformation) {
-	//
-	// // Prüfe auf zusätzliche Kosten
-	// if (totalCostInformation.hasAdditionalCostType()) {
-	// switch (totalCostInformation.getAdditionalCostType()) {
-	// case NO_ADDITIONAL_COST:
-	// return true;
-	// case TAP:
-	// return !magicPermanent.isFlagTapped();
-	// default:
-	// return false;
-	// }
-	// }
-	// }
-
 	/**
 	 * Setzt die flagDeclareAttackers auf true und verlangt vom Spieler eine
 	 * Reaktion (flagNeedPlayerInput = true).
@@ -1172,7 +1222,7 @@ public class RuleEnforcer {
 	/**
 	 * Durchläuft den Stack und ruft für jedes Element resolve(stackable) auf. Der
 	 * Stack wird durchlaufen, jedes mal wenn beide Spieler die Priorität abgegeben
-	 * haben (rule=405.5.)
+	 * haben (rule=405.5.).
 	 */
 	void processStack() {
 		LOGGER.debug("{} processStack()", this);

@@ -23,8 +23,8 @@ public interface IsInput {
 	public RuleEnforcer getRuleEnforcer();
 
 	/**
-	 * Informiert das Spiel über eine Spielerhandlung: Der Spieler hat ein
-	 * Permanent aktiviert.
+	 * Informiert das Spiel über eine Spielerhandlung: Der Spieler hat ein Permanent
+	 * aktiviert.
 	 *
 	 * @param magicPermanent
 	 *            das aktivierte Permanent.
@@ -39,15 +39,15 @@ public interface IsInput {
 			System.out.println("Nope");
 			// Kann Aktion nicht ausführen.
 			/**
-			 * TODO HIGH throws new InteractionException()? Kann über ähnliches
-			 * System wie die requests erledigt werden.
+			 * TODO HIGH throws new InteractionException()? Kann über ähnliches System wie
+			 * die requests erledigt werden.
 			 */
 		}
 	}
 
 	/**
-	 * Informiert das Spiel über eine Spielerhandlung: Der Spieler beschwört
-	 * einen Zauberspruch.
+	 * Informiert das Spiel über eine Spielerhandlung: Der Spieler beschwört einen
+	 * Zauberspruch.
 	 *
 	 * @param magicCard
 	 *            der Zauberspruch.
@@ -62,8 +62,8 @@ public interface IsInput {
 			System.out.println("Nope");
 			// Kann Aktion nicht ausführen.
 			/**
-			 * TODO HIGH throws new InteractionException()? Kann über ähnliches
-			 * System wie die requests erledigt werden.
+			 * TODO HIGH throws new InteractionException()? Kann über ähnliches System wie
+			 * die requests erledigt werden.
 			 */
 		}
 	}
@@ -77,8 +77,8 @@ public interface IsInput {
 	}
 
 	/**
-	 * Informiert das Spiel über eine Spielerhandlung: Der Spieler deklariert
-	 * einen Angreifer.
+	 * Informiert das Spiel über eine Spielerhandlung: Der Spieler deklariert einen
+	 * Angreifer.
 	 *
 	 * @param attacker
 	 *            der Angreifer.
@@ -93,15 +93,15 @@ public interface IsInput {
 			System.out.println("Nope");
 			// Kann Aktion nicht ausführen.
 			/**
-			 * TODO HIGH throws new InteractionException()? Kann über ähnliches
-			 * System wie die requests erledigt werden.
+			 * TODO HIGH throws new InteractionException()? Kann über ähnliches System wie
+			 * die requests erledigt werden.
 			 */
 		}
 	}
 
 	/**
-	 * Informiert das Spiel über eine Spielerhandlung: Der Spieler deklariert
-	 * einen Blocker.
+	 * Informiert das Spiel über eine Spielerhandlung: Der Spieler deklariert einen
+	 * Blocker.
 	 *
 	 * @param attackerIndex
 	 *            der Index des Angreifer, der geblockt werden soll.
@@ -113,13 +113,36 @@ public interface IsInput {
 			// Führe Aktion aus.
 
 			getPlayer().setFlagNeedInput(false);
-			getRuleEnforcer().i_declareBlocker(getPlayer(), magicPermanent);
+			getRuleEnforcer().i_declareBlockerStart(getPlayer(), magicPermanent);
 		} else {
 			System.out.println("Nope");
 			// Kann Aktion nicht ausführen.
 			/**
-			 * TODO HIGH throws new InteractionException()? Kann über ähnliches
-			 * System wie die requests erledigt werden.
+			 * TODO HIGH throws new InteractionException()? Kann über ähnliches System wie
+			 * die requests erledigt werden.
+			 */
+		}
+	}
+
+	/**
+	 * Informiert das Spiel über eine Spielerhandlung: Der Spieler möchte ein
+	 * Blockziel deklarieren.
+	 *
+	 * @param blockTarget
+	 *            das Blockziel.
+	 */
+	public default void inputDeclareBlockTarget(MagicPermanent blockTarget) {
+		if (blockTarget.getFlagIsInteractable()) {
+			// Führe Aktion aus.
+
+			getPlayer().setFlagNeedInput(false);
+			getRuleEnforcer().i_declareBlockerStop(getPlayer(), blockTarget);
+		} else {
+			System.out.println("Nope");
+			// Kann Aktion nicht ausführen.
+			/**
+			 * TODO HIGH throws new InteractionException()? Kann über ähnliches System wie
+			 * die requests erledigt werden.
 			 */
 		}
 	}
@@ -138,8 +161,8 @@ public interface IsInput {
 	}
 
 	/**
-	 * Informiert das Spiel über eine Spielerhandlung: Der Spieler wirft N
-	 * zufällige Karten ab.
+	 * Informiert das Spiel über eine Spielerhandlung: Der Spieler wirft N zufällige
+	 * Karten ab.
 	 *
 	 * @param howMany
 	 *            Anzahl abzuwerfender Karten.
@@ -150,8 +173,8 @@ public interface IsInput {
 	}
 
 	/**
-	 * Informiert das Spiel über eine Spielerhandlung: Der Spieler hat möchte
-	 * keine weiteren Angreifer deklarieren.
+	 * Informiert das Spiel über eine Spielerhandlung: Der Spieler hat möchte keine
+	 * weiteren Angreifer deklarieren.
 	 */
 	public default void inputEndDeclareAttackers() {
 		getPlayer().setFlagNeedInput(false);
@@ -177,22 +200,24 @@ public interface IsInput {
 	}
 
 	/**
-	 * Informiert das Spiel über eine Spielerhandlung: Der Spieler möchte ein
-	 * Land spielen.
+	 * Informiert das Spiel über eine Spielerhandlung: Der Spieler möchte ein Land
+	 * spielen.
 	 *
 	 * @param magicCard
 	 *            das Land.
 	 */
 	public default void inputPlayLand(MagicCard magicCard) {
 		if (magicCard.getFlagIsInteractable()) {
+			// Führe Aktion aus.
+
 			getPlayer().setFlagNeedInput(false);
 			getRuleEnforcer().i_playLand(getPlayer(), magicCard);
 		} else {
 			System.out.println("Nope");
 			// Kann Aktion nicht ausführen.
 			/**
-			 * TODO HIGH throws new InteractionException()? Kann über ähnliches
-			 * System wie die requests erledigt werden.
+			 * TODO HIGH throws new InteractionException()? Kann über ähnliches System wie
+			 * die requests erledigt werden.
 			 */
 		}
 	}

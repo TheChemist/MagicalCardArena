@@ -18,8 +18,7 @@ public class MagicPermanent extends MagicCard implements IsCombatant {
 
 	private final int basePower;
 	/**
-	 * Speichert die Grundverteidigung der Kreatur, so wie sie auf der Karte
-	 * steht.
+	 * Speichert die Grundverteidigung der Kreatur, so wie sie auf der Karte steht.
 	 */
 	private final int baseToughness;
 	/**
@@ -121,25 +120,39 @@ public class MagicPermanent extends MagicCard implements IsCombatant {
 		setDamage(getDamage() + combatDamage);
 	}
 
-	/**
-	 * Prüft, ob die Kreatur angreifen kann. Die Kreatur kann angreifen, wenn
-	 * sie ungetappt ist und nicht der SummoningSickness unterliegt. (rule =
-	 * 508.1a).
-	 *
-	 * @return true, wenn die Kreatur angreifen kann.
-	 */
-	public boolean checkCanAttack() {
-		return !getFlagTapped() && !getFlagHasSummoningSickness();
+	public boolean checkCanActivate() {
+		return !getListAbilities().isEmpty() && !getFlagTapped();
 	}
 
 	/**
-	 * Prüft, ob die Kreatur verteidigen kann. Die Kreatur kann blocken, wenn
-	 * sie nicht getappt ist.
+	 * Prüft, ob das Permanent angreifen kann. Das Permanent kann angreifen, wenn es
+	 * eine Kreatur ist, ungetappt ist und nicht der SummoningSickness unterliegt.
+	 * (rule = 508.1a).
 	 *
-	 * @return true, wenn die Kreatur verteidigen kann.
+	 * @return true, wenn das Permanent angreifen kann.
+	 */
+	public boolean checkCanAttack() {
+		return isCreature() && !getFlagAttacking() && !getFlagTapped() && !getFlagHasSummoningSickness();
+	}
+
+	/**
+	 * Prüft, ob das Permanent geblockt werden kann. Ein Permanent kann geblockt
+	 * werden, wenn es eine Kreatur ist und angreift.
+	 * 
+	 * @return true, wenn das Permanent geblockt werden kann.
+	 */
+	public boolean checkCanBeBlocked() {
+		return isCreature() && getFlagAttacking();
+	}
+
+	/**
+	 * Prüft, ob das Permanent blocken kann. Das Permanent kann blocken, wenn es
+	 * eine Kreatur und nicht getappt ist sowie nicht gerade blockt.
+	 *
+	 * @return true, wenn das Permanent verteidigen kann.
 	 */
 	public boolean checkCanBlock() {
-		return !getFlagTapped();
+		return isCreature() && !getFlagBlocking() && !getFlagTapped();
 	}
 
 	@Override
@@ -157,13 +170,41 @@ public class MagicPermanent extends MagicCard implements IsCombatant {
 		return propertyDamage().get();
 	}
 
+	public boolean getFlagAttacking() {
+		return flagAttacking.get();
+	}
+
+	public boolean getFlagAttackingAlone() {
+		return flagAttackingAlone.get();
+	}
+
 	@Override
 	public boolean getFlagBlocked() {
 		return flagBlocked.get();
 	}
 
+	public boolean getFlagBlocking() {
+		return flagBlocking.get();
+	}
+
+	public boolean getFlagBlockingAlone() {
+		return flagBlockingAlone.get();
+	}
+
+	public boolean getFlagFaceDown() {
+		return flagFaceDown.get();
+	}
+
+	public boolean getFlagFlipped() {
+		return flagFlipped.get();
+	}
+
 	public boolean getFlagHasSummoningSickness() {
 		return flagSummoningSickness.get();
+	}
+
+	public boolean getFlagPhasedOut() {
+		return flagPhasedOut.get();
 	}
 
 	public boolean getFlagTapped() {
@@ -172,38 +213,6 @@ public class MagicPermanent extends MagicCard implements IsCombatant {
 
 	public PlayerType getPlayerControlling() {
 		return playerControlling.get();
-	}
-
-	public boolean isActivatable() {
-		return !getListAbilities().isEmpty();
-	}
-
-	public boolean isFlagAttacking() {
-		return flagAttacking.get();
-	}
-
-	public boolean isFlagAttackingAlone() {
-		return flagAttackingAlone.get();
-	}
-
-	public boolean isFlagBlocking() {
-		return flagBlocking.get();
-	}
-
-	public boolean isFlagBlockingAlone() {
-		return flagBlockingAlone.get();
-	}
-
-	public boolean isFlagFaceDown() {
-		return flagFaceDown.get();
-	}
-
-	public boolean isFlagFlipped() {
-		return flagFlipped.get();
-	}
-
-	public boolean isFlagPhasedOut() {
-		return flagPhasedOut.get();
 	}
 
 	@Override

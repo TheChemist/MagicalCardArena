@@ -3,7 +3,6 @@ package de.mca.model;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import de.mca.model.enums.PlayerState;
 import de.mca.model.enums.ZoneType;
 import de.mca.model.interfaces.IsInput;
 import de.mca.model.interfaces.IsPlayer;
@@ -22,6 +21,9 @@ public class InputHuman implements IsInput {
 	 * Speichert den Logger.
 	 */
 	private final static Logger LOGGER = LoggerFactory.getLogger("Input");
+	/**
+	 * Speichert das Match.
+	 */
 	private Match match;
 	/**
 	 * Speichert den MatchPresenter
@@ -37,8 +39,6 @@ public class InputHuman implements IsInput {
 		this.match = match;
 		this.player = player;
 
-		// Erstelle Binding zur flagNeedInput.
-		// Setze hier die Trigger zum Öffnen der Dialoge
 		this.player.propertyFlagNeedInput().addListener(new ChangeListener<Boolean>() {
 
 			@Override
@@ -46,10 +46,24 @@ public class InputHuman implements IsInput {
 				LOGGER.trace("{} changed({}, {})", player, oldValue, newValue);
 
 				if (newValue) {
-					if (player.getPlayerState().equals(PlayerState.DISCARDING)) {
+					getPlayer().getRuleEnforcer().i_deriveInteractionStatus(getPlayer());
 
-					} else {
-						getPlayer().getRuleEnforcer().i_deriveInteractionStatus(getPlayer());
+					switch (getPlayer().getPlayerState()) {
+					case ATTACKING:
+						if (getPlayer().getInteractionCount() < 1) {
+							inputEndDeclareAttackers();
+						}
+						break;
+					case DEFENDING:
+						if (getPlayer().getInteractionCount() < 1) {
+							inputEndDeclareBlockers();
+						}
+						break;
+					default:
+						if (getPlayer().getInteractionCount() < 1) {
+							inputPassPriority();
+						}
+						break;
 					}
 				}
 			}
@@ -106,6 +120,10 @@ public class InputHuman implements IsInput {
 				// Blocker deklarieren.
 
 				inputDeclareBlocker(magicPermanent);
+			} else if (getPlayer().isChoosingBlockTarget()) {
+				// Blockziel deklarieren.
+
+				inputDeclareBlockTarget(magicPermanent);
 			} else {
 				// Permanent aktivieren
 

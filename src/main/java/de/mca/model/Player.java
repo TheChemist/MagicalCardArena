@@ -34,6 +34,10 @@ public final class Player implements IsPlayer {
 	 */
 	private final static Logger LOGGER = LoggerFactory.getLogger("Player");
 	/**
+	 * Speichert die Anzahl an Aktionen, die der Spieler derzeit durchführen kann.
+	 */
+	private int interactionCount;
+	/**
 	 * Speichert den Bezahlfortschritt des aktuellen Spruchs oder Fähigkeit.
 	 */
 	private IsManaMap manaCostAlreadyPaid;
@@ -74,8 +78,8 @@ public final class Player implements IsPlayer {
 	 */
 	private final BooleanProperty propertyFlagNeedInput;
 	/**
-	 * Zeigt an, ob der Spieler bereits die Priorität abgegeben hat. Wird am
-	 * Ende jeden Schrittes wieder zurück gesetzt.
+	 * Zeigt an, ob der Spieler bereits die Priorität abgegeben hat. Wird am Ende
+	 * jeden Schrittes wieder zurück gesetzt.
 	 */
 	private final BooleanProperty propertyFlagPassedPriority;
 	/**
@@ -99,6 +103,9 @@ public final class Player implements IsPlayer {
 	 * Speichert den aktuellen Spielerstatus.
 	 */
 	private final ObjectProperty<PlayerState> propertyPlayerState;
+	/**
+	 * Speichert den RuleEnforcer.
+	 */
 	private final RuleEnforcer ruleEnforcer;
 	/**
 	 * Speichert den Friedhof des Spielers.
@@ -254,6 +261,11 @@ public final class Player implements IsPlayer {
 	}
 
 	@Override
+	public int getInteractionCount() {
+		return interactionCount;
+	}
+
+	@Override
 	public int getLife() {
 		return propertyLife.get();
 	}
@@ -272,11 +284,6 @@ public final class Player implements IsPlayer {
 	public IsManaMap getManaPool() {
 		return manaPool;
 	}
-
-	// @Override
-	// public Match getMatch() {
-	// return match;
-	// }
 
 	@Override
 	public PlayerState getPlayerState() {
@@ -331,6 +338,11 @@ public final class Player implements IsPlayer {
 	@Override
 	public boolean isCastingSpell() {
 		return getPlayerState().equals(PlayerState.CASTING_SPELL);
+	}
+
+	@Override
+	public boolean isChoosingBlockTarget() {
+		return getPlayerState().equals(PlayerState.CHOOSING_BLOCK_TARGET);
 	}
 
 	@Override
@@ -494,6 +506,11 @@ public final class Player implements IsPlayer {
 	}
 
 	@Override
+	public void setInteractionCount(int interactionCount) {
+		this.interactionCount = interactionCount;
+	}
+
+	@Override
 	public void setLife(int life) {
 		LOGGER.trace("{} setLife({})", this, life);
 		propertyLife().set(life);
@@ -527,7 +544,7 @@ public final class Player implements IsPlayer {
 
 	@Override
 	public String toString() {
-		return getDisplayName();
+		return getDisplayName() + " " + getPlayerState();
 		// TODO LOW Detaillierte Status-Ausgabe
 		// new StringBuilder("[pt=[").append(getPlayerType()).append("]
 		// ps=[").append(getPlayerState())

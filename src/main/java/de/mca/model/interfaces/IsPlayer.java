@@ -39,8 +39,8 @@ public interface IsPlayer extends IsAttackTarget {
 	 *
 	 * @param playerType
 	 *            der Spielertyp.
-	 * @return true, wenn der Spielertyp des Spielers dem übergebenen
-	 *         Spielertyps entspricht.
+	 * @return true, wenn der Spielertyp des Spielers dem übergebenen Spielertyps
+	 *         entspricht.
 	 */
 	public boolean equals(PlayerType playerType);
 
@@ -65,6 +65,8 @@ public interface IsPlayer extends IsAttackTarget {
 	public boolean getFlagPassedPriority();
 
 	public boolean getFlagPlayedLand();
+
+	public int getInteractionCount();
 
 	public IsManaMap getManaCostAlreadyPaid();
 
@@ -111,6 +113,8 @@ public interface IsPlayer extends IsAttackTarget {
 	 * @return true, wenn der Spieler einen Zauberspruch beschwört.
 	 */
 	public boolean isCastingSpell();
+
+	public boolean isChoosingBlockTarget();
 
 	/**
 	 * Prüft, ob der Spieler gerade der verteidigende Spieler ist.
@@ -189,6 +193,8 @@ public interface IsPlayer extends IsAttackTarget {
 	public void setFlagPassedPriority(boolean flagPassedPriority);
 
 	public void setFlagPlayedLand(boolean flagPlayedLand);
+
+	public void setInteractionCount(int interactionCount);
 
 	public void setManaCostAlreadyPaid(ManaMapDefault manaMapDefault);
 

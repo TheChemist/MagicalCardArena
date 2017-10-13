@@ -38,13 +38,13 @@ import javafx.collections.ObservableSet;
 public class MagicCard implements IsObject, IsInteractable {
 
 	/**
-	 * Höhe eines Kartenscans. Angegeben in Double, um das Seitenverhältnis
-	 * exakt errechnen zu können.
+	 * Höhe eines Kartenscans. Angegeben in Double, um das Seitenverhältnis exakt
+	 * errechnen zu können.
 	 */
 	public static final double CARD_HEIGHT = 445.0;
 	/**
-	 * Breite eines Kartenscans. Angegeben in Double, um das Seitenverhältnis
-	 * exakt errechnen zu können.
+	 * Breite eines Kartenscans. Angegeben in Double, um das Seitenverhältnis exakt
+	 * errechnen zu können.
 	 */
 	public static final double CARD_WIDTH = 312.0;
 	/**
@@ -60,14 +60,13 @@ public class MagicCard implements IsObject, IsInteractable {
 	 */
 	private String fileName;
 	/**
-	 * Zeigt an, ob mit der Objekt, in gegebenem Kontext, interagiert werden
-	 * kann.
+	 * Zeigt an, ob mit der Objekt, in gegebenem Kontext, interagiert werden kann.
 	 */
 	private boolean flagIsInteractable;
 	/**
 	 * Speichert die eindeutige Identifikationsnummer des Objekts. Wird beim
-	 * erstellen der Karten vergeben. Üblicherweise von 0 bis
-	 * (computerDeck.size() + humanDeck.size()).
+	 * erstellen der Karten vergeben. Üblicherweise von 0 bis (computerDeck.size() +
+	 * humanDeck.size()).
 	 */
 	private final int id;
 	/**
@@ -102,10 +101,9 @@ public class MagicCard implements IsObject, IsInteractable {
 	 */
 	private final IntegerProperty propertyPower;
 	/**
-	 * Speichert die Farbe der Karte. Es wird auch farblos gespeichert,
-	 * allerdings handelt es sich dabei um keine echte Farbe im Sinne der
-	 * Magic-Regeln. Dient auch als Color Indicator im Sinne von Regel 204. im
-	 * Magic Rulebook.
+	 * Speichert die Farbe der Karte. Es wird auch farblos gespeichert, allerdings
+	 * handelt es sich dabei um keine echte Farbe im Sinne der Magic-Regeln. Dient
+	 * auch als Color Indicator im Sinne von Regel 204. im Magic Rulebook.
 	 */
 	private final SetProperty<ColorType> propertySetColorType;
 	/**
@@ -314,6 +312,13 @@ public class MagicCard implements IsObject, IsInteractable {
 		return propertyLoyalty().get();
 	}
 
+	public ActivatedAbility getManaAbility() throws NullPointerException {
+		for (ActivatedAbility ability : propertyListAbilities()) {
+			return ability;
+		}
+		throw new NullPointerException("No Mana Ability!");
+	}
+
 	public PlayerType getPlayerOwning() {
 		return propertyPlayerOwning().get();
 	}
@@ -378,6 +383,14 @@ public class MagicCard implements IsObject, IsInteractable {
 
 	public boolean isLand() {
 		return propertySetObjectTypes().contains(ObjectType.LAND);
+	}
+
+	public boolean isManaSource() {
+		try {
+			return getManaAbility() != null;
+		} catch (NullPointerException e) {
+			return false;
+		}
 	}
 
 	public boolean isMonocolored() {
@@ -556,6 +569,7 @@ public class MagicCard implements IsObject, IsInteractable {
 	}
 
 	public void setStrength(int power, int toughness) {
+		LOGGER.trace("{} setStrength({}, {})", this, power, toughness);
 		setPower(power);
 		setToughness(toughness);
 	}
