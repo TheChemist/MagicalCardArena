@@ -46,23 +46,29 @@ public class InputHuman implements IsInput {
 				LOGGER.trace("{} changed({}, {})", player, oldValue, newValue);
 
 				if (newValue) {
-					getPlayer().getRuleEnforcer().i_deriveInteractionStatus(getPlayer());
+					getPlayer().getRuleEnforcer().i_deriveInteractionStatus(getPlayer(), "InputHuman");
 
 					switch (getPlayer().getPlayerState()) {
 					case ATTACKING:
 						if (getPlayer().getInteractionCount() < 1) {
 							inputEndDeclareAttackers();
 						}
+
+						getRuleEnforcer().gui_enableProgressButton("Finish");
 						break;
 					case DEFENDING:
 						if (getPlayer().getInteractionCount() < 1) {
 							inputEndDeclareBlockers();
 						}
+
+						getRuleEnforcer().gui_enableProgressButton("Finish");
 						break;
 					default:
 						if (getPlayer().getInteractionCount() < 1) {
 							inputPassPriority();
 						}
+
+						getRuleEnforcer().gui_enableProgressButton("Pass");
 						break;
 					}
 				}

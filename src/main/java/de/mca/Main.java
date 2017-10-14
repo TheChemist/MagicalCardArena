@@ -111,7 +111,16 @@ public class Main extends Application {
 		addScreen("match", new MatchView());
 
 		sceneStacker = new ScreenStacker();
-		sceneStacker.setScreen("main");
+
+		if (Constants.DEBUG) {
+			// Starte direkt in Match
+
+			sceneStacker.setScreen("match");
+		} else {
+			// Zeige Hauptmenü
+
+			sceneStacker.setScreen("main");
+		}
 
 		final Scene scene = new Scene(sceneStacker);
 

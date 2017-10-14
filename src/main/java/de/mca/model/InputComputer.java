@@ -47,12 +47,15 @@ public class InputComputer implements IsInput {
 				LOGGER.trace("{} changed({}, {})", player, oldValue, newValue);
 
 				if (newValue) {
-					getRuleEnforcer().i_deriveInteractionStatus(getPlayer());
+					getRuleEnforcer().i_deriveInteractionStatus(getPlayer(), "InputComputer");
 
 					switch (getPlayer().getPlayerState()) {
 					case ATTACKING:
 						if (getPlayer().getInteractionCount() < 1) {
+							// Kein Interaktion möglich, breche ab.
+
 							inputEndDeclareAttackers();
+							break;
 						}
 
 						if (getPlayer().getFlagDeclaringAttackers()) {
@@ -77,7 +80,10 @@ public class InputComputer implements IsInput {
 						break;
 					case DEFENDING:
 						if (getPlayer().getInteractionCount() < 1) {
+							// Kein Interaktion möglich, breche ab.
+
 							inputEndDeclareBlockers();
+							break;
 						}
 
 						if (getPlayer().getFlagDeclaringBlockers()) {
@@ -101,7 +107,10 @@ public class InputComputer implements IsInput {
 						break;
 					case PRIORITIZED:
 						if (getPlayer().getInteractionCount() < 1) {
+							// Kein Interaktion möglich, breche ab.
+
 							inputPassPriority();
+							break;
 						}
 
 						// Spiele zufälliges Land

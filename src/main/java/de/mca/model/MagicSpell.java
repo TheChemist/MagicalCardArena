@@ -1,6 +1,6 @@
 package de.mca.model;
 
-import de.mca.model.enums.PlayerType;
+import de.mca.model.interfaces.IsPlayer;
 import de.mca.model.interfaces.IsStackable;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
@@ -19,9 +19,9 @@ public class MagicSpell extends MagicCard implements IsStackable {
 	 *
 	 * @see http://magiccards.info/rule/109-objects.html#rule-109-4
 	 */
-	private final ObjectProperty<PlayerType> playerControlling;
+	private final ObjectProperty<IsPlayer> playerControlling;
 
-	MagicSpell(MagicCard magicCard, PlayerType playerControlling) {
+	MagicSpell(MagicCard magicCard, IsPlayer playerControlling) {
 		super(magicCard.getId());
 		this.playerControlling = new SimpleObjectProperty<>(playerControlling);
 		setDisplayName(magicCard.getDisplayName());
@@ -47,7 +47,7 @@ public class MagicSpell extends MagicCard implements IsStackable {
 	}
 
 	@Override
-	public PlayerType getPlayerControlling() {
+	public IsPlayer getPlayerControlling() {
 		return playerControlling.get();
 	}
 
@@ -97,7 +97,7 @@ public class MagicSpell extends MagicCard implements IsStackable {
 	}
 
 	@Override
-	public void setPlayerControlling(PlayerType playerControlling) {
+	public void setPlayerControlling(IsPlayer playerControlling) {
 		this.playerControlling.set(playerControlling);
 	}
 

@@ -7,7 +7,6 @@ import de.mca.model.ManaMapDefault;
 import de.mca.model.RuleEnforcer;
 import de.mca.model.enums.ColorType;
 import de.mca.model.enums.PlayerState;
-import de.mca.model.enums.PlayerType;
 import de.mca.model.enums.ZoneType;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.IntegerProperty;
@@ -33,16 +32,6 @@ public interface IsPlayer extends IsAttackTarget {
 	 *            die Anzahl n.
 	 */
 	public void addMana(ColorType color, int howMany);
-
-	/**
-	 * Prüft, ob sich der Spieler einen Spielertyp mit einem übergebenem teilt.
-	 *
-	 * @param playerType
-	 *            der Spielertyp.
-	 * @return true, wenn der Spielertyp des Spielers dem übergebenen Spielertyps
-	 *         entspricht.
-	 */
-	public boolean equals(PlayerType playerType);
 
 	public String getDisplayName();
 
@@ -75,8 +64,6 @@ public interface IsPlayer extends IsAttackTarget {
 	public IsManaMap getManaPool();
 
 	public PlayerState getPlayerState();
-
-	public PlayerType getPlayerType();
 
 	public RuleEnforcer getRuleEnforcer();
 
@@ -188,7 +175,7 @@ public interface IsPlayer extends IsAttackTarget {
 
 	public void setFlagDeclareBlockers(boolean flagDeclareBlockers);
 
-	public void setFlagNeedInput(boolean flagNeedInput);
+	public void setFlagNeedInput(boolean flagNeedInput, String from);
 
 	public void setFlagPassedPriority(boolean flagPassedPriority);
 

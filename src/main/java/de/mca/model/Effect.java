@@ -3,7 +3,7 @@ package de.mca.model;
 import java.util.EventObject;
 
 import de.mca.model.enums.EffectType;
-import de.mca.model.enums.PlayerType;
+import de.mca.model.interfaces.IsPlayer;
 
 /**
  *
@@ -17,7 +17,10 @@ public abstract class Effect extends EventObject {
 	 * Speichert den Effekttyp.
 	 */
 	private final EffectType magicEffectType;
-	private PlayerType playerType;
+	/**
+	 * Speichert den Spieler, der den Effekt ausgelöst hat.
+	 */
+	private IsPlayer player;
 
 	protected Effect(ActivatedAbility source, EffectType magicEffectType) {
 		super(source);
@@ -28,12 +31,12 @@ public abstract class Effect extends EventObject {
 		return magicEffectType;
 	}
 
-	public PlayerType getPlayerType() {
-		return playerType;
+	public IsPlayer getPlayer() {
+		return player;
 	}
 
-	public void setPlayerType(PlayerType playerType) {
-		this.playerType = playerType;
+	public void setPlayer(IsPlayer player) {
+		this.player = player;
 	}
 
 	@Override

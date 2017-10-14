@@ -8,9 +8,9 @@ import com.google.gson.JsonArray;
 import de.mca.MagicParser;
 import de.mca.model.enums.AbilityType;
 import de.mca.model.enums.AdditionalCostType;
-import de.mca.model.enums.PlayerType;
 import de.mca.model.interfaces.IsManaMap;
 import de.mca.model.interfaces.IsObject;
+import de.mca.model.interfaces.IsPlayer;
 import de.mca.model.interfaces.IsStackable;
 import javafx.beans.property.ListProperty;
 import javafx.beans.property.ObjectProperty;
@@ -48,7 +48,7 @@ public class ActivatedAbility implements IsStackable {
 	/**
 	 * Speichert den Spielertyp des kontrollierenden Spielers.
 	 */
-	private final ObjectProperty<PlayerType> propertyPlayerControlling;
+	private final ObjectProperty<IsPlayer> propertyPlayerControlling;
 	/**
 	 * Speichert das Objekt, das durch die Fähigkeit charakterisiert wird.
 	 */
@@ -69,7 +69,7 @@ public class ActivatedAbility implements IsStackable {
 	}
 
 	public void add(Effect magicEffect) {
-		magicEffect.setPlayerType(getPlayerControlling());
+		magicEffect.setPlayer(getPlayerControlling());
 		propertyListEffects().add(magicEffect);
 	}
 
@@ -97,7 +97,7 @@ public class ActivatedAbility implements IsStackable {
 	}
 
 	@Override
-	public PlayerType getPlayerControlling() {
+	public IsPlayer getPlayerControlling() {
 		return propertyPlayerControlling().get();
 	}
 
@@ -124,7 +124,7 @@ public class ActivatedAbility implements IsStackable {
 		return propertyListEffects;
 	}
 
-	public ObjectProperty<PlayerType> propertyPlayerControlling() {
+	public ObjectProperty<IsPlayer> propertyPlayerControlling() {
 		return propertyPlayerControlling;
 	}
 
@@ -137,8 +137,8 @@ public class ActivatedAbility implements IsStackable {
 	}
 
 	@Override
-	public void setPlayerControlling(PlayerType playerControlling) {
-		propertyListEffects().forEach(effect -> effect.setPlayerType(playerControlling));
+	public void setPlayerControlling(IsPlayer playerControlling) {
+		propertyListEffects().forEach(effect -> effect.setPlayer(playerControlling));
 		propertyPlayerControlling().set(playerControlling);
 	}
 

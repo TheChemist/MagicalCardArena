@@ -1,7 +1,6 @@
 package de.mca.model.interfaces;
 
 import de.mca.model.Effect;
-import de.mca.model.enums.PlayerType;
 import javafx.collections.ObservableList;
 
 /**
@@ -21,8 +20,7 @@ public interface IsStackable {
 	public String getDisplayName();
 
 	/**
-	 * Liefert die ID. Handelt es sich um eine Fähigkeit, wird -1 zurück
-	 * gegeben.
+	 * Liefert die ID. Handelt es sich um eine Fähigkeit, wird -1 zurück gegeben.
 	 *
 	 * @return die ID.
 	 */
@@ -33,7 +31,7 @@ public interface IsStackable {
 	 *
 	 * @return den Spieler, der das Stackable kontrolliert.
 	 */
-	public PlayerType getPlayerControlling();
+	public IsPlayer getPlayerControlling();
 
 	/**
 	 * Prüft, ob es sich bei dem Stackable umd einen Permanent Spell handelt.
@@ -57,6 +55,6 @@ public interface IsStackable {
 	 * @param playerType
 	 *            Der kontrollierende Spieler.
 	 */
-	public void setPlayerControlling(PlayerType playerType);
+	public void setPlayerControlling(IsPlayer playerType);
 
 }

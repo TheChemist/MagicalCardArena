@@ -71,6 +71,10 @@
 
 		{
 			"name": "right.png"
+		},
+		
+		{
+			"name": "busy.gif"
 		}
 	]
 }

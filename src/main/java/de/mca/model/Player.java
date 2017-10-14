@@ -7,7 +7,6 @@ import org.slf4j.LoggerFactory;
 
 import de.mca.model.enums.ColorType;
 import de.mca.model.enums.PlayerState;
-import de.mca.model.enums.PlayerType;
 import de.mca.model.enums.StateBasedActionType;
 import de.mca.model.enums.ZoneType;
 import de.mca.model.interfaces.IsManaMap;
@@ -19,8 +18,6 @@ import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleObjectProperty;
-import javafx.beans.property.SimpleStringProperty;
-import javafx.beans.property.StringProperty;
 
 /**
  *
@@ -50,10 +47,6 @@ public final class Player implements IsPlayer {
 	 */
 	private final IsManaMap manaPool;
 	/**
-	 * Speichert den Spielertyp. Dient zur Identifikation.
-	 */
-	private final PlayerType playerType;
-	/**
 	 * Speichert den zugefügten Kampfschaden. Wird jede Runde zurück gesetzt.
 	 */
 	private final IntegerProperty propertyDamage;
@@ -64,7 +57,7 @@ public final class Player implements IsPlayer {
 	/**
 	 * Speichert den Anzeigenamen des Spielers.
 	 */
-	private final StringProperty propertyDisplayName;
+	private final String displayName;
 	/**
 	 * Zeigt an, ob der Spieler gerade Angreifer deklariert.
 	 */
@@ -120,13 +113,12 @@ public final class Player implements IsPlayer {
 	 */
 	private final IsZone<MagicCard> zoneLibrary;
 
-	public Player(RuleEnforcer ruleEnforcer, PlayerType playerType, String displayName, Deck deck) {
-		this.playerType = playerType;
+	public Player(RuleEnforcer ruleEnforcer, String displayName, Deck deck) {
 		this.ruleEnforcer = ruleEnforcer;
+		this.displayName = displayName;
 
 		propertyDamage = new SimpleIntegerProperty(0);
 		propertyDeckSize = new SimpleIntegerProperty(0);
-		propertyDisplayName = new SimpleStringProperty(displayName);
 		propertyFlagDeclaringAttackers = new SimpleBooleanProperty(false);
 		propertyFlagDeclaringBlockers = new SimpleBooleanProperty(false);
 		propertyFlagPassedPriority = new SimpleBooleanProperty(false);
@@ -136,9 +128,9 @@ public final class Player implements IsPlayer {
 		propertyHandSize = new SimpleIntegerProperty(0);
 		propertyLife = new SimpleIntegerProperty(20);
 		propertyPlayerState = new SimpleObjectProperty<>(PlayerState.NONACTIVE);
-		zoneGraveyard = new ZoneDefault<>(playerType, ZoneType.GRAVEYARD);
-		zoneHand = new ZoneDefault<>(playerType, ZoneType.HAND);
-		zoneLibrary = new ZoneDefault<>(playerType, ZoneType.LIBRARY);
+		zoneGraveyard = new ZoneDefault<>(this, ZoneType.GRAVEYARD);
+		zoneHand = new ZoneDefault<>(this, ZoneType.HAND);
+		zoneLibrary = new ZoneDefault<>(this, ZoneType.LIBRARY);
 
 		manaPool = new ManaMapDefault();
 		manaCostAlreadyPaid = new ManaMapDefault();
@@ -147,7 +139,7 @@ public final class Player implements IsPlayer {
 		addAllCards(deck.getCardsList(), ZoneType.LIBRARY);
 
 		// Setze den Eigentümer jeder Karte
-		getZoneLibrary().propertyListZoneCards().forEach(card -> card.setPlayerOwning(getPlayerType()));
+		getZoneLibrary().propertyListZoneCards().forEach(card -> card.setPlayerOwning(this));
 
 		// Mische
 		getZoneLibrary().shuffle();
@@ -221,18 +213,13 @@ public final class Player implements IsPlayer {
 	}
 
 	@Override
-	public boolean equals(PlayerType playerType) {
-		return getPlayerType().equals(playerType);
-	}
-
-	@Override
 	public int getDamage() {
 		return propertyDamage().get();
 	}
 
 	@Override
 	public String getDisplayName() {
-		return propertyDisplayName.get();
+		return displayName;
 	}
 
 	@Override
@@ -291,13 +278,33 @@ public final class Player implements IsPlayer {
 	}
 
 	@Override
-	public PlayerType getPlayerType() {
-		return playerType;
+	public IntegerProperty getPropertyLife() {
+		return propertyLife;
 	}
 
 	@Override
-	public IntegerProperty getPropertyLife() {
-		return propertyLife;
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((displayName == null) ? 0 : displayName.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		Player other = (Player) obj;
+		if (displayName == null) {
+			if (other.displayName != null)
+				return false;
+		} else if (!displayName.equals(other.displayName))
+			return false;
+		return true;
 	}
 
 	@Override
@@ -488,8 +495,8 @@ public final class Player implements IsPlayer {
 	}
 
 	@Override
-	public void setFlagNeedInput(boolean flagNeedInput) {
-		LOGGER.trace("{} setFlagNeedInput({})", this, flagNeedInput);
+	public void setFlagNeedInput(boolean flagNeedInput, String from) {
+		LOGGER.trace("{} setFlagNeedInput({}) coming from {}", this, flagNeedInput, from);
 		propertyFlagNeedInput().set(flagNeedInput);
 	}
 
@@ -544,11 +551,8 @@ public final class Player implements IsPlayer {
 
 	@Override
 	public String toString() {
-		return getDisplayName() + " " + getPlayerState();
-		// TODO LOW Detaillierte Status-Ausgabe
-		// new StringBuilder("[pt=[").append(getPlayerType()).append("]
-		// ps=[").append(getPlayerState())
-		// .append("] l=[").append(getLife()).append("]]").toString();
+		return new StringBuilder("[").append(getDisplayName()).append("] i=[").append(getInteractionCount())
+				.append("]]").toString();
 	}
 
 	private void setDeckSize(int deckSize) {

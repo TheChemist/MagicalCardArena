@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory;
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
 
+import de.mca.Constants;
 import de.mca.MagicParser;
 import de.mca.Main;
 import de.mca.io.FileManager;
@@ -25,7 +26,6 @@ import de.mca.model.Match;
 import de.mca.model.Player;
 import de.mca.model.RuleEnforcer;
 import de.mca.model.enums.ColorType;
-import de.mca.model.enums.PlayerType;
 import de.mca.model.enums.ZoneType;
 import de.mca.model.interfaces.IsPlayer;
 import de.mca.model.interfaces.IsStackable;
@@ -54,6 +54,7 @@ import javafx.scene.layout.GridPane;
  */
 public class MatchPresenter extends AnimationTimer implements Initializable, IsStackableScreen {
 
+	private ImageView loadingIcon;
 	/**
 	 * Speichert den Logger.
 	 */
@@ -203,6 +204,7 @@ public class MatchPresenter extends AnimationTimer implements Initializable, IsS
 	private Tab tabHumanHand;
 	@FXML
 	private Tab tabStack;
+	private float secondsElapsedSinceUpdate;
 
 	public MatchPresenter() {
 		// TODO LOW Threading?
@@ -219,19 +221,24 @@ public class MatchPresenter extends AnimationTimer implements Initializable, IsS
 
 	@FXML
 	public void concede() {
-		if (getMatchActive() == null) {
-			return;
-		}
-		getMatchActive().getRuleEnforcer().i_concede(getMatchActive().getPlayer(PlayerType.HUMAN));
+		stopMatch();
 	}
 
 	@Subscribe
 	public void examineButtonChange(GameStatusChange progressNameChange) {
 		if (progressNameChange.getProgressButtonText().equals("concede")) {
 			stopMatch();
+			return;
+		}
+
+		if (progressNameChange.getDisableProgressButton()) {
+			buttonProgress.setText("");
+			buttonProgress.setGraphic(loadingIcon);
+			buttonProgress.setDisable(true);
 		} else {
 			buttonProgress.setText(progressNameChange.getProgressButtonText());
-			buttonProgress.setDisable(progressNameChange.getDisableProgressButton());
+			buttonProgress.setGraphic(null);
+			buttonProgress.setDisable(false);
 		}
 	}
 
@@ -239,6 +246,9 @@ public class MatchPresenter extends AnimationTimer implements Initializable, IsS
 		return matchActive;
 	}
 
+	/**
+	 * @see http://svanimpe.be/blog/game-loops-fx.html
+	 */
 	@Override
 	public void handle(long currentTime) {
 		if (matchUpdater == null) {
@@ -254,8 +264,13 @@ public class MatchPresenter extends AnimationTimer implements Initializable, IsS
 
 		previousTime = currentTime;
 
-		matchUpdater.run();
+		// Update das Match jede Sekunde
+		if (secondsElapsedSinceUpdate >= 0.25f) {
+			matchUpdater.run();
+			secondsElapsedSinceUpdate = 0;
+		}
 
+		// Die Renderer
 		rendererBattlefield.run();
 		rendererComputerGraveyard.run();
 		rendererComputerHand.run();
@@ -265,7 +280,10 @@ public class MatchPresenter extends AnimationTimer implements Initializable, IsS
 		rendererStack.run();
 
 		secondsElapsedSinceLastFpsUpdate += secondsElapsed;
+		secondsElapsedSinceUpdate += secondsElapsed;
 		framesSinceLastFpsUpdate++;
+
+		// Update FPS-Anzeige alle halbe Sekunde
 		if (secondsElapsedSinceLastFpsUpdate >= 0.5f) {
 			int fps = Math.round(framesSinceLastFpsUpdate / secondsElapsedSinceLastFpsUpdate);
 			fpsReporter.accept(fps);
@@ -287,6 +305,12 @@ public class MatchPresenter extends AnimationTimer implements Initializable, IsS
 		paneCardZoom.getChildren().add(imageViewCardZoom);
 		tabCardZoom.setContent(paneCardZoom);
 
+		loadingIcon = new AdaptableImageView(ResourceManager.getIcon("busy.gif"), new SimpleDoubleProperty(32.0),
+				new SimpleDoubleProperty(32.0));
+
+		buttonProgress.setText("");
+		buttonProgress.setGraphic(loadingIcon);
+		buttonProgress.setDisable(true);
 		buttonProgress.setOnAction(actionEvent -> {
 			inputHuman.progress();
 		});
@@ -323,6 +347,10 @@ public class MatchPresenter extends AnimationTimer implements Initializable, IsS
 		tabHumanHand.setContent(paneHumanHand);
 		tabHumanHand.setGraphic(new AdaptableImageView(ResourceManager.getIcon("hand.png"),
 				new SimpleDoubleProperty(16.0), new SimpleDoubleProperty(16.0)));
+
+		if (Constants.DEBUG) {
+			startMatch();
+		}
 	}
 
 	@Override
@@ -332,29 +360,40 @@ public class MatchPresenter extends AnimationTimer implements Initializable, IsS
 
 	@FXML
 	public void startMatch() {
-		LOGGER.debug("{} play()", this);
+		LOGGER.debug("{} startMatch()", this);
 		if (getMatchActive() != null) {
 			stopMatch();
 		}
 
-		// Parameter für Testmatch
-		String nameHuman = "Human";
-		String nameComputer = "Computer";
+		RuleEnforcer ruleEnforcer = new RuleEnforcer(getEventBus());
+
 		String deckComputer = "vanillaartifact.json";
 		String deckHuman = "vanillaartifact.json";
 		Image avatarComputer = FileManager.getAvatarImages().get(0);
 		Image avatarHuman = FileManager.getAvatarImages().get(1);
 
-		// Erstelle Spielobjekte
-		RuleEnforcer ruleEnforcer = new RuleEnforcer(getEventBus());
-		IsPlayer playerComputer = new Player(ruleEnforcer, PlayerType.COMPUTER, nameComputer,
-				MagicParser.parseDeckFromPath(FileManager.getDeckPath(deckComputer)));
-		IsPlayer playerHuman = new Player(ruleEnforcer, PlayerType.HUMAN, nameHuman,
-				MagicParser.parseDeckFromPath(FileManager.getDeckPath(deckHuman)));
+		IsPlayer playerOne = null;
+		IsPlayer playerTwo = null;
 
-		matchActive = new Match(ruleEnforcer, playerHuman, playerComputer);
-		new InputComputer(this, matchActive, playerComputer);
-		inputHuman = new InputHuman(this, matchActive, playerHuman);
+		if (Constants.AI_ONLY) {
+			playerOne = new Player(ruleEnforcer, "AI_ONE",
+					MagicParser.parseDeckFromPath(FileManager.getDeckPath(deckComputer)));
+			playerTwo = new Player(ruleEnforcer, "AI_TWO",
+					MagicParser.parseDeckFromPath(FileManager.getDeckPath(deckHuman)));
+
+			matchActive = new Match(ruleEnforcer, playerOne, playerTwo);
+			new InputComputer(this, matchActive, playerOne);
+			new InputComputer(this, matchActive, playerTwo);
+		} else {
+			playerOne = new Player(ruleEnforcer, "Computer",
+					MagicParser.parseDeckFromPath(FileManager.getDeckPath(deckComputer)));
+			playerTwo = new Player(ruleEnforcer, "Human",
+					MagicParser.parseDeckFromPath(FileManager.getDeckPath(deckHuman)));
+
+			matchActive = new Match(ruleEnforcer, playerOne, playerTwo);
+			new InputComputer(this, matchActive, playerOne);
+			inputHuman = new InputHuman(this, matchActive, playerTwo);
+		}
 
 		// Erstelle Game Loop
 		matchUpdater = () -> matchActive.update();
@@ -372,6 +411,7 @@ public class MatchPresenter extends AnimationTimer implements Initializable, IsS
 		 */
 		canvasBattlefield.setListSprites(spriteListBattlefield);
 		canvasBattlefield.setInput(inputHuman);
+		canvasBattlefield.setMatchActive(matchActive);
 
 		canvasComputerGraveyard.setListSprites(spriteListComputerGraveyard);
 		canvasComputerGraveyard.setInput(inputHuman);
@@ -415,34 +455,34 @@ public class MatchPresenter extends AnimationTimer implements Initializable, IsS
 		initializeIconLabel(ResourceManager.getIcon("w.png"), labelIconHumanWhiteMana);
 
 		// Elemente binden
-		bindLifeLabel(labelComputerLife, playerComputer);
-		bindManaPool(playerComputer);
+		bindLifeLabel(labelComputerLife, playerOne);
+		bindManaPoolPlayerOne(playerOne);
 
-		bindSizeTab(tabStack, PlayerType.NONE, ZoneType.STACK);
+		bindSizeTab(tabStack, null, ZoneType.STACK);
 		bindZoneStack(matchActive.getZoneStack(), spriteListStack);
 
-		bindLifeLabel(labelHumanLife, playerHuman);
-		bindManaPool(playerHuman);
+		bindLifeLabel(labelHumanLife, playerTwo);
+		bindManaPoolPlayerTwo(playerTwo);
 
 		/**
 		 * Mittleres Panel
 		 */
 		// Elemente binden
-		bindSizeTab(tabBattlefield, PlayerType.NONE, ZoneType.BATTLEFIELD);
+		bindSizeTab(tabBattlefield, null, ZoneType.BATTLEFIELD);
 		bindZoneBattlefield(matchActive.getZoneBattlefield(), spriteListBattlefield);
 
-		bindSizeTab(tabComputerGraveyard, PlayerType.COMPUTER, ZoneType.GRAVEYARD);
-		bindSizeTab(tabComputerHand, PlayerType.COMPUTER, ZoneType.HAND);
-		bindZoneDefault(playerComputer.getZoneGraveyard(), spriteListComputerGraveyard);
-		bindZoneDefault(playerComputer.getZoneHand(), spriteListComputerHand);
+		bindSizeTab(tabComputerGraveyard, playerOne, ZoneType.GRAVEYARD);
+		bindSizeTab(tabComputerHand, playerTwo, ZoneType.HAND);
+		bindZoneDefault(playerOne.getZoneGraveyard(), spriteListComputerGraveyard);
+		bindZoneDefault(playerOne.getZoneHand(), spriteListComputerHand);
 
-		bindSizeTab(tabExile, PlayerType.NONE, ZoneType.EXILE);
+		bindSizeTab(tabExile, null, ZoneType.EXILE);
 		bindZoneDefault(matchActive.getZoneExile(), spriteListExile);
 
-		bindSizeTab(tabHumanGraveyard, PlayerType.HUMAN, ZoneType.GRAVEYARD);
-		bindSizeTab(tabHumanHand, PlayerType.HUMAN, ZoneType.HAND);
-		bindZoneDefault(playerHuman.getZoneGraveyard(), spriteListHumanGraveyard);
-		bindZoneDefault(playerHuman.getZoneHand(), spriteListHumanHand);
+		bindSizeTab(tabHumanGraveyard, playerTwo, ZoneType.GRAVEYARD);
+		bindSizeTab(tabHumanHand, playerTwo, ZoneType.HAND);
+		bindZoneDefault(playerTwo.getZoneGraveyard(), spriteListHumanGraveyard);
+		bindZoneDefault(playerTwo.getZoneHand(), spriteListHumanHand);
 
 		/**
 		 * Unteres Panel
@@ -452,13 +492,14 @@ public class MatchPresenter extends AnimationTimer implements Initializable, IsS
 		labelCurrentPhase.textProperty().bind(matchActive.propertyCurrentPhase().asString());
 		labelCurrentStep.textProperty().bind(matchActive.propertyCurrentStep().asString());
 		labelPlayerActive.textProperty().bind(matchActive.propertyPlayerActive().asString());
-		labelHint.textProperty().bind(playerHuman.propertyPlayerState().asString());
+		labelHint.textProperty().bind(playerTwo.propertyPlayerState().asString());
 
 		// Starten
 		this.start();
 	}
 
 	public void stopMatch() {
+		LOGGER.debug("{} stopMatch()", this);
 		if (getMatchActive() != null) {
 			matchActive = null;
 		}
@@ -496,8 +537,8 @@ public class MatchPresenter extends AnimationTimer implements Initializable, IsS
 		statusLabel.textProperty().bind(player.propertyLife().asString());
 	}
 
-	private void bindManaPool(IsPlayer player) {
-		player.getManaPool().propertyMapMana().addListener(new MapChangeListener<ColorType, Integer>() {
+	private void bindManaPoolPlayerOne(IsPlayer playerOne) {
+		playerOne.getManaPool().propertyMapMana().addListener(new MapChangeListener<ColorType, Integer>() {
 
 			@Override
 			public void onChanged(
@@ -506,48 +547,50 @@ public class MatchPresenter extends AnimationTimer implements Initializable, IsS
 				String stringValue = change.getValueAdded() == null ? "0" : change.getValueAdded().toString();
 
 				if (colorType.equals(ColorType.BLACK)) {
-					if (player.equals(PlayerType.COMPUTER)) {
-						labelComputerBlackMana.setText(stringValue);
-					} else {
-						labelHumanBlackMana.setText(stringValue);
-					}
+					labelComputerBlackMana.setText(stringValue);
 				} else if (change.getKey().equals(ColorType.BLUE)) {
-					if (player.equals(PlayerType.COMPUTER)) {
-						labelComputerBlueMana.setText(stringValue);
-					} else {
-						labelHumanBlueMana.setText(stringValue);
-					}
+					labelComputerBlueMana.setText(stringValue);
 				} else if (change.getKey().equals(ColorType.GREEN)) {
-					if (player.equals(PlayerType.COMPUTER)) {
-						labelComputerGreenMana.setText(stringValue);
-					} else {
-						labelHumanGreenMana.setText(stringValue);
-					}
+					labelComputerGreenMana.setText(stringValue);
 				} else if (change.getKey().equals(ColorType.NONE)) {
-					if (player.equals(PlayerType.COMPUTER)) {
-						labelComputerColorlessMana.setText(stringValue);
-					} else {
-						labelHumanColorlessMana.setText(stringValue);
-					}
+					labelComputerColorlessMana.setText(stringValue);
 				} else if (change.getKey().equals(ColorType.RED)) {
-					if (player.equals(PlayerType.COMPUTER)) {
-						labelComputerRedMana.setText(stringValue);
-					} else {
-						labelHumanRedMana.setText(stringValue);
-					}
+					labelComputerRedMana.setText(stringValue);
 				} else if (change.getKey().equals(ColorType.WHITE)) {
-					if (player.equals(PlayerType.COMPUTER)) {
-						labelComputerWhiteMana.setText(stringValue);
-					} else {
-						labelHumanWhiteMana.setText(stringValue);
-					}
+					labelComputerWhiteMana.setText(stringValue);
 				}
 			}
 		});
 	}
 
-	private void bindSizeTab(Tab sizeTab, PlayerType playerType, ZoneType zoneType) {
-		sizeTab.textProperty().bind(createTabBinding(playerType, zoneType));
+	private void bindManaPoolPlayerTwo(IsPlayer playerTwo) {
+		playerTwo.getManaPool().propertyMapMana().addListener(new MapChangeListener<ColorType, Integer>() {
+
+			@Override
+			public void onChanged(
+					javafx.collections.MapChangeListener.Change<? extends ColorType, ? extends Integer> change) {
+				ColorType colorType = change.getKey();
+				String stringValue = change.getValueAdded() == null ? "0" : change.getValueAdded().toString();
+
+				if (colorType.equals(ColorType.BLACK)) {
+					labelHumanBlackMana.setText(stringValue);
+				} else if (change.getKey().equals(ColorType.BLUE)) {
+					labelHumanBlueMana.setText(stringValue);
+				} else if (change.getKey().equals(ColorType.GREEN)) {
+					labelHumanGreenMana.setText(stringValue);
+				} else if (change.getKey().equals(ColorType.NONE)) {
+					labelHumanColorlessMana.setText(stringValue);
+				} else if (change.getKey().equals(ColorType.RED)) {
+					labelHumanRedMana.setText(stringValue);
+				} else if (change.getKey().equals(ColorType.WHITE)) {
+					labelHumanWhiteMana.setText(stringValue);
+				}
+			}
+		});
+	}
+
+	private void bindSizeTab(Tab sizeTab, IsPlayer isPlayer, ZoneType zoneType) {
+		sizeTab.textProperty().bind(createTabBinding(isPlayer, zoneType));
 	}
 
 	private void bindZoneBattlefield(IsZone<? extends MagicPermanent> zone, List<SpriteMagicPermanent> listSprites) {
@@ -616,7 +659,7 @@ public class MatchPresenter extends AnimationTimer implements Initializable, IsS
 		});
 	}
 
-	private StringExpression createTabBinding(PlayerType playerType, ZoneType zoneType) {
+	private StringExpression createTabBinding(IsPlayer player, ZoneType zoneType) {
 		if (zoneType.equals(ZoneType.BATTLEFIELD)) {
 			return Bindings.concat("(").concat(matchActive.propertyBattlefieldSize().asString())
 					.concat(") Battlefield");
@@ -625,11 +668,9 @@ public class MatchPresenter extends AnimationTimer implements Initializable, IsS
 		} else if (zoneType.equals(ZoneType.STACK)) {
 			return Bindings.concat("(").concat(matchActive.propertyStackSize().asString()).concat(") Stack");
 		} else if (zoneType.equals(ZoneType.HAND)) {
-			IsPlayer player = getMatchActive().getPlayer(playerType);
 			return Bindings.concat("(").concat(player.propertyHandSize().asString()).concat(") ")
 					.concat(player.getDisplayName());
 		} else if (zoneType.equals(ZoneType.GRAVEYARD)) {
-			IsPlayer player = getMatchActive().getPlayer(playerType);
 			return Bindings.concat("(").concat(player.propertyGraveSize().asString()).concat(") ")
 					.concat(player.getDisplayName());
 		} else {

@@ -15,8 +15,8 @@ import javafx.beans.property.SimpleBooleanProperty;
 public class Step {
 
 	/**
-	 * Speichert die rundenbasiert Aktion, die am Ende jeden Spielschrittes
-	 * gefeuert wird.
+	 * Speichert die rundenbasiert Aktion, die am Ende jeden Spielschrittes gefeuert
+	 * wird.
 	 */
 	private final TurnBasedActionType endTBA;
 	/**
@@ -65,11 +65,10 @@ public class Step {
 
 	public void fireDeclareDamageAssignmentBlocker() {
 		/**
-		 * Hierbei handelt es sich um einen Sonderfall. Mehrere TurnBasedActions
-		 * werden nacheinander abgefeuert, jedoch sind die späteren abhängig von
-		 * Spielerinput der in den ersten TBAs eingeholt wird. Um eine
-		 * sequenzielle Abarbeitung zu gewährleisten muss der Aufruf in diesem
-		 * Fall an einen Ort verlegt werden.
+		 * Hierbei handelt es sich um einen Sonderfall. Mehrere TurnBasedActions werden
+		 * nacheinander abgefeuert, jedoch sind die späteren abhängig von Spielerinput
+		 * der in den ersten TBAs eingeholt wird. Um eine sequenzielle Abarbeitung zu
+		 * gewährleisten muss der Aufruf in diesem Fall an einen Ort verlegt werden.
 		 */
 		ruleEnforcer.examineTurnBasedAction(
 				new TurnBasedAction(this, TurnBasedActionType.DECLARE_DAMAGE_ASSIGNMENT_ORDER_BLOCKER));
@@ -90,6 +89,16 @@ public class Step {
 
 	private void setFlagStepRunning(boolean flagRunning) {
 		propertyFlagStepRunning.set(flagRunning);
+	}
+
+	void begin() {
+		setFlagStepRunning(true);
+		fireStartTBAs();
+	}
+
+	void end() {
+		setFlagStepRunning(false);
+		fireEndTBA();
 	}
 
 	boolean equals(StepType stepType) {
@@ -118,15 +127,5 @@ public class Step {
 
 	void setFlagSkipped(boolean flagSkipped) {
 		this.propertyFlagStepSkipped.set(flagSkipped);
-	}
-
-	void stepBegin() {
-		setFlagStepRunning(true);
-		fireStartTBAs();
-	}
-
-	void stepEnd() {
-		setFlagStepRunning(false);
-		fireEndTBA();
 	}
 }

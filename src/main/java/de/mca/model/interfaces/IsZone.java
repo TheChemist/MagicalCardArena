@@ -6,7 +6,6 @@ import de.mca.model.enums.AbilityType;
 import de.mca.model.enums.ColorType;
 import de.mca.model.enums.EffectType;
 import de.mca.model.enums.ObjectType;
-import de.mca.model.enums.PlayerType;
 import de.mca.model.enums.SubType;
 import de.mca.model.enums.SuperType;
 import de.mca.model.enums.ZoneType;
@@ -45,13 +44,13 @@ public interface IsZone<T> {
 	public List<T> getAll();
 
 	/**
-	 * Liefert eine Liste mit allen Karten, die Fähigkeiten eines bestimmten
-	 * Typs besitzen.
+	 * Liefert eine Liste mit allen Karten, die Fähigkeiten eines bestimmten Typs
+	 * besitzen.
 	 *
 	 * @param abilityType
 	 *            der Fähigkeitstyp.
-	 * @return eine Liste mit allen Karten, die Fähigkeiten eines bestimmten
-	 *         Typs besitzen.
+	 * @return eine Liste mit allen Karten, die Fähigkeiten eines bestimmten Typs
+	 *         besitzen.
 	 */
 	public List<T> getAll(AbilityType abilityType);
 
@@ -80,8 +79,7 @@ public interface IsZone<T> {
 	 * Manas der Zone.
 	 *
 	 * @param convertedManaCost
-	 *            Die umgewandelten Manakosten, denen die Karten entsprechen
-	 *            sollen.
+	 *            Die umgewandelten Manakosten, denen die Karten entsprechen sollen.
 	 * @return eine Liste mit allen Karten einer bestimmten Menge umgewandelten
 	 *         Manas der Zone.
 	 */
@@ -103,7 +101,7 @@ public interface IsZone<T> {
 	 *            Der Spieler, dem die Karten entsprechen sollen.
 	 * @return eine Liste mit allen Karten eines bestimmten Spielers der Zone.
 	 */
-	public List<T> getAll(PlayerType playerOwning);
+	public List<T> getAll(IsPlayer playerOwning);
 
 	/**
 	 * Liefert eine Liste mit allen Karten eines bestimmten Subtyps der Zone.
@@ -135,7 +133,7 @@ public interface IsZone<T> {
 	 *
 	 * @return Spielertyp des assozierten Spielers.
 	 */
-	public PlayerType getPlayerType();
+	public IsPlayer getPlayerType();
 
 	/**
 	 * Liefert die Größe der Zone.
@@ -210,7 +208,7 @@ public interface IsZone<T> {
 	 *            Der Spieler, nach dem die Zone durchsucht werden soll.
 	 * @return true, wenn eine Karte gefunden wurde, die dem Spieler entspricht.
 	 */
-	public boolean searchZone(PlayerType playerOwning);
+	public boolean searchZone(IsPlayer playerOwning);
 
 	/**
 	 * Durchsuchte die Zone nach einer Karte eines bestimmten Subtyps.
@@ -226,8 +224,7 @@ public interface IsZone<T> {
 	 *
 	 * @param superType
 	 *            Der Supertype, nach dem die Zone durchsucht werden soll.
-	 * @return true, wenn eine Karte gefunden wurde, die dem Supertyp
-	 *         entspricht.
+	 * @return true, wenn eine Karte gefunden wurde, die dem Supertyp entspricht.
 	 */
 	public boolean searchZone(SuperType superType);
 

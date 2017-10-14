@@ -1,7 +1,7 @@
 package de.mca.model;
 
-import de.mca.model.enums.PlayerType;
 import de.mca.model.interfaces.IsCombatant;
+import de.mca.model.interfaces.IsPlayer;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.ObjectProperty;
@@ -66,7 +66,7 @@ public class MagicPermanent extends MagicCard implements IsCombatant {
 	 *
 	 * @see http://magiccards.info/rule/109-objects.html#rule-109-4
 	 */
-	private final ObjectProperty<PlayerType> playerControlling;
+	private final ObjectProperty<IsPlayer> playerControlling;
 	/**
 	 * Speichert den Schaden der der Kreatur zugefügt wurden.
 	 */
@@ -211,7 +211,7 @@ public class MagicPermanent extends MagicCard implements IsCombatant {
 		return flagTapped.get();
 	}
 
-	public PlayerType getPlayerControlling() {
+	public IsPlayer getPlayerControlling() {
 		return playerControlling.get();
 	}
 
@@ -276,7 +276,7 @@ public class MagicPermanent extends MagicCard implements IsCombatant {
 		this.flagTapped.set(flagTapped);
 	}
 
-	public void setPlayerControlling(PlayerType playerControlling) {
+	public void setPlayerControlling(IsPlayer playerControlling) {
 		LOGGER.trace("{} setPlayerControlling({})", this, playerControlling);
 		this.playerControlling.set(playerControlling);
 	}

@@ -33,8 +33,9 @@ public interface IsInput {
 		if (magicPermanent.getFlagIsInteractable()) {
 			// Führe Aktion aus.
 
-			getPlayer().setFlagNeedInput(false);
+			getPlayer().setFlagNeedInput(false, "inputActivatePermanent()");
 			getRuleEnforcer().i_activatePermanentStart(getPlayer(), magicPermanent);
+			getRuleEnforcer().gui_disableProgressButton();
 		} else {
 			System.out.println("Nope");
 			// Kann Aktion nicht ausführen.
@@ -56,8 +57,9 @@ public interface IsInput {
 		if (magicCard.getFlagIsInteractable()) {
 			// Führe Aktion aus.
 
-			getPlayer().setFlagNeedInput(false);
+			getPlayer().setFlagNeedInput(false, "inputCastSpell()");
 			getRuleEnforcer().i_castSpellStart(getPlayer(), magicCard);
+			getRuleEnforcer().gui_disableProgressButton();
 		} else {
 			System.out.println("Nope");
 			// Kann Aktion nicht ausführen.
@@ -72,8 +74,9 @@ public interface IsInput {
 	 * Informiert das Spiel über eine Spielerhandlung: Der Spieler gibt auf.
 	 */
 	public default void inputConcede() {
-		getPlayer().setFlagNeedInput(false);
+		getPlayer().setFlagNeedInput(false, "inputConcede()");
 		getRuleEnforcer().i_concede(getPlayer());
+		getRuleEnforcer().gui_disableProgressButton();
 	}
 
 	/**
@@ -87,8 +90,9 @@ public interface IsInput {
 		if (magicPermanent.getFlagIsInteractable()) {
 			// Führe Aktion aus.
 
-			getPlayer().setFlagNeedInput(false);
+			getPlayer().setFlagNeedInput(false, "inputDeclareAttacker()");
 			getRuleEnforcer().i_declareAttacker(getPlayer(), magicPermanent);
+			getRuleEnforcer().gui_disableProgressButton();
 		} else {
 			System.out.println("Nope");
 			// Kann Aktion nicht ausführen.
@@ -112,8 +116,9 @@ public interface IsInput {
 		if (magicPermanent.getFlagIsInteractable()) {
 			// Führe Aktion aus.
 
-			getPlayer().setFlagNeedInput(false);
-			getRuleEnforcer().i_declareBlockerStart(getPlayer(), magicPermanent);
+			getPlayer().setFlagNeedInput(false, "inputDeclareBlocker()");
+			getRuleEnforcer().i_declareBlocker(getPlayer(), magicPermanent);
+			getRuleEnforcer().gui_disableProgressButton();
 		} else {
 			System.out.println("Nope");
 			// Kann Aktion nicht ausführen.
@@ -135,8 +140,9 @@ public interface IsInput {
 		if (blockTarget.getFlagIsInteractable()) {
 			// Führe Aktion aus.
 
-			getPlayer().setFlagNeedInput(false);
-			getRuleEnforcer().i_declareBlockerStop(getPlayer(), blockTarget);
+			getPlayer().setFlagNeedInput(false, "inputDeclareBlockTarget()");
+			getRuleEnforcer().i_declareBlockTarget(getPlayer(), blockTarget);
+			getRuleEnforcer().gui_disableProgressButton();
 		} else {
 			System.out.println("Nope");
 			// Kann Aktion nicht ausführen.
@@ -155,9 +161,9 @@ public interface IsInput {
 	 *            Die abzuwerfende Karte.
 	 */
 	public default void inputDiscard(MagicCard magicCard) {
-		getPlayer().setFlagNeedInput(false);
+		getPlayer().setFlagNeedInput(false, "inputDiscard()");
 		getRuleEnforcer().i_discard(getPlayer(), magicCard);
-		getRuleEnforcer().i_discardStop(getPlayer());
+		getRuleEnforcer().gui_disableProgressButton();
 	}
 
 	/**
@@ -168,8 +174,9 @@ public interface IsInput {
 	 *            Anzahl abzuwerfender Karten.
 	 */
 	public default void inputDiscardRandom(int howMany) {
-		getPlayer().setFlagNeedInput(false);
+		getPlayer().setFlagNeedInput(false, "inputDiscardRandom()");
 		getRuleEnforcer().i_discardRandom(getPlayer(), howMany);
+		getRuleEnforcer().gui_disableProgressButton();
 	}
 
 	/**
@@ -177,8 +184,9 @@ public interface IsInput {
 	 * weiteren Angreifer deklarieren.
 	 */
 	public default void inputEndDeclareAttackers() {
-		getPlayer().setFlagNeedInput(false);
+		getPlayer().setFlagNeedInput(false, "inputEndDeclareAttackers()");
 		getRuleEnforcer().i_declareAttackersStop(getPlayer());
+		getRuleEnforcer().gui_disableProgressButton();
 	}
 
 	/**
@@ -186,8 +194,9 @@ public interface IsInput {
 	 * weiteren Blocker deklarieren.
 	 */
 	public default void inputEndDeclareBlockers() {
-		getPlayer().setFlagNeedInput(false);
+		getPlayer().setFlagNeedInput(false, "inputEndDeclareBlockers()");
 		getRuleEnforcer().i_declareBlockersStop(getPlayer());
+		getRuleEnforcer().gui_disableProgressButton();
 	}
 
 	/**
@@ -195,8 +204,9 @@ public interface IsInput {
 	 * Priorität ab.
 	 */
 	public default void inputPassPriority() {
-		getPlayer().setFlagNeedInput(false);
+		getPlayer().setFlagNeedInput(false, "inputPassPriority()");
 		getRuleEnforcer().i_passPriority(getPlayer());
+		getRuleEnforcer().gui_disableProgressButton();
 	}
 
 	/**
@@ -210,8 +220,9 @@ public interface IsInput {
 		if (magicCard.getFlagIsInteractable()) {
 			// Führe Aktion aus.
 
-			getPlayer().setFlagNeedInput(false);
+			getPlayer().setFlagNeedInput(false, "inputPlayLand()");
 			getRuleEnforcer().i_playLand(getPlayer(), magicCard);
+			getRuleEnforcer().gui_disableProgressButton();
 		} else {
 			System.out.println("Nope");
 			// Kann Aktion nicht ausführen.

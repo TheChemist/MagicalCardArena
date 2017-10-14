@@ -8,7 +8,6 @@ import org.slf4j.LoggerFactory;
 
 import de.mca.model.enums.ColorType;
 import de.mca.model.enums.ObjectType;
-import de.mca.model.enums.PlayerType;
 import de.mca.model.enums.RarityType;
 import de.mca.model.enums.SubType;
 import de.mca.model.enums.SuperType;
@@ -16,6 +15,7 @@ import de.mca.model.enums.ZoneType;
 import de.mca.model.interfaces.IsInteractable;
 import de.mca.model.interfaces.IsManaMap;
 import de.mca.model.interfaces.IsObject;
+import de.mca.model.interfaces.IsPlayer;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.ListProperty;
 import javafx.beans.property.ObjectProperty;
@@ -95,7 +95,7 @@ public class MagicCard implements IsObject, IsInteractable {
 	 *
 	 * @see http://magiccards.info/rule/108-cards.html#rule-108-3
 	 */
-	private final ObjectProperty<PlayerType> propertyPlayerOwning;
+	private final ObjectProperty<IsPlayer> propertyPlayerOwning;
 	/**
 	 * Speichert die Angriffstärke des Objekts.
 	 */
@@ -136,7 +136,7 @@ public class MagicCard implements IsObject, IsInteractable {
 		propertyListEffects = new SimpleListProperty<>(FXCollections.observableArrayList());
 		propertyListZonesVisited = new SimpleListProperty<>(FXCollections.observableArrayList());
 		propertyLoyalty = new SimpleIntegerProperty(0);
-		propertyPlayerOwning = new SimpleObjectProperty<>(PlayerType.NONE);
+		propertyPlayerOwning = new SimpleObjectProperty<>();
 		propertyPower = new SimpleIntegerProperty(0);
 		propertySetColorType = new SimpleSetProperty<>(FXCollections.observableSet());
 		propertySetObjectTypes = new SimpleSetProperty<>(FXCollections.observableSet());
@@ -319,7 +319,7 @@ public class MagicCard implements IsObject, IsInteractable {
 		throw new NullPointerException("No Mana Ability!");
 	}
 
-	public PlayerType getPlayerOwning() {
+	public IsPlayer getPlayerOwning() {
 		return propertyPlayerOwning().get();
 	}
 
@@ -450,7 +450,7 @@ public class MagicCard implements IsObject, IsInteractable {
 		return propertyLoyalty;
 	}
 
-	public ObjectProperty<PlayerType> propertyPlayerOwning() {
+	public ObjectProperty<IsPlayer> propertyPlayerOwning() {
 		return propertyPlayerOwning;
 	}
 
@@ -539,7 +539,7 @@ public class MagicCard implements IsObject, IsInteractable {
 		propertyLoyalty().set(loyalty);
 	}
 
-	public void setPlayerOwning(PlayerType playerOwning) {
+	public void setPlayerOwning(IsPlayer playerOwning) {
 		propertyListAbilities().forEach(ability -> ability.setPlayerControlling(playerOwning));
 		propertyPlayerOwning().set(playerOwning);
 	}

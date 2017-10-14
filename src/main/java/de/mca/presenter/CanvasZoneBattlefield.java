@@ -6,8 +6,9 @@ import java.util.List;
 import de.mca.Constants;
 import de.mca.model.InputHuman;
 import de.mca.model.MagicPermanent;
-import de.mca.model.enums.PlayerType;
+import de.mca.model.Match;
 import de.mca.model.enums.ZoneType;
+import de.mca.model.interfaces.IsPlayer;
 import javafx.beans.binding.DoubleBinding;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleDoubleProperty;
@@ -30,10 +31,10 @@ class CanvasZoneBattlefield extends AdaptableCanvas<SpriteMagicPermanent> {
 
 	private InputHuman inputHuman;
 	private final ImageView zoomView;
+	private Match matchActive;
 
 	CanvasZoneBattlefield(Pane parent, ImageView zoomView) {
 		super(parent);
-		this.inputHuman = inputHuman;
 		this.zoomView = zoomView;
 
 		indexComputerRowOne = 0;
@@ -65,7 +66,7 @@ class CanvasZoneBattlefield extends AdaptableCanvas<SpriteMagicPermanent> {
 
 	private void drawCard(SpriteMagicPermanent sprite, GraphicsContext gc) {
 		MagicPermanent magicPermanent = sprite.getMagicPermanent();
-		PlayerType playerControlling = magicPermanent.getPlayerControlling();
+		IsPlayer playerControlling = magicPermanent.getPlayerControlling();
 
 		double positionX = 0;
 		double positionY = 0;
@@ -76,7 +77,7 @@ class CanvasZoneBattlefield extends AdaptableCanvas<SpriteMagicPermanent> {
 		sprite.propertyHeight().bind(propertyHeight);
 		sprite.propertyWidth().bind(propertyWidth);
 
-		if (playerControlling.equals(PlayerType.HUMAN)) {
+		if (playerControlling.equals(matchActive.getPlayerTwo())) {
 			// Wird unten gezeichnet.
 
 			if (magicPermanent.isCreature()) {
@@ -95,7 +96,7 @@ class CanvasZoneBattlefield extends AdaptableCanvas<SpriteMagicPermanent> {
 				indexHumanRowOne++;
 			}
 
-		} else if (playerControlling.equals(PlayerType.COMPUTER)) {
+		} else if (playerControlling.equals(matchActive.getPlayerOne())) {
 			// Wird oben gezeichnet.
 
 			if (magicPermanent.isCreature()) {
@@ -158,6 +159,10 @@ class CanvasZoneBattlefield extends AdaptableCanvas<SpriteMagicPermanent> {
 
 		initializeMouseClicked();
 		initializeMouseMoved();
+	}
+
+	void setMatchActive(Match matchActive) {
+		this.matchActive = matchActive;
 	}
 
 }

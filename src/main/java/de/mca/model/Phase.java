@@ -7,7 +7,9 @@ import de.mca.model.enums.PhaseType;
 import de.mca.model.enums.StepType;
 import de.mca.model.enums.TurnBasedActionType;
 import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.property.SimpleObjectProperty;
 
 /**
  *
@@ -25,13 +27,13 @@ public class Phase {
 	 */
 	private final List<Step> listSteps;
 	/**
-	 * Speichert eine Referenz auf das Match.
-	 */
-	private Match match;
-	/**
 	 * Speichert den Phasentyp.
 	 */
 	private final PhaseType phaseType;
+	/**
+	 * Speichert den aktuellen Spielschritt.
+	 */
+	private final ObjectProperty<Step> propertyCurrentStep;
 	/**
 	 * Zeigt an, ob die Phase wiederholt wird.
 	 */
@@ -44,18 +46,22 @@ public class Phase {
 	 * Zeigt an, ob die Phase übersprungen wird.
 	 */
 	private final BooleanProperty propertyFlagPhaseSkipped;
+	/**
+	 * Speichert den RuleEnforcer.
+	 */
+	private RuleEnforcer ruleEnforcer;
 
-	Phase(Match match, PhaseType phaseType, List<Step> listSteps) {
+	Phase(RuleEnforcer ruleEnforcer, PhaseType phaseType, List<Step> listSteps) {
 		this.listSteps = listSteps;
-		this.match = match;
 		this.phaseType = phaseType;
+		this.ruleEnforcer = ruleEnforcer;
 
 		propertyFlagPhaseRepeated = new SimpleBooleanProperty(false);
 		propertyFlagPhaseRunning = new SimpleBooleanProperty(false);
 		propertyFlagPhaseSkipped = new SimpleBooleanProperty(false);
+		propertyCurrentStep = new SimpleObjectProperty<>(listSteps.get(0));
 
 		iteratorSteps = listSteps.listIterator();
-		match.propertyCurrentStep().set(listSteps.get(0));
 	}
 
 	public boolean isMain() {
@@ -68,7 +74,7 @@ public class Phase {
 	}
 
 	private void fireEndTBA() {
-		match.getRuleEnforcer().examineTurnBasedAction(new TurnBasedAction(this, TurnBasedActionType.CLEAR_MANA_POOLS));
+		ruleEnforcer.examineTurnBasedAction(new TurnBasedAction(this, TurnBasedActionType.CLEAR_MANA_POOLS));
 	}
 
 	boolean equals(PhaseType phaseType) {
@@ -76,7 +82,7 @@ public class Phase {
 	}
 
 	Step getCurrentStep() {
-		return match.propertyCurrentStep().get();
+		return propertyCurrentStep().get();
 	}
 
 	boolean getFlagPhaseRunning() {
@@ -102,7 +108,7 @@ public class Phase {
 	void phaseBegin() {
 		setFlagPhaseRunning(true);
 		iteratorSteps = listSteps.listIterator();
-		match.propertyCurrentStep().set(listSteps.get(0));
+		propertyCurrentStep().set(listSteps.get(0));
 	}
 
 	void phaseEnd() {
@@ -112,8 +118,12 @@ public class Phase {
 		}
 	}
 
+	ObjectProperty<Step> propertyCurrentStep() {
+		return propertyCurrentStep;
+	}
+
 	void setCurrentStep() {
-		match.propertyCurrentStep().set(iteratorSteps.next());
+		propertyCurrentStep().set(iteratorSteps.next());
 	}
 
 	void setFlagPhaseRunning(boolean flagRunning) {
@@ -129,11 +139,11 @@ public class Phase {
 	}
 
 	void stepBegin() {
-		getCurrentStep().stepBegin();
+		getCurrentStep().begin();
 	}
 
 	void stepEnd() {
-		getCurrentStep().stepEnd();
+		getCurrentStep().end();
 	}
 
 	/**

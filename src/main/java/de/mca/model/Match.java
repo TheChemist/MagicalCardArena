@@ -1,6 +1,5 @@
 package de.mca.model;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
@@ -9,7 +8,6 @@ import org.slf4j.LoggerFactory;
 
 import de.mca.Constants;
 import de.mca.model.enums.PlayerState;
-import de.mca.model.enums.PlayerType;
 import de.mca.model.enums.ZoneType;
 import de.mca.model.interfaces.IsAttackTarget;
 import de.mca.model.interfaces.IsPlayer;
@@ -28,6 +26,12 @@ import javafx.collections.FXCollections;
  * so lange, bis ein Spieler gewinnt oder unentschieden gespielt wird. Die
  * Rundenstruktur wird in verschiedene Hilfsklassen ausgelagert und vollständig
  * gekapselt (Turn, Phase, Step).
+ * 
+ * TODO: Benötigt wird ein GameStateRecorder, der nach jeder Änderung im
+ * Spielzustand einen "Snapshot" des Spielfeldes, der Hand- und Deckkarten sowie
+ * der Spielerzustände speichert. Benötigt wird dies zum einen für die KI, zum
+ * anderen können so eine Zurück-Funktion und Illegale Handlungen abgebildet
+ * werden.
  *
  * @author Maximilian Werling
  *
@@ -43,17 +47,17 @@ public final class Match {
 	 */
 	private final MagicStack magicStack;
 	/**
+	 * Speichert den ersten Spieler.
+	 */
+	private final IsPlayer playerOne;
+	/**
+	 * Speichert den zweiten Spieler.
+	 */
+	private final IsPlayer playerTwo;
+	/**
 	 * Speichert die Kartenanzahl im Battlefield.
 	 */
 	private final IntegerProperty propertyBattlefieldSize;
-	/**
-	 * Speichert die aktuelle Spielphase.
-	 */
-	private final ObjectProperty<Phase> propertyCurrentPhase;
-	/**
-	 * Speichert den aktuellen Spielschritt.
-	 */
-	private final ObjectProperty<Step> propertyCurrentStep;
 	/**
 	 * Speichert die aktuelle Runde.
 	 */
@@ -104,34 +108,26 @@ public final class Match {
 	 */
 	private final ZoneDefault<MagicCard> zoneExile;
 
-	public Match(RuleEnforcer ruleEnforcer, IsPlayer playerHuman, IsPlayer playerComputer) {
+	public Match(RuleEnforcer ruleEnforcer, IsPlayer playerTwo, IsPlayer playerOne) {
 		this.ruleEnforcer = ruleEnforcer;
 		this.ruleEnforcer.setMatch(this);
 
+		this.playerOne = playerOne;
+		this.playerTwo = playerTwo;
+
 		magicStack = new MagicStack();
 		propertyBattlefieldSize = new SimpleIntegerProperty(0);
-		propertyCurrentPhase = new SimpleObjectProperty<>(null);
-		propertyCurrentStep = new SimpleObjectProperty<>(null);
-		propertyCurrentTurn = new SimpleObjectProperty<>(null);
+		propertyCurrentTurn = new SimpleObjectProperty<>(new Turn(ruleEnforcer));
 		propertyExileSize = new SimpleIntegerProperty(0);
 		propertyMatchRunning = new SimpleBooleanProperty(false);
-		propertyListAttacks = new SimpleListProperty<>(FXCollections.observableArrayList(new ArrayList<>()));
-		propertyListAttackTargets = new SimpleListProperty<>(FXCollections.observableArrayList(new ArrayList<>()));
-		propertyListTurns = new SimpleListProperty<>(FXCollections.observableArrayList(new ArrayList<>()));
-		propertyPlayerActive = new SimpleObjectProperty<>(playerComputer);
-		propertyPlayerPrioritized = new SimpleObjectProperty<>(playerComputer);
+		propertyListAttacks = new SimpleListProperty<>(FXCollections.observableArrayList());
+		propertyListAttackTargets = new SimpleListProperty<>(FXCollections.observableArrayList(playerOne, playerTwo));
+		propertyListTurns = new SimpleListProperty<>(FXCollections.observableArrayList(getCurrentTurn()));
+		propertyPlayerActive = new SimpleObjectProperty<>(playerOne);
+		propertyPlayerPrioritized = new SimpleObjectProperty<>(playerOne);
 		propertyStackSize = new SimpleIntegerProperty(0);
-		zoneBattlefield = new ZoneDefault<>(PlayerType.NONE, ZoneType.BATTLEFIELD);
-		zoneExile = new ZoneDefault<>(PlayerType.NONE, ZoneType.EXILE);
-
-		propertyListAttackTargets.add(playerComputer);
-		propertyListAttackTargets.add(playerHuman);
-
-		setCurrentTurn(new Turn(this, playerComputer, playerHuman));
-	}
-
-	public IsPlayer getPlayer(PlayerType playerType) {
-		return getCurrentTurn().getPlayer(playerType);
+		zoneBattlefield = new ZoneDefault<>(ZoneType.BATTLEFIELD);
+		zoneExile = new ZoneDefault<>(ZoneType.EXILE);
 	}
 
 	public RuleEnforcer getRuleEnforcer() {
@@ -155,15 +151,19 @@ public final class Match {
 	}
 
 	public ObjectProperty<Phase> propertyCurrentPhase() {
-		return propertyCurrentPhase;
+		return getCurrentTurn().propertyCurrentPhase();
 	}
 
 	public ObjectProperty<Step> propertyCurrentStep() {
-		return propertyCurrentStep;
+		return getCurrentTurn().getCurrentPhase().propertyCurrentStep();
 	}
 
 	public IntegerProperty propertyExileSize() {
 		return propertyExileSize;
+	}
+
+	public ListProperty<Turn> propertyListTurns() {
+		return propertyListTurns;
 	}
 
 	public ObjectProperty<IsPlayer> propertyPlayerActive() {
@@ -185,7 +185,7 @@ public final class Match {
 	@Override
 	public String toString() {
 		return new StringBuilder("[").append("r=[").append(getTurnNumber()).append("] p=[").append(getCurrentPhase())
-				.append("] s=[").append(getCurrentStep()).append("] ap=[").append(getPlayerActive()).append("]]")
+				.append("] s=[").append(getCurrentStep()).append("] ap=").append(getPlayerActive()).append("]")
 				.toString();
 	}
 
@@ -209,6 +209,7 @@ public final class Match {
 				setCurrentPhase();
 				if (checkSkipPhase()) {
 					skipCurrentPhase();
+					return;
 				} else {
 					phaseBegin(isPhaseRunning());
 				}
@@ -221,67 +222,15 @@ public final class Match {
 				 * muss die Phase erst ausgespielt werden.
 				 */
 			}
-		}
-
-		if (getCurrentPhase().isMain()) {
-			// Bei der Phase handelt es sich um eine Hauptphase.
-			/**
-			 * Es werden keine Schritte gespielt. Spieler bekommen direkt Priorität.
-			 */
-
-			// Spiele Hauptphasen
-			ruleEnforcer.processStateBasedActions();
-			if (checkProcessStack()) {
-				// Spieler haben gepasst, aber es liegt etwas auf dem Stack.
-
-				ruleEnforcer.processStack();
-			} else if (checkContinueRound()) {
-				// Ein Spieler hat nicht noch gepasst.
-
-				determinePlayerPrioritised();
-			} else {
-				// Spieler haben gespasst, es liegt nichts auf dem Stack.
-
-				// Beende Phase
-				phaseEnd(false, isPhaseRunning(), waitForInput());
-			}
-
 		} else {
-			// Bei der Phase handelt es sich nicht um eine Hauptphase.
-			/**
-			 * Es werden Schritte gespielt.
-			 */
+			// Es läuft gerade eine Phase.
 
-			// Setze neuen Schritt und prüfe, ob er übersprungen wird.
-			if (!isStepRunning()) {
-				// Es läuft gerade kein Schritt.
+			if (getCurrentPhase().isMain()) {
+				// Bei der Phase handelt es sich um eine Hauptphase.
+				/**
+				 * Es werden keine Schritte gespielt. Spieler bekommen direkt Priorität.
+				 */
 
-				if (getCurrentPhase().hasNextStep()) {
-					// Die Phase hat noch Schritte, die gespielt werden können.
-
-					setCurrentStep();
-					if (checkSkipStep()) {
-						skipCurrentStep();
-						return;
-					} else {
-						stepBegin(isStepRunning());
-					}
-				} else {
-					// Phase hat keine weiteren Schritte mehr.
-					/**
-					 * An dieser Stelle kann die aktuelle Phase beendet werden. Die Phase läuft
-					 * noch, es gibt aber keine weiteren Schritte mehr.
-					 */
-
-					// Beende Phase
-					phaseEnd(false, isPhaseRunning(), waitForInput());
-				}
-			}
-
-			if (checkPlayersGetPriority() && !waitForInput()) {
-				// Spieler erhalten in diesem Schritt Priorität.
-
-				// Spiele Schritt
 				ruleEnforcer.processStateBasedActions();
 				if (checkProcessStack()) {
 					// Spieler haben gepasst, aber es liegt etwas auf dem Stack.
@@ -290,24 +239,82 @@ public final class Match {
 				} else if (checkContinueRound()) {
 					// Ein Spieler hat nicht noch gepasst.
 
-					determinePlayerPrioritised();
+					determinePlayerPrioritised("update() Phase");
 				} else {
 					// Spieler haben gespasst, es liegt nichts auf dem Stack.
 
-					// Beende Schritt
-					stepEnd(waitForInput());
-
 					// Beende Phase
-					phaseEnd(getCurrentPhase().hasNextStep(), isPhaseRunning(), waitForInput());
+					phaseEnd(false, isPhaseRunning(), waitForInput());
 				}
+
 			} else {
-				// Spieler erhalten keine Priorität.
+				// Bei der Phase handelt es sich nicht um eine Hauptphase.
+				/**
+				 * Es werden Schritte gespielt.
+				 */
 
-				// Beende Schritt
-				stepEnd(waitForInput());
+				// Setze neuen Schritt und prüfe, ob er übersprungen wird.
+				if (!isStepRunning()) {
+					// Es läuft gerade kein Schritt.
 
-				// Beende Phase
-				phaseEnd(getCurrentPhase().hasNextStep(), isPhaseRunning(), waitForInput());
+					if (getCurrentPhase().hasNextStep()) {
+						// Die Phase hat noch Schritte, die gespielt werden können.
+
+						setCurrentStep();
+						if (checkSkipStep()) {
+							// Runde wird übersprungen.
+
+							skipCurrentStep();
+							return;
+						} else {
+							stepBegin(isStepRunning());
+						}
+					} else {
+						// Phase hat keine weiteren Schritte mehr.
+						/**
+						 * An dieser Stelle kann die aktuelle Phase beendet werden. Die Phase läuft
+						 * noch, es gibt aber keine weiteren Schritte mehr.
+						 */
+
+						// Beende Phase
+						phaseEnd(false, isPhaseRunning(), waitForInput());
+					}
+				} else {
+					// Es läuft ein Schritt.
+
+					if (checkPlayersGetPriority() && !waitForInput()) {
+						// Spieler erhalten in diesem Schritt Priorität.
+
+						// Spiele Schritt
+						ruleEnforcer.processStateBasedActions();
+						if (checkProcessStack()) {
+							// Spieler haben gepasst, aber es liegt etwas auf dem Stack.
+
+							ruleEnforcer.processStack();
+						} else if (checkContinueRound()) {
+							// Ein Spieler hat nicht noch gepasst.
+
+							determinePlayerPrioritised("update() Step");
+						} else {
+							// Spieler haben gespasst, es liegt nichts auf dem Stack.
+
+							// Beende Schritt
+							stepEnd(waitForInput());
+
+							// Beende Phase
+							phaseEnd(getCurrentPhase().hasNextStep(), isPhaseRunning(), waitForInput());
+						}
+
+					} else {
+						// Spieler erhalten keine Priorität.
+
+						// Beende Schritt
+						stepEnd(waitForInput());
+
+						// Beende Phase
+						phaseEnd(getCurrentPhase().hasNextStep(), isPhaseRunning(), waitForInput());
+					}
+				}
 			}
 		}
 
@@ -383,26 +390,42 @@ public final class Match {
 	 * Bestimmt den aktiven Spieler.
 	 */
 	private IsPlayer determinePlayerActive() {
-		IsPlayer playerActive = (isPlayerActive(getPlayer(PlayerType.HUMAN))) ? getPlayer(PlayerType.COMPUTER)
-				: getPlayer(PlayerType.HUMAN);
-		LOGGER.debug("{} determinePlayerActive() -> {}", this, playerActive);
+		IsPlayer playerActive = (isPlayerActive(getPlayerOne())) ? getPlayerTwo() : getPlayerOne();
+		LOGGER.trace("{} determinePlayerActive() -> {}", this, playerActive);
 		return playerActive;
+	}
+
+	public IsPlayer getPlayerTwo() {
+		return playerTwo;
+	}
+
+	public IsPlayer getPlayerOne() {
+		return playerOne;
 	}
 
 	/**
 	 * Bestimmt, welcher Spieler das Spiel beginnt.
 	 */
 	private IsPlayer determinePlayerStarting() {
-		IsPlayer playerStarting = (new Random().nextInt(2) == 0) ? getPlayer(PlayerType.COMPUTER)
-				: getPlayer(PlayerType.HUMAN);
-		LOGGER.debug("{} determinePlayerStarting() -> {}", this, playerStarting);
+		IsPlayer playerStarting = (new Random().nextInt(2) == 0) ? getPlayerOne() : getPlayerTwo();
+		LOGGER.trace("{} determinePlayerStarting() -> {}", this, playerStarting);
 		return playerStarting;
 	}
 
+	/**
+	 * Liefert den aktuellen Spielschritt.
+	 * 
+	 * @return der aktuelle Spielschritt.
+	 */
 	private Step getCurrentStep() {
 		return propertyCurrentStep().get();
 	}
 
+	/**
+	 * Liefert die aktuelle Runde.
+	 *
+	 * @return die aktuelle Runde.
+	 */
 	private Turn getCurrentTurn() {
 		return propertyCurrentTurn().get();
 	}
@@ -416,6 +439,11 @@ public final class Match {
 		return propertyMatchRunning.get();
 	}
 
+	/**
+	 * Liefert die aktuelle Rundennummer.
+	 * 
+	 * @return die aktuelle Rundennummer.
+	 */
 	private int getTurnNumber() {
 		return getCurrentTurn().propertyTurnNumber().get();
 	}
@@ -429,6 +457,12 @@ public final class Match {
 		return getCurrentPhase().getFlagPhaseRunning();
 	}
 
+	/**
+	 * Prüft, ob ein Spielschritt läuft. Ein Schritt läuft, solange die Flag nicht
+	 * gesetzt ist.
+	 * 
+	 * @return true, wenn der Spielschritt noch läuft.
+	 */
 	private boolean isStepRunning() {
 		return getCurrentStep().getFlagStepRunning();
 	}
@@ -443,46 +477,67 @@ public final class Match {
 	}
 
 	/**
-	 * Startet ein neues Spiel (rule = 103.).
+	 * Startet ein neues Match, falls flagMatchRunning = false.
+	 * 
+	 * @param flagMatchRunning
+	 *            flag, die anzeigt, ob das Match bereits läuft.
 	 */
-	private void matchBegin(boolean alreadyRunning) {
-		if (!alreadyRunning) {
-			LOGGER.debug("{} matchBegin()", this);
+	private void matchBegin(boolean flagMatchRunning) {
+		if (!flagMatchRunning) {
+			LOGGER.trace("{} matchBegin()", this);
 
-			ruleEnforcer.actionDraw(getPlayer(PlayerType.COMPUTER), Constants.HAND_SIZE);
-			ruleEnforcer.actionDraw(getPlayer(PlayerType.HUMAN), Constants.HAND_SIZE);
+			ruleEnforcer.actionDraw(getPlayerOne(), Constants.HAND_SIZE);
+			ruleEnforcer.actionDraw(getPlayerTwo(), Constants.HAND_SIZE);
 
 			setFlagIsMatchRunning(true);
 		}
 	}
 
 	/**
-	 * Beendet das Spiel (rule = 104.).
+	 * Beendet ein Match, wenn flagMatchRunning = false.
+	 * 
+	 * @param flagMatchRunning
+	 *            flag, die anzeigt, ob ein Match läuft.
 	 */
 	private void matchEnd(boolean flagMatchRunning) {
 		if (!flagMatchRunning) {
-			LOGGER.debug("{} matchEnd()", this);
+			LOGGER.trace("{} matchEnd()", this);
 			getRuleEnforcer().tb_endMatch();
 		}
 	}
 
 	/**
-	 * Beginn eine neue Phase.
+	 * Beginnt eine neue Phase, wenn es eine nächste Phase gibt und keine Phase
+	 * läuft (flagPhaseRunning = false).
+	 * 
+	 * @param flagPhaseRunning
+	 *            Zeigt an, ob eine Phase bereits läuft.
 	 */
-	private void phaseBegin(boolean alreadyRunning) {
-		if (!alreadyRunning) {
-			LOGGER.debug("{} phaseBegin()", this);
+	private void phaseBegin(boolean flagPhaseRunning) {
+		if (!flagPhaseRunning) {
+			LOGGER.trace("{} phaseBegin()", this);
 			getCurrentTurn().phaseBegin();
 		}
 	}
 
 	/**
 	 * Beendet eine Phase. Eine Phase kann beendet werden, wenn keine weiteren
-	 * Schritt mehr in der Phase gespielt werden und die Runde gerade läuft.
+	 * Schritt mehr in der Phase gespielt werden und nicht auf Spielerinput gewartet
+	 * wird.
+	 * 
+	 * @param hasNextStep
+	 * @param flagPhaseRunning
+	 * @param flagNeedPlayerInput
 	 */
-	private void phaseEnd(boolean hasNextStep, boolean isPhaseRunning, boolean needPlayerInput) {
-		if (!hasNextStep && isPhaseRunning && !needPlayerInput) {
-			LOGGER.debug("{} phaseEnd()", this);
+	private void phaseEnd(boolean hasNextStep, boolean flagPhaseRunning, boolean flagNeedPlayerInput) {
+		if (!hasNextStep && flagPhaseRunning && !flagNeedPlayerInput) {
+			LOGGER.trace("{} phaseEnd()", this);
+
+			if (getCurrentPhase().isMain()) {
+				getPlayerOne().setFlagPassedPriority(false);
+				getPlayerTwo().setFlagPassedPriority(false);
+			}
+
 			getCurrentTurn().phaseEnd();
 		}
 	}
@@ -492,7 +547,7 @@ public final class Match {
 	}
 
 	/**
-	 * Setzt die neuen aktuelle Spielphase.
+	 * Setzt die neue aktuelle Spielphase.
 	 */
 	private void setCurrentPhase() {
 		getCurrentTurn().setCurrentPhase();
@@ -507,33 +562,51 @@ public final class Match {
 		LOGGER.trace("{} setCurrentStep() -> {}", this, getCurrentStep());
 	}
 
+	/**
+	 * Setzt die neue aktuelle Runde.
+	 * 
+	 * @param turn
+	 *            die neue Runde.
+	 */
 	private void setCurrentTurn(Turn turn) {
-		propertyCurrentTurn.set(turn);
-		propertyListTurns.add(turn);
+		propertyCurrentTurn().set(turn);
+		propertyListTurns().add(turn);
 		LOGGER.trace("{} setCurrentTurn({})", this, turn);
 	}
 
-	private void setPlayerActive(IsPlayer player) {
-		LOGGER.trace("{} setPlayerActive({})", this, player);
-		propertyPlayerActive().set(player);
+	/**
+	 * Setzt den neuen aktiven Spieler.
+	 * 
+	 * @param playerActive
+	 *            der neue aktive Spieler.
+	 */
+	private void setPlayerActive(IsPlayer playerActive) {
+		LOGGER.trace("{} setPlayerActive({})", this, playerActive);
+		propertyPlayerActive().set(playerActive);
 		getPlayerActive().setPlayerState(PlayerState.ACTIVE);
 		getPlayerNonactive().setPlayerState(PlayerState.NONACTIVE);
 	}
 
-	private void setPlayerPrioritized(IsPlayer player) {
-		LOGGER.trace("{} setPlayerPrioritized({})", this, player);
-		propertyPlayerPrioritized().set(player);
+	/**
+	 * Setzt den neuen priorisierten Spieler.
+	 * 
+	 * @param playerPrioritized
+	 *            der neue priorisierte Spieler.
+	 */
+	private void setPlayerPrioritized(IsPlayer playerPrioritized) {
+		LOGGER.trace("{} setPlayerPrioritized({})", this, playerPrioritized);
+		propertyPlayerPrioritized().set(playerPrioritized);
 
 		// Setze Status und flag.
-		player.setPlayerState(PlayerState.PRIORITIZED);
-		player.setFlagNeedInput(true);
+		playerPrioritized.setPlayerState(PlayerState.PRIORITIZED);
+		playerPrioritized.setFlagNeedInput(true, "setPlayerPrioritized() in Match");
 	}
 
 	/**
 	 * Überspringe eine Phase.
 	 */
 	private void skipCurrentPhase() {
-		LOGGER.debug("{} skipCurrentPhase()", this);
+		LOGGER.trace("{} skipCurrentPhase() -> {}", this, getCurrentPhase());
 		getCurrentPhase().setFlagSkipped(false);
 	}
 
@@ -541,17 +614,21 @@ public final class Match {
 	 * Überspringe einen Spielschritt.
 	 */
 	private void skipCurrentStep() {
-		LOGGER.debug("{} skipCurrentStep()", this);
+		LOGGER.trace("{} skipCurrentStep() -> {}", this, getCurrentStep());
 		getCurrentStep().setFlagSkipped(false);
 	}
 
 	/**
-	 * Beginnt den neuen Spielschritt. Es werden alle TurnBasedActions gefeuert, die
-	 * für den Beginn dieses Schrittes vorgesehen sind.
+	 * Beginnt den neuen Spielschritt, wenn flagStepRunning = false. Es werden alle
+	 * TurnBasedActions gefeuert, die für den Beginn dieses Schrittes vorgesehen
+	 * sind.
+	 * 
+	 * @param flagStepRunning
+	 *            Flag, die anzeigt, ob ein Schritt gerade läuft.
 	 */
-	private void stepBegin(boolean alreadyRunning) {
-		if (!isStepRunning()) {
-			LOGGER.debug("{} stepBegin()", this);
+	private void stepBegin(boolean flagStepRunning) {
+		if (!flagStepRunning) {
+			LOGGER.trace("{} stepBegin()", this);
 			getCurrentTurn().stepBegin();
 		}
 	}
@@ -561,24 +638,37 @@ public final class Match {
 	 * gefeuert und die Prioritäts-Flags der Spieler zurück gesetzt. Ein Schritt
 	 * kann beendet werden, wenn kein Spielerinput mehr benötigt wird. Das wird vor
 	 * allem im letzten Schritt (Aufräumen) relevant.
+	 * 
+	 * @param flagNeedPlayerInput
+	 *            Flag, die anzeigt, ob auf Spielerinput gewartet wird.
 	 */
-	private void stepEnd(boolean needPlayerInput) {
-		if (!needPlayerInput) {
-			LOGGER.debug("{} stepEnd()", this);
+	private void stepEnd(boolean flagNeedPlayerInput) {
+		if (!flagNeedPlayerInput) {
+			LOGGER.trace("{} stepEnd()", this);
+
+			getPlayerOne().setFlagPassedPriority(false);
+			getPlayerTwo().setFlagPassedPriority(false);
+
 			getCurrentTurn().stepEnd();
 		}
 	}
 
 	/**
-	 * Beginnt eine neue Runde.
+	 * Beginnt eine neue Runde, wenn flagTurnRunning = false. In der ersten Runde
+	 * wird der Spieler, der das Spiel startet bestimmt und der Ziehschritt
+	 * übersprungen. In den folgenden Runden wird der aktive Spieler bestimmt.
+	 * 
+	 * @param flagTurnRunning
+	 *            Flag, die anzeigt, ob eine Runde läuft.
 	 */
-	private void turnBegin(boolean alreadyRunning) {
-		if (!alreadyRunning) {
-			LOGGER.debug("{} turnBegin()", this);
+	private void turnBegin(boolean flagTurnRunning) {
+		if (!flagTurnRunning) {
+			LOGGER.trace("{} turnBegin()", this);
 			if (getTurnNumber() == 0) {
 				setPlayerActive(determinePlayerStarting());
+				skipStepDraw();
 			} else {
-				setCurrentTurn(new Turn(getCurrentTurn(), this));
+				setCurrentTurn(new Turn(getCurrentTurn()));
 				setPlayerActive(determinePlayerActive());
 			}
 			getCurrentTurn().turnBegin();
@@ -590,15 +680,31 @@ public final class Match {
 	 * und die playedLandThisTurn-Flag für den aktiven Spieler auf false gesetzt.
 	 * Eine Runde kann beendet werden, wenn keine weiteren Phasen (und in der
 	 * letzten Phase keine weiteren Schritte) mehr gespielt werden können.
+	 * 
+	 * @param hasNextPhase
+	 *            Zeigt an, ob die Runde weitere Phasen hat.
+	 * @param hasNextStep
+	 *            Zeigt an, ob die Phase weitere Schritte hat.
+	 * @param playerDiscard
+	 *            Zeigt an, ob der Spieler noch Karten abwerfen muss. TODO: Muss das
+	 *            wirklich hier hin?
 	 */
 	private void turnEnd(boolean hasNextPhase, boolean hasNextStep, boolean playerDiscard) {
 		if (!hasNextPhase && !hasNextStep && !playerDiscard) {
-			LOGGER.debug("{} turnEnd()", this);
+			LOGGER.trace("{} turnEnd()", this);
+
+			getPlayerActive().setFlagPlayedLand(false);
+
 			getCurrentTurn().turnEnd();
 		}
 
 	}
 
+	/**
+	 * Hilfsmethode, die bestimmt, ob auf Spielerinput gewartet wird.
+	 * 
+	 * @return true, wenn auf Input einer der beiden Spieler gewartet wird.
+	 */
 	private boolean waitForInput() {
 		final IsPlayer playerActive = getPlayerActive();
 		final IsPlayer playerNonactive = getPlayerNonactive();
@@ -637,26 +743,26 @@ public final class Match {
 	 * Bestimmt, welcher Spieler priorisiert wird. Hat ein Spieler im aktuellen Step
 	 * einmal seine Priorität abgegeben, kann er nicht wieder priorisiert werden.
 	 */
-	void determinePlayerPrioritised() {
+	void determinePlayerPrioritised(String from) {
 		final IsPlayer playerActive = getPlayerActive();
 		final IsPlayer playerNonactive = getPlayerNonactive();
 
 		if (!playerActive.getFlagPassedPriority() && !playerActive.isPaying()) {
-			LOGGER.trace("{} determinePlayerPrioritised() -> {}", this, playerActive);
+			LOGGER.trace("{} determinePlayerPrioritised() -> {} coming from {}", this, playerActive, from);
 			setPlayerPrioritized(playerActive);
 			return;
 		} else if (!playerNonactive.getFlagPassedPriority() && playerNonactive.isPaying()) {
-			LOGGER.trace("{} determinePlayerPrioritised() -> {}", this, playerNonactive);
+			LOGGER.trace("{} determinePlayerPrioritised() -> {} coming from {}", this, playerNonactive, from);
 			setPlayerPrioritized(playerNonactive);
 			return;
 		}
 
 		if (!playerActive.getFlagPassedPriority() && !playerActive.isPaying()) {
-			LOGGER.trace("{} determinePlayerPrioritised() -> {}", this, playerActive);
+			LOGGER.trace("{} determinePlayerPrioritised() -> {} coming from {}", this, playerActive, from);
 			setPlayerPrioritized(playerActive);
 			return;
 		} else if (!playerNonactive.getFlagPassedPriority() && !playerNonactive.isPaying()) {
-			LOGGER.trace("{} determinePlayerPrioritised() -> {}", this, playerNonactive);
+			LOGGER.trace("{} determinePlayerPrioritised() -> {} coming from {}", this, playerNonactive, from);
 			setPlayerPrioritized(playerNonactive);
 			return;
 		}
@@ -686,11 +792,6 @@ public final class Match {
 		return propertyListAttackTargets.get();
 	}
 
-	IsPlayer getOppnent(IsPlayer player) {
-		return player.getPlayerType().equals(PlayerType.HUMAN) ? getPlayer(PlayerType.COMPUTER)
-				: getPlayer(PlayerType.HUMAN);
-	}
-
 	/**
 	 * Liefert den aktiven Spieler.
 	 *
@@ -706,7 +807,11 @@ public final class Match {
 	 * @return den nichtaktiven Spieler.
 	 */
 	IsPlayer getPlayerNonactive() {
-		return getCurrentTurn().getPlayerOpponent(getPlayerActive().getPlayerType());
+		return getPlayerOpponent(getPlayerActive());
+	}
+
+	IsPlayer getPlayerOpponent(IsPlayer player) {
+		return getPlayerOne().equals(player) ? getPlayerOne() : getPlayerTwo();
 	}
 
 	int getTotalAttackers() {
@@ -714,7 +819,7 @@ public final class Match {
 	}
 
 	boolean isPlayerActive(IsPlayer player) {
-		return getCurrentTurn().isPlayerActive(player);
+		return player.equals(getPlayerActive());
 	}
 
 	void popSpell() {
@@ -789,5 +894,9 @@ public final class Match {
 
 	void skipStepDeclareBlockers() {
 		getCurrentTurn().skipStepDeclareBlockers();
+	}
+
+	void skipStepDraw() {
+		getCurrentTurn().skipStepDraw();
 	}
 }

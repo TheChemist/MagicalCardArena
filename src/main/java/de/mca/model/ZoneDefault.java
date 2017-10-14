@@ -10,10 +10,10 @@ import de.mca.model.enums.AbilityType;
 import de.mca.model.enums.ColorType;
 import de.mca.model.enums.EffectType;
 import de.mca.model.enums.ObjectType;
-import de.mca.model.enums.PlayerType;
 import de.mca.model.enums.SubType;
 import de.mca.model.enums.SuperType;
 import de.mca.model.enums.ZoneType;
+import de.mca.model.interfaces.IsPlayer;
 import de.mca.model.interfaces.IsZone;
 import javafx.beans.property.ListProperty;
 import javafx.beans.property.SimpleListProperty;
@@ -28,9 +28,9 @@ import javafx.collections.ObservableList;
 public final class ZoneDefault<E extends MagicCard> implements IsZone<E> {
 
 	/**
-	 * Speichert den Spielertyp des Spielers.
+	 * Speichert den kontrollierenden Spieler.
 	 */
-	private final PlayerType playerType;
+	private final IsPlayer player;
 	/**
 	 * Speichert die Karten der Zone.
 	 */
@@ -40,9 +40,15 @@ public final class ZoneDefault<E extends MagicCard> implements IsZone<E> {
 	 */
 	private final ZoneType zoneType;
 
-	ZoneDefault(PlayerType playerType, ZoneType zoneType) {
-		this.playerType = playerType;
+	ZoneDefault(IsPlayer playerType, ZoneType zoneType) {
+		this.player = playerType;
 		this.zoneType = zoneType;
+		propertyCardList = new SimpleListProperty<>(FXCollections.observableArrayList());
+	}
+
+	ZoneDefault(ZoneType zoneType) {
+		this.zoneType = zoneType;
+		player = null;
 		propertyCardList = new SimpleListProperty<>(FXCollections.observableArrayList());
 	}
 
@@ -135,7 +141,7 @@ public final class ZoneDefault<E extends MagicCard> implements IsZone<E> {
 	}
 
 	@Override
-	public List<E> getAll(PlayerType playerOwning) {
+	public List<E> getAll(IsPlayer playerOwning) {
 		final List<E> result = new ArrayList<>();
 		for (final E card : propertyCardList) {
 			if (card.getPlayerOwning().equals(playerOwning)) {
@@ -173,8 +179,8 @@ public final class ZoneDefault<E extends MagicCard> implements IsZone<E> {
 	}
 
 	@Override
-	public PlayerType getPlayerType() {
-		return playerType;
+	public IsPlayer getPlayerType() {
+		return player;
 	}
 
 	@Override
@@ -248,7 +254,7 @@ public final class ZoneDefault<E extends MagicCard> implements IsZone<E> {
 	}
 
 	@Override
-	public boolean searchZone(PlayerType playerOwning) {
+	public boolean searchZone(IsPlayer playerOwning) {
 		for (final MagicCard card : propertyCardList) {
 			if (card.getPlayerOwning().equals(playerOwning)) {
 				return true;

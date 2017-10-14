@@ -1,7 +1,7 @@
 package de.mca.model;
 
-import de.mca.model.enums.PlayerType;
 import de.mca.model.enums.StateBasedActionType;
+import de.mca.model.interfaces.IsPlayer;
 
 /**
  *
@@ -15,7 +15,7 @@ public class SBACreatureToughnessZero extends StateBasedAction {
 		super(source, StateBasedActionType.CREATURE_TOUGHNESS_ZERO);
 	}
 
-	public PlayerType getPlayerControlling() {
+	public IsPlayer getPlayerControlling() {
 		return ((MagicPermanent) getSource()).getPlayerControlling();
 	}
 
