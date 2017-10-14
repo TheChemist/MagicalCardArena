@@ -31,6 +31,10 @@ public final class Player implements IsPlayer {
 	 */
 	private final static Logger LOGGER = LoggerFactory.getLogger("Player");
 	/**
+	 * Speichert den Anzeigenamen des Spielers.
+	 */
+	private final String displayName;
+	/**
 	 * Speichert die Anzahl an Aktionen, die der Spieler derzeit durchführen kann.
 	 */
 	private int interactionCount;
@@ -54,10 +58,6 @@ public final class Player implements IsPlayer {
 	 * Speichert seperat noch Anzahl Karten in der Bibliothek.
 	 */
 	private final IntegerProperty propertyDeckSize;
-	/**
-	 * Speichert den Anzeigenamen des Spielers.
-	 */
-	private final String displayName;
 	/**
 	 * Zeigt an, ob der Spieler gerade Angreifer deklariert.
 	 */
@@ -213,6 +213,23 @@ public final class Player implements IsPlayer {
 	}
 
 	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		Player other = (Player) obj;
+		if (displayName == null) {
+			if (other.displayName != null)
+				return false;
+		} else if (!displayName.equals(other.displayName))
+			return false;
+		return true;
+	}
+
+	@Override
 	public int getDamage() {
 		return propertyDamage().get();
 	}
@@ -283,31 +300,6 @@ public final class Player implements IsPlayer {
 	}
 
 	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((displayName == null) ? 0 : displayName.hashCode());
-		return result;
-	}
-
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		Player other = (Player) obj;
-		if (displayName == null) {
-			if (other.displayName != null)
-				return false;
-		} else if (!displayName.equals(other.displayName))
-			return false;
-		return true;
-	}
-
-	@Override
 	public RuleEnforcer getRuleEnforcer() {
 		return ruleEnforcer;
 	}
@@ -325,6 +317,14 @@ public final class Player implements IsPlayer {
 	@Override
 	public IsZone<MagicCard> getZoneLibrary() {
 		return zoneLibrary;
+	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((displayName == null) ? 0 : displayName.hashCode());
+		return result;
 	}
 
 	@Override

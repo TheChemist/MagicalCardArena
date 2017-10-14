@@ -30,8 +30,8 @@ class CanvasZoneBattlefield extends AdaptableCanvas<SpriteMagicPermanent> {
 	private int indexHumanRowTwo;
 
 	private InputHuman inputHuman;
-	private final ImageView zoomView;
 	private Match matchActive;
+	private final ImageView zoomView;
 
 	CanvasZoneBattlefield(Pane parent, ImageView zoomView) {
 		super(parent);

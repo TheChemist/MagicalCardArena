@@ -130,10 +130,10 @@ public final class ZoneDefault<E extends MagicCard> implements IsZone<E> {
 	}
 
 	@Override
-	public List<E> getAll(ObjectType coreType) {
+	public List<E> getAll(IsPlayer playerOwning) {
 		final List<E> result = new ArrayList<>();
 		for (final E card : propertyCardList) {
-			if (card.contains(coreType)) {
+			if (card.getPlayerOwning().equals(playerOwning)) {
 				result.add(card);
 			}
 		}
@@ -141,10 +141,10 @@ public final class ZoneDefault<E extends MagicCard> implements IsZone<E> {
 	}
 
 	@Override
-	public List<E> getAll(IsPlayer playerOwning) {
+	public List<E> getAll(ObjectType coreType) {
 		final List<E> result = new ArrayList<>();
 		for (final E card : propertyCardList) {
-			if (card.getPlayerOwning().equals(playerOwning)) {
+			if (card.contains(coreType)) {
 				result.add(card);
 			}
 		}
@@ -234,6 +234,16 @@ public final class ZoneDefault<E extends MagicCard> implements IsZone<E> {
 	}
 
 	@Override
+	public boolean searchZone(IsPlayer playerOwning) {
+		for (final MagicCard card : propertyCardList) {
+			if (card.getPlayerOwning().equals(playerOwning)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	@Override
 	public boolean searchZone(MagicCard card) {
 		for (final MagicCard c : propertyCardList) {
 			if (c.equals(card)) {
@@ -247,16 +257,6 @@ public final class ZoneDefault<E extends MagicCard> implements IsZone<E> {
 	public boolean searchZone(ObjectType coreType) {
 		for (final MagicCard card : propertyCardList) {
 			if (card.contains(coreType)) {
-				return true;
-			}
-		}
-		return false;
-	}
-
-	@Override
-	public boolean searchZone(IsPlayer playerOwning) {
-		for (final MagicCard card : propertyCardList) {
-			if (card.getPlayerOwning().equals(playerOwning)) {
 				return true;
 			}
 		}

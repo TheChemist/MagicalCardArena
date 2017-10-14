@@ -130,7 +130,7 @@ public class InputComputer implements IsInput {
 							}
 						}
 
-						// Beschwöre erste beschwörbaren Zauberspruch.
+						// Beschwöre ersten beschwörbaren Zauberspruch.
 						for (final MagicCard magicCard : player.getZoneHand().getAll(ObjectType.CREATURE)) {
 							if (magicCard.getFlagIsInteractable() && getMatch().getCurrentPhase().isMain()) {
 								inputCastSpell(magicCard);

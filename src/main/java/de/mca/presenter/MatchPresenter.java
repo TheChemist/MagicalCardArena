@@ -54,7 +54,6 @@ import javafx.scene.layout.GridPane;
  */
 public class MatchPresenter extends AnimationTimer implements Initializable, IsStackableScreen {
 
-	private ImageView loadingIcon;
 	/**
 	 * Speichert den Logger.
 	 */
@@ -147,6 +146,7 @@ public class MatchPresenter extends AnimationTimer implements Initializable, IsS
 	private Label labelPlayerActive;
 	@FXML
 	private Label labelTurnNumber;
+	private ImageView loadingIcon;
 	private Match matchActive;
 	private Runnable matchUpdater;
 	@FXML
@@ -181,6 +181,7 @@ public class MatchPresenter extends AnimationTimer implements Initializable, IsS
 	private Runnable rendererStack;
 	private Main screenController;
 	private float secondsElapsedSinceLastFpsUpdate = 0f;
+	private float secondsElapsedSinceUpdate;
 	private final List<SpriteMagicPermanent> spriteListBattlefield;
 	private final List<SpriteMagicCard> spriteListComputerGraveyard;
 	private final List<SpriteMagicCard> spriteListComputerHand;
@@ -204,7 +205,6 @@ public class MatchPresenter extends AnimationTimer implements Initializable, IsS
 	private Tab tabHumanHand;
 	@FXML
 	private Tab tabStack;
-	private float secondsElapsedSinceUpdate;
 
 	public MatchPresenter() {
 		// TODO LOW Threading?

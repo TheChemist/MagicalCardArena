@@ -137,6 +137,14 @@ public class RuleEnforcer {
 		}
 	}
 
+	public void gui_disableProgressButton() {
+		getEventBus().post(new GameStatusChange(this, "", true));
+	}
+
+	public void gui_enableProgressButton(final String text) {
+		getEventBus().post(new GameStatusChange(this, text, false));
+	}
+
 	/**
 	 * Wird aufgerufen, wenn der Spieler eine bleibende Karte aktiviert. Sind alle
 	 * Voraussetzungen erfüllt, wird die zu aktivierende Fähigkeit bestimmt und für
@@ -308,23 +316,6 @@ public class RuleEnforcer {
 	}
 
 	/**
-	 * Setzt die flagDeclareBlockers auf false. Danach wird die Priorität neu
-	 * bestimmt und eine Eingabe vom priorisierten Spieler erwartet.
-	 *
-	 * @param player
-	 *            der nichtaktive Spieler.
-	 */
-	public void i_declareBlockersStop(IsPlayer player) {
-		LOGGER.debug("{} i_declareBlockersStop({})", this, player);
-
-		// Setze flags zurück.
-		player.setFlagDeclareBlockers(false);
-
-		// Bestimme Priorität neu.
-		match.determinePlayerPrioritised("i_declareBlockersStop()");
-	}
-
-	/**
 	 * Wird aufgerufen, wenn der Spieler einen Blocker auswählt. Zunächst wird das
 	 * Blockziel ausgewählt, dann wird der ausgewählte Blocker registriert.
 	 *
@@ -354,6 +345,23 @@ public class RuleEnforcer {
 			player.setPlayerState(PlayerState.CHOOSING_BLOCK_TARGET);
 			player.setFlagNeedInput(true, "i_declareBlocker");
 		}
+	}
+
+	/**
+	 * Setzt die flagDeclareBlockers auf false. Danach wird die Priorität neu
+	 * bestimmt und eine Eingabe vom priorisierten Spieler erwartet.
+	 *
+	 * @param player
+	 *            der nichtaktive Spieler.
+	 */
+	public void i_declareBlockersStop(IsPlayer player) {
+		LOGGER.debug("{} i_declareBlockersStop({})", this, player);
+
+		// Setze flags zurück.
+		player.setFlagDeclareBlockers(false);
+
+		// Bestimme Priorität neu.
+		match.determinePlayerPrioritised("i_declareBlockersStop()");
 	}
 
 	public void i_declareBlockTarget(IsPlayer player, MagicPermanent blockTarget) {
@@ -1253,14 +1261,6 @@ public class RuleEnforcer {
 
 	void tb_endMatch() {
 		getEventBus().post(new GameStatusChange(this, "concede", true));
-	}
-
-	public void gui_disableProgressButton() {
-		getEventBus().post(new GameStatusChange(this, "", true));
-	}
-
-	public void gui_enableProgressButton(final String text) {
-		getEventBus().post(new GameStatusChange(this, text, false));
 	}
 
 }

@@ -130,6 +130,14 @@ public final class Match {
 		zoneExile = new ZoneDefault<>(ZoneType.EXILE);
 	}
 
+	public IsPlayer getPlayerOne() {
+		return playerOne;
+	}
+
+	public IsPlayer getPlayerTwo() {
+		return playerTwo;
+	}
+
 	public RuleEnforcer getRuleEnforcer() {
 		return ruleEnforcer;
 	}
@@ -393,14 +401,6 @@ public final class Match {
 		IsPlayer playerActive = (isPlayerActive(getPlayerOne())) ? getPlayerTwo() : getPlayerOne();
 		LOGGER.trace("{} determinePlayerActive() -> {}", this, playerActive);
 		return playerActive;
-	}
-
-	public IsPlayer getPlayerTwo() {
-		return playerTwo;
-	}
-
-	public IsPlayer getPlayerOne() {
-		return playerOne;
 	}
 
 	/**

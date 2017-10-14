@@ -86,15 +86,6 @@ public interface IsZone<T> {
 	public List<T> getAll(int convertedManaCost);
 
 	/**
-	 * Liefert eine Liste mit allen Karten eines bestimmten Kerntyps der Zone.
-	 *
-	 * @param coreType
-	 *            Der Kerntyp, dem die Karten entsprechen sollen.
-	 * @return eine Liste mit allen Karten eines bestimmten Kerntyps der Zone.
-	 */
-	public List<T> getAll(ObjectType coreType);
-
-	/**
 	 * Liefert eine Liste mit allen Karten eines bestimmten Spielers der Zone.
 	 *
 	 * @param playerOwning
@@ -102,6 +93,15 @@ public interface IsZone<T> {
 	 * @return eine Liste mit allen Karten eines bestimmten Spielers der Zone.
 	 */
 	public List<T> getAll(IsPlayer playerOwning);
+
+	/**
+	 * Liefert eine Liste mit allen Karten eines bestimmten Kerntyps der Zone.
+	 *
+	 * @param coreType
+	 *            Der Kerntyp, dem die Karten entsprechen sollen.
+	 * @return eine Liste mit allen Karten eines bestimmten Kerntyps der Zone.
+	 */
+	public List<T> getAll(ObjectType coreType);
 
 	/**
 	 * Liefert eine Liste mit allen Karten eines bestimmten Subtyps der Zone.
@@ -193,15 +193,6 @@ public interface IsZone<T> {
 	public boolean searchZone(int convertedManaCost);
 
 	/**
-	 * Durchsuchte die Zone nach einer Karte eines bestimmten Kerntyps.
-	 *
-	 * @param coreType
-	 *            Der Kerntyp, nach dem die Zone durchsucht werden soll.
-	 * @return true, wenn eine Karte gefunden wurde, die dem Kerntyp entspricht.
-	 */
-	public boolean searchZone(ObjectType coreType);
-
-	/**
 	 * Durchsuchte die Zone nach einer Karte eines bestimmten Spielers.
 	 *
 	 * @param playerOwning
@@ -209,6 +200,15 @@ public interface IsZone<T> {
 	 * @return true, wenn eine Karte gefunden wurde, die dem Spieler entspricht.
 	 */
 	public boolean searchZone(IsPlayer playerOwning);
+
+	/**
+	 * Durchsuchte die Zone nach einer Karte eines bestimmten Kerntyps.
+	 *
+	 * @param coreType
+	 *            Der Kerntyp, nach dem die Zone durchsucht werden soll.
+	 * @return true, wenn eine Karte gefunden wurde, die dem Kerntyp entspricht.
+	 */
+	public boolean searchZone(ObjectType coreType);
 
 	/**
 	 * Durchsuchte die Zone nach einer Karte eines bestimmten Subtyps.
