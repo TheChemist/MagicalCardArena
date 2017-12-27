@@ -1,10 +1,10 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-	<groupId>MagicalCardArena</groupId>
-	<artifactId>MagicalCardArena</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
-	<name>MagicalCardArena</name>
+	<groupId>MCA</groupId>
+	<artifactId>MCA</artifactId>
+	<version>1.0</version>
+	<name>MCA</name>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<slf4jVersion>1.7.10</slf4jVersion>
