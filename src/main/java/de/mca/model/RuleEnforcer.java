@@ -302,7 +302,7 @@ public class RuleEnforcer {
 	public void i_declareAttackersStop(IsPlayer player) {
 		LOGGER.debug("{} i_declareAttackersStop({})", this, player);
 
-		// Setz flags zum Überspringen.
+		// Setze flags zum Überspringen.
 		if (match.getTotalAttackers() == 0) {
 			match.skipStepDeclareBlockers();
 			match.skipStepCombatDamage();

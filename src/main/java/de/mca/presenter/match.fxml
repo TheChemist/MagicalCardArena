@@ -1,12 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.geometry.Insets?>
-<?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.Menu?>
 <?import javafx.scene.control.MenuBar?>
 <?import javafx.scene.control.MenuItem?>
-<?import javafx.scene.control.ProgressIndicator?>
 <?import javafx.scene.control.Tab?>
 <?import javafx.scene.control.TabPane?>
 <?import javafx.scene.layout.AnchorPane?>
@@ -18,61 +16,77 @@
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.text.Font?>
 
-<BorderPane maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="600.0" minWidth="800.0" xmlns="http://javafx.com/javafx/8.0.60" xmlns:fx="http://javafx.com/fxml/1" fx:controller="de.mca.presenter.MatchPresenter">
+<BorderPane maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308"
+	minHeight="600.0" minWidth="800.0" xmlns="http://javafx.com/javafx/8.0.60"
+	xmlns:fx="http://javafx.com/fxml/1" fx:controller="de.mca.presenter.MatchPresenter">
 	<center>
-		<AnchorPane maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="-Infinity" minWidth="-Infinity" BorderPane.alignment="CENTER">
+		<AnchorPane maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308"
+			minHeight="-Infinity" minWidth="-Infinity" BorderPane.alignment="CENTER">
 			<children>
-				<StackPane minHeight="600.0" minWidth="800.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+				<StackPane minHeight="600.0" minWidth="800.0"
+					AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
+					AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
 					<children>
-                  <GridPane fx:id="gridPaneCenter">
-                    <columnConstraints>
-                      <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
-                    </columnConstraints>
-                    <rowConstraints>
-                      <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                      <RowConstraints minHeight="10.0" percentHeight="30.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                    </rowConstraints>
-                     <children>
-                        <TabPane tabClosingPolicy="UNAVAILABLE">
-                          <tabs>
-                            <Tab fx:id="tabBattlefield" text="Battlefield">
-                              <content>
-                                <AnchorPane fx:id="paneBattlefield" minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />
-                              </content>
-                            </Tab>
-                            <Tab fx:id="tabExile" text="Exile">
-                              <content>
-                                <AnchorPane fx:id="paneExile" minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />
-                              </content>
-                            </Tab>
-                          </tabs>
-                        </TabPane>
-                        <TabPane tabClosingPolicy="UNAVAILABLE" GridPane.rowIndex="1">
-                          <tabs>
-                            <Tab fx:id="tabHumanHand" text="Human Hand">
-                              <content>
-                                <AnchorPane fx:id="paneHumanHand" minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />
-                              </content>
-                            </Tab>
-                              <Tab fx:id="tabComputerHand" text="Computer Hand">
-                                <content>
-                                  <AnchorPane fx:id="paneComputerHand" minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />
-                                </content>
-                              </Tab>
-                            <Tab fx:id="tabHumanGraveyard" text="Human Graveyard">
-                              <content>
-                                <AnchorPane fx:id="paneHumanGraveyard" minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />
-                              </content>
-                            </Tab>
-                              <Tab fx:id="tabComputerGraveyard" text="Computer Graveyard">
-                                <content>
-                                  <AnchorPane fx:id="paneComputerGraveyard" minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />
-                                </content>
-                              </Tab>
-                          </tabs>
-                        </TabPane>
-                     </children>
-                  </GridPane>
+						<GridPane fx:id="gridPaneCenter">
+							<columnConstraints>
+								<ColumnConstraints hgrow="SOMETIMES" minWidth="10.0"
+									prefWidth="100.0" />
+							</columnConstraints>
+							<rowConstraints>
+								<RowConstraints minHeight="10.0" prefHeight="30.0"
+									vgrow="SOMETIMES" />
+								<RowConstraints minHeight="10.0" percentHeight="30.0"
+									prefHeight="30.0" vgrow="SOMETIMES" />
+							</rowConstraints>
+							<children>
+								<TabPane tabClosingPolicy="UNAVAILABLE">
+									<tabs>
+										<Tab fx:id="tabBattlefield" text="Battlefield">
+											<content>
+												<AnchorPane fx:id="paneBattlefield" minHeight="0.0"
+													minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />
+											</content>
+										</Tab>
+										<Tab fx:id="tabExile" text="Exile">
+											<content>
+												<AnchorPane fx:id="paneExile" minHeight="0.0"
+													minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />
+											</content>
+										</Tab>
+									</tabs>
+								</TabPane>
+								<TabPane tabClosingPolicy="UNAVAILABLE"
+									GridPane.rowIndex="1">
+									<tabs>
+										<Tab fx:id="tabHumanHand" text="Human Hand">
+											<content>
+												<AnchorPane fx:id="paneHumanHand" minHeight="0.0"
+													minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />
+											</content>
+										</Tab>
+										<Tab fx:id="tabComputerHand" text="Computer Hand">
+											<content>
+												<AnchorPane fx:id="paneComputerHand" minHeight="0.0"
+													minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />
+											</content>
+										</Tab>
+										<Tab fx:id="tabHumanGraveyard" text="Human Graveyard">
+											<content>
+												<AnchorPane fx:id="paneHumanGraveyard" minHeight="0.0"
+													minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />
+											</content>
+										</Tab>
+										<Tab fx:id="tabComputerGraveyard" text="Computer Graveyard">
+											<content>
+												<AnchorPane fx:id="paneComputerGraveyard"
+													minHeight="0.0" minWidth="0.0" prefHeight="180.0"
+													prefWidth="200.0" />
+											</content>
+										</Tab>
+									</tabs>
+								</TabPane>
+							</children>
+						</GridPane>
 						<Label fx:id="fpsLabel" StackPane.alignment="TOP_RIGHT">
 							<StackPane.margin>
 								<Insets right="5.0" top="5.0" />
@@ -84,253 +98,122 @@
 		</AnchorPane>
 	</center>
 	<top>
-		<MenuBar fx:id="menuBarTop" maxHeight="-Infinity" maxWidth="1.7976931348623157E308" minHeight="-Infinity" minWidth="-Infinity" prefHeight="25.0" BorderPane.alignment="CENTER">
+		<MenuBar fx:id="menuBarTop" maxHeight="-Infinity" maxWidth="1.7976931348623157E308"
+			minHeight="-Infinity" minWidth="-Infinity" prefHeight="25.0"
+			BorderPane.alignment="CENTER">
 			<menus>
 				<Menu mnemonicParsing="false" text="File">
 					<items>
-						<MenuItem mnemonicParsing="false" onAction="#startMatch" text="New Match" />
+						<MenuItem mnemonicParsing="false" onAction="#startMatch"
+							text="New Match" />
 						<MenuItem mnemonicParsing="false" text="Exit" />
 					</items>
 				</Menu>
 				<Menu mnemonicParsing="false" text="Debug">
 					<items>
-						<MenuItem mnemonicParsing="false"  onAction="#concede" text="Concede" />
+						<MenuItem mnemonicParsing="false" onAction="#concede"
+							text="Concede" />
 					</items>
 				</Menu>
 			</menus>
 		</MenuBar>
 	</top>
 	<left>
-		<AnchorPane fx:id="paneLeft" maxHeight="1.7976931348623157E308" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefWidth="200.0" BorderPane.alignment="CENTER">
+		<AnchorPane fx:id="paneLeft" maxHeight="1.7976931348623157E308"
+			maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity"
+			prefWidth="200.0" BorderPane.alignment="CENTER">
 			<children>
-            <GridPane AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-              <columnConstraints>
-                <ColumnConstraints hgrow="SOMETIMES" maxWidth="-Infinity" minWidth="10.0" prefWidth="25.0" />
-                  <ColumnConstraints hgrow="SOMETIMES" maxWidth="-Infinity" minWidth="10.0" prefWidth="25.0" />
-                  <ColumnConstraints hgrow="SOMETIMES" maxWidth="-Infinity" minWidth="10.0" prefWidth="25.0" />
-                  <ColumnConstraints hgrow="SOMETIMES" maxWidth="-Infinity" minWidth="10.0" prefWidth="25.0" />
-                  <ColumnConstraints hgrow="SOMETIMES" maxWidth="-Infinity" minWidth="10.0" prefWidth="25.0" />
-                  <ColumnConstraints hgrow="SOMETIMES" maxWidth="-Infinity" minWidth="10.0" prefWidth="25.0" />
-                  <ColumnConstraints hgrow="SOMETIMES" maxWidth="-Infinity" minWidth="10.0" prefWidth="25.0" />
-                  <ColumnConstraints hgrow="SOMETIMES" maxWidth="-Infinity" minWidth="10.0" prefWidth="25.0" />
-              </columnConstraints>
-              <rowConstraints>
-                  <RowConstraints maxHeight="1.7976931348623157E308" minHeight="10.0" prefHeight="25.0" vgrow="SOMETIMES" />
-                  <RowConstraints maxHeight="1.7976931348623157E308" minHeight="10.0" prefHeight="25.0" vgrow="SOMETIMES" />
-                  <RowConstraints maxHeight="1.7976931348623157E308" minHeight="10.0" prefHeight="25.0" vgrow="SOMETIMES" />
-                  <RowConstraints maxHeight="1.7976931348623157E308" minHeight="10.0" prefHeight="25.0" vgrow="SOMETIMES" />
-                  <RowConstraints maxHeight="1.7976931348623157E308" minHeight="10.0" prefHeight="25.0" vgrow="SOMETIMES" />
-                <RowConstraints maxHeight="1.7976931348623157E308" minHeight="10.0" prefHeight="25.0" vgrow="SOMETIMES" />
-                <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" prefHeight="300.0" vgrow="ALWAYS" />
-                  <RowConstraints maxHeight="1.7976931348623157E308" minHeight="10.0" prefHeight="25.0" vgrow="SOMETIMES" />
-                  <RowConstraints maxHeight="1.7976931348623157E308" minHeight="10.0" prefHeight="25.0" vgrow="SOMETIMES" />
-                  <RowConstraints maxHeight="1.7976931348623157E308" minHeight="10.0" prefHeight="25.0" vgrow="SOMETIMES" />
-                  <RowConstraints maxHeight="-Infinity" minHeight="10.0" prefHeight="25.0" vgrow="SOMETIMES" />
-                  <RowConstraints maxHeight="1.7976931348623157E308" minHeight="10.0" prefHeight="25.0" vgrow="SOMETIMES" />
-                  <RowConstraints minHeight="10.0" prefHeight="25.0" vgrow="SOMETIMES" />
-              </rowConstraints>
-               <children>
-                  <TabPane tabClosingPolicy="UNAVAILABLE" GridPane.columnSpan="8" GridPane.rowIndex="6">
-                    <tabs>
-                      <Tab fx:id="tabStack" text="Stack">
-                        <content>
-                          <AnchorPane fx:id="paneStack" />
-                        </content>
-                      </Tab>
-                      <Tab fx:id="tabCardZoom" text="Card">
-                        <content>
-                          <AnchorPane fx:id="paneCardZoom" />
-                        </content>
-                      </Tab>
-                    </tabs>
-                  </TabPane>
-                  <ProgressIndicator maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" progress="0.0" GridPane.columnIndex="6" GridPane.columnSpan="2" GridPane.rowIndex="4" GridPane.rowSpan="2">
-                     <GridPane.margin>
-                        <Insets bottom="2.0" left="2.0" right="2.0" top="2.0" />
-                     </GridPane.margin>
-                  </ProgressIndicator>
-                  <Label fx:id="labelComputerAvatar" alignment="CENTER" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="17.0" minWidth="17.0" GridPane.columnSpan="4" GridPane.halignment="CENTER" GridPane.rowSpan="4" GridPane.valignment="CENTER">
-                     <padding>
-                        <Insets bottom="2.0" left="2.0" right="2.0" top="2.0" />
-                     </padding>
-                     <GridPane.margin>
-                        <Insets bottom="2.0" left="2.0" right="2.0" top="2.0" />
-                     </GridPane.margin></Label>
-                  <Label fx:id="labelIconComputerColorlessMana" alignment="CENTER" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" GridPane.halignment="CENTER" GridPane.rowIndex="4" GridPane.valignment="CENTER">
-                     <GridPane.margin>
-                        <Insets bottom="2.0" left="2.0" right="2.0" top="2.0" />
-                     </GridPane.margin></Label>
-                  <Label fx:id="labelComputerColorlessMana" alignment="CENTER" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" text="0" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.rowIndex="4" GridPane.valignment="CENTER">
-                     <GridPane.margin>
-                        <Insets bottom="2.0" left="2.0" right="2.0" top="2.0" />
-                     </GridPane.margin></Label>
-                  <Label fx:id="labelIconComputerBlackMana" alignment="CENTER" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" GridPane.halignment="CENTER" GridPane.rowIndex="5" GridPane.valignment="CENTER">
-                     <GridPane.margin>
-                        <Insets bottom="2.0" left="2.0" right="2.0" top="2.0" />
-                     </GridPane.margin></Label>
-                  <Label fx:id="labelComputerBlackMana" alignment="CENTER" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" text="0" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.rowIndex="5" GridPane.valignment="CENTER">
-                     <GridPane.margin>
-                        <Insets bottom="2.0" left="2.0" right="2.0" top="2.0" />
-                     </GridPane.margin></Label>
-                  <Label fx:id="labelIconComputerBlueMana" alignment="CENTER" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" GridPane.columnIndex="2" GridPane.rowIndex="4">
-                     <GridPane.margin>
-                        <Insets bottom="2.0" left="2.0" right="2.0" top="2.0" />
-                     </GridPane.margin>
-                  </Label>
-                  <Label fx:id="labelComputerBlueMana" alignment="CENTER" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" text="0" GridPane.columnIndex="3" GridPane.halignment="CENTER" GridPane.rowIndex="4" GridPane.valignment="CENTER">
-                     <GridPane.margin>
-                        <Insets bottom="2.0" left="2.0" right="2.0" top="2.0" />
-                     </GridPane.margin>
-                  </Label>
-                  <Label fx:id="labelIconComputerGreenMana" alignment="CENTER" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" GridPane.columnIndex="2" GridPane.rowIndex="5">
-                     <GridPane.margin>
-                        <Insets bottom="2.0" left="2.0" right="2.0" top="2.0" />
-                     </GridPane.margin>
-                  </Label>
-                  <Label fx:id="labelComputerGreenMana" alignment="CENTER" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" text="0" GridPane.columnIndex="3" GridPane.rowIndex="5">
-                     <GridPane.margin>
-                        <Insets bottom="2.0" left="2.0" right="2.0" top="2.0" />
-                     </GridPane.margin>
-                  </Label>
-                  <Label fx:id="labelIconComputerRedMana" alignment="CENTER" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" GridPane.columnIndex="4" GridPane.halignment="CENTER" GridPane.rowIndex="4" GridPane.valignment="CENTER">
-                     <GridPane.margin>
-                        <Insets bottom="2.0" left="2.0" right="2.0" top="2.0" />
-                     </GridPane.margin></Label>
-                  <Label fx:id="labelComputerRedMana" alignment="CENTER" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" text="0" GridPane.columnIndex="5" GridPane.halignment="CENTER" GridPane.rowIndex="4" GridPane.valignment="CENTER">
-                     <GridPane.margin>
-                        <Insets bottom="2.0" left="2.0" right="2.0" top="2.0" />
-                     </GridPane.margin></Label>
-                  <Label fx:id="labelIconComputerWhiteMana" alignment="CENTER" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" GridPane.columnIndex="4" GridPane.halignment="CENTER" GridPane.rowIndex="5" GridPane.valignment="CENTER">
-                     <GridPane.margin>
-                        <Insets bottom="2.0" left="2.0" right="2.0" top="2.0" />
-                     </GridPane.margin></Label>
-                  <Label fx:id="labelComputerWhiteMana" alignment="CENTER" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" text="0" GridPane.columnIndex="5" GridPane.halignment="CENTER" GridPane.rowIndex="5" GridPane.valignment="CENTER">
-                     <GridPane.margin>
-                        <Insets bottom="2.0" left="2.0" right="2.0" top="2.0" />
-                     </GridPane.margin></Label>
-      				<Button fx:id="buttonProgress" alignment="CENTER" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Pass" GridPane.columnIndex="6" GridPane.columnSpan="2" GridPane.halignment="CENTER" GridPane.rowIndex="7" GridPane.rowSpan="2" GridPane.valignment="CENTER">
-                     <GridPane.margin>
-                        <Insets bottom="2.0" left="2.0" right="2.0" top="2.0" />
-                     </GridPane.margin>
-                  </Button>
-                  <Label fx:id="labelIconHumanColorlessMana" alignment="CENTER" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" GridPane.halignment="CENTER" GridPane.rowIndex="7" GridPane.valignment="CENTER">
-                     <GridPane.margin>
-                        <Insets bottom="2.0" left="2.0" right="2.0" top="2.0" />
-                     </GridPane.margin></Label>
-                  <Label fx:id="labelHumanColorlessMana" alignment="CENTER" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" text="0" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.rowIndex="7" GridPane.valignment="CENTER">
-                     <GridPane.margin>
-                        <Insets bottom="2.0" left="2.0" right="2.0" top="2.0" />
-                     </GridPane.margin></Label>
-                  <Label fx:id="labelIconHumanBlackMana" alignment="CENTER" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" GridPane.halignment="CENTER" GridPane.rowIndex="8" GridPane.valignment="CENTER">
-                     <GridPane.margin>
-                        <Insets bottom="2.0" left="2.0" right="2.0" top="2.0" />
-                     </GridPane.margin></Label>
-                  <Label fx:id="labelHumanBlackMana" alignment="CENTER" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" text="0" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.rowIndex="8" GridPane.valignment="CENTER">
-                     <GridPane.margin>
-                        <Insets bottom="2.0" left="2.0" right="2.0" top="2.0" />
-                     </GridPane.margin></Label>
-                  <Label fx:id="labelIconHumanBlueMana" alignment="CENTER" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" GridPane.columnIndex="2" GridPane.rowIndex="7">
-                     <GridPane.margin>
-                        <Insets bottom="2.0" left="2.0" right="2.0" top="2.0" />
-                     </GridPane.margin>
-                  </Label>
-                  <Label fx:id="labelHumanBlueMana" alignment="CENTER" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" text="0" GridPane.columnIndex="3" GridPane.rowIndex="7">
-                     <GridPane.margin>
-                        <Insets bottom="2.0" left="2.0" right="2.0" top="2.0" />
-                     </GridPane.margin>
-                  </Label>
-                  <Label fx:id="labelIconHumanGreenMana" alignment="CENTER" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" GridPane.columnIndex="2" GridPane.rowIndex="8">
-                     <GridPane.margin>
-                        <Insets bottom="2.0" left="2.0" right="2.0" top="2.0" />
-                     </GridPane.margin>
-                  </Label>
-                  <Label fx:id="labelHumanGreenMana" alignment="CENTER" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" text="0" GridPane.columnIndex="3" GridPane.rowIndex="8">
-                     <GridPane.margin>
-                        <Insets bottom="2.0" left="2.0" right="2.0" top="2.0" />
-                     </GridPane.margin>
-                  </Label>
-                  <Label fx:id="labelIconHumanRedMana" alignment="CENTER" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" GridPane.columnIndex="4" GridPane.halignment="CENTER" GridPane.rowIndex="7" GridPane.valignment="CENTER">
-                     <GridPane.margin>
-                        <Insets bottom="2.0" left="2.0" right="2.0" top="2.0" />
-                     </GridPane.margin></Label>
-                  <Label fx:id="labelHumanRedMana" alignment="CENTER" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" text="0" GridPane.columnIndex="5" GridPane.halignment="CENTER" GridPane.rowIndex="7" GridPane.valignment="CENTER">
-                     <GridPane.margin>
-                        <Insets bottom="2.0" left="2.0" right="2.0" top="2.0" />
-                     </GridPane.margin></Label>
-                  <Label fx:id="labelIconHumanWhiteMana" alignment="CENTER" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" GridPane.columnIndex="4" GridPane.halignment="CENTER" GridPane.rowIndex="8" GridPane.valignment="CENTER">
-                     <GridPane.margin>
-                        <Insets bottom="2.0" left="2.0" right="2.0" top="2.0" />
-                     </GridPane.margin></Label>
-                  <Label fx:id="labelHumanWhiteMana" alignment="CENTER" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" text="0" GridPane.columnIndex="5" GridPane.halignment="CENTER" GridPane.rowIndex="8" GridPane.valignment="CENTER">
-                     <GridPane.margin>
-                        <Insets bottom="2.0" left="2.0" right="2.0" top="2.0" />
-                     </GridPane.margin></Label>
-                  <Label fx:id="labelHumanAvatar" alignment="CENTER" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="25.0" minWidth="25.0" GridPane.columnSpan="4" GridPane.rowIndex="9" GridPane.rowSpan="4">
-                     <padding>
-                        <Insets bottom="2.0" left="2.0" right="2.0" top="2.0" />
-                     </padding>
-                  </Label>
-                  <Label fx:id="labelIconComputerLife" alignment="CENTER" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" GridPane.columnIndex="4" GridPane.rowIndex="3">
-                     <GridPane.margin>
-                        <Insets bottom="2.0" left="2.0" right="2.0" top="2.0" />
-                     </GridPane.margin>
-                  </Label>
-                  <Label fx:id="labelComputerLife" alignment="CENTER" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" text="0" GridPane.columnIndex="5" GridPane.rowIndex="3">
-                     <GridPane.margin>
-                        <Insets bottom="2.0" left="2.0" right="2.0" top="2.0" />
-                     </GridPane.margin>
-                  </Label>
-                  <Label fx:id="labelIconHumanLife" alignment="CENTER" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" GridPane.columnIndex="4" GridPane.rowIndex="9">
-                     <GridPane.margin>
-                        <Insets bottom="2.0" left="2.0" right="2.0" top="2.0" />
-                     </GridPane.margin>
-                  </Label>
-                  <Label fx:id="labelHumanLife" alignment="CENTER" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" text="0" GridPane.columnIndex="5" GridPane.rowIndex="9">
-                     <GridPane.margin>
-                        <Insets bottom="2.0" left="2.0" right="2.0" top="2.0" />
-                     </GridPane.margin>
-                  </Label>
-               </children>
-            </GridPane>
+				<BorderPane maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308"
+					AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
+					AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+					<top>
+						<AnchorPane fx:id="panePlayerStatusOne" maxHeight="1.7976931348623157E308"
+							maxWidth="1.7976931348623157E308" minHeight="-Infinity" minWidth="-Infinity"
+							prefHeight="150.0" prefWidth="200.0" BorderPane.alignment="CENTER" />
+					</top>
+					<center>
+						<TabPane maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308"
+							minHeight="-Infinity" minWidth="-Infinity" prefHeight="300.0"
+							prefWidth="200.0" tabClosingPolicy="UNAVAILABLE"
+							BorderPane.alignment="CENTER">
+							<tabs>
+								<Tab fx:id="tabStack" text="Stack">
+									<content>
+										<AnchorPane fx:id="paneStack" />
+									</content>
+								</Tab>
+								<Tab fx:id="tabCardZoom" text="Card">
+									<content>
+										<AnchorPane fx:id="paneCardZoom" />
+									</content>
+								</Tab>
+							</tabs>
+						</TabPane>
+					</center>
+					<bottom>
+						<AnchorPane fx:id="panePlayerStatusTwo" maxHeight="1.7976931348623157E308"
+							maxWidth="1.7976931348623157E308" minHeight="-Infinity" minWidth="-Infinity"
+							prefHeight="150.0" prefWidth="200.0" BorderPane.alignment="CENTER" />
+					</bottom>
+				</BorderPane>
 			</children>
 		</AnchorPane>
 	</left>
-   <bottom>
-      <AnchorPane maxHeight="-Infinity" maxWidth="1.7976931348623157E308" minHeight="-Infinity" minWidth="-Infinity" prefHeight="25.0" BorderPane.alignment="CENTER">
-         <children>
-            <FlowPane alignment="CENTER" hgap="10.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-               <children>
-                  <Label alignment="CENTER" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" text="Turn Number:" />
-                  <Label fx:id="labelTurnNumber" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308">
-                     <font>
-                        <Font name="System Bold" size="12.0" />
-                     </font></Label>
-                  <Label alignment="CENTER" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" text="Current Phase:" />
-                  <Label fx:id="labelCurrentPhase" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308">
-                     <font>
-                        <Font name="System Bold" size="12.0" />
-                     </font></Label>
-                  <Label alignment="CENTER" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" text="Current Step:" />
-                  <Label fx:id="labelCurrentStep" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308">
-                     <font>
-                        <Font name="System Bold" size="12.0" />
-                     </font></Label>
-                  <Label alignment="CENTER" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" text="Active Player:" />
-                  <Label fx:id="labelPlayerActive" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308">
-                     <font>
-                        <Font name="System Bold" size="12.0" />
-                     </font></Label>
-                  <Label text="Hint:" />
-                  <Label fx:id="labelHint" textFill="RED">
-                     <font>
-                        <Font name="System Bold" size="12.0" />
-                     </font></Label>
-               </children>
-            </FlowPane>
-         </children>
-      </AnchorPane>
-   </bottom>
-   <right>
-      <AnchorPane fx:id="paneRight" maxHeight="1.7976931348623157E308" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="200.0" BorderPane.alignment="CENTER" />
-   </right>
+	<bottom>
+		<AnchorPane maxHeight="-Infinity" maxWidth="1.7976931348623157E308"
+			minHeight="-Infinity" minWidth="-Infinity" prefHeight="25.0"
+			BorderPane.alignment="CENTER">
+			<children>
+				<FlowPane alignment="CENTER" hgap="10.0"
+					AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
+					AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+					<children>
+						<Label alignment="CENTER" maxHeight="1.7976931348623157E308"
+							maxWidth="1.7976931348623157E308" text="Turn Number:" />
+						<Label fx:id="labelTurnNumber" maxHeight="1.7976931348623157E308"
+							maxWidth="1.7976931348623157E308">
+							<font>
+								<Font name="System Bold" size="12.0" />
+							</font>
+						</Label>
+						<Label alignment="CENTER" maxHeight="1.7976931348623157E308"
+							maxWidth="1.7976931348623157E308" text="Current Phase:" />
+						<Label fx:id="labelCurrentPhase" maxHeight="1.7976931348623157E308"
+							maxWidth="1.7976931348623157E308">
+							<font>
+								<Font name="System Bold" size="12.0" />
+							</font>
+						</Label>
+						<Label alignment="CENTER" maxHeight="1.7976931348623157E308"
+							maxWidth="1.7976931348623157E308" text="Current Step:" />
+						<Label fx:id="labelCurrentStep" maxHeight="1.7976931348623157E308"
+							maxWidth="1.7976931348623157E308">
+							<font>
+								<Font name="System Bold" size="12.0" />
+							</font>
+						</Label>
+						<Label alignment="CENTER" maxHeight="1.7976931348623157E308"
+							maxWidth="1.7976931348623157E308" text="Active Player:" />
+						<Label fx:id="labelPlayerActive" maxHeight="1.7976931348623157E308"
+							maxWidth="1.7976931348623157E308">
+							<font>
+								<Font name="System Bold" size="12.0" />
+							</font>
+						</Label>
+						<Label text="Hint:" />
+						<Label fx:id="labelHint" textFill="RED">
+							<font>
+								<Font name="System Bold" size="12.0" />
+							</font>
+						</Label>
+					</children>
+				</FlowPane>
+			</children>
+		</AnchorPane>
+	</bottom>
+	<right>
+		<AnchorPane fx:id="paneRight" maxHeight="1.7976931348623157E308"
+			maxWidth="-Infinity" minWidth="-Infinity" prefWidth="200.0"
+			BorderPane.alignment="CENTER" />
+	</right>
 </BorderPane>

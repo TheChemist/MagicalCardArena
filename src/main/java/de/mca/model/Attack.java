@@ -19,11 +19,6 @@ import javafx.collections.ObservableList;
  */
 public class Attack {
 
-	// /**
-	// * Speichert die vom aktiven Spieler sortierten Verteidiger.
-	// */
-	// TODO MID Wieder verfügbar machen.
-	// private final ListProperty<IsCombatant> listBlockersSorted;
 	/**
 	 * Speichert die Kreatur von der der Angriff ausgeht.
 	 */
@@ -41,8 +36,6 @@ public class Attack {
 		this.attacker = new SimpleObjectProperty<>(source);
 		this.attackTarget = new SimpleObjectProperty<>(target);
 		listBlockers = new SimpleListProperty<>(FXCollections.observableArrayList());
-		// listBlockersSorted = new
-		// SimpleListProperty<>(FXCollections.observableArrayList());
 
 		getAttacker().setFlagTapped(true);
 		getAttacker().setFlagAttacking(true);
@@ -77,10 +70,6 @@ public class Attack {
 	public ObjectProperty<IsCombatant> propertyAttacker() {
 		return attacker;
 	}
-
-	// public ObservableList<IsCombatant> propertyListBlockersSorted() {
-	// return listBlockersSorted;
-	// }
 
 	public ObjectProperty<IsAttackTarget> propertyAttackTarget() {
 		return attackTarget;

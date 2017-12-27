@@ -551,8 +551,8 @@ public final class Player implements IsPlayer {
 
 	@Override
 	public String toString() {
-		return new StringBuilder("[").append(getDisplayName()).append("] i=[").append(getInteractionCount())
-				.append("]]").toString();
+		return new StringBuilder("[").append(getDisplayName()).append("] ps=[").append(getPlayerState()).append("]]")
+				.toString();
 	}
 
 	private void setDeckSize(int deckSize) {

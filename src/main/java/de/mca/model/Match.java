@@ -108,7 +108,7 @@ public final class Match {
 	 */
 	private final ZoneDefault<MagicCard> zoneExile;
 
-	public Match(RuleEnforcer ruleEnforcer, IsPlayer playerTwo, IsPlayer playerOne) {
+	public Match(RuleEnforcer ruleEnforcer, IsPlayer playerOne, IsPlayer playerTwo) {
 		this.ruleEnforcer = ruleEnforcer;
 		this.ruleEnforcer.setMatch(this);
 
@@ -811,7 +811,7 @@ public final class Match {
 	}
 
 	IsPlayer getPlayerOpponent(IsPlayer player) {
-		return getPlayerOne().equals(player) ? getPlayerOne() : getPlayerTwo();
+		return player.equals(getPlayerOne()) ? getPlayerTwo() : getPlayerOne();
 	}
 
 	int getTotalAttackers() {

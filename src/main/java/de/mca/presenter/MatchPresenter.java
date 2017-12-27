@@ -9,9 +9,6 @@ import java.util.function.Consumer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.eventbus.EventBus;
-import com.google.common.eventbus.Subscribe;
-
 import de.mca.Constants;
 import de.mca.MagicParser;
 import de.mca.Main;
@@ -25,7 +22,6 @@ import de.mca.model.MagicStack;
 import de.mca.model.Match;
 import de.mca.model.Player;
 import de.mca.model.RuleEnforcer;
-import de.mca.model.enums.ColorType;
 import de.mca.model.enums.ZoneType;
 import de.mca.model.interfaces.IsPlayer;
 import de.mca.model.interfaces.IsStackable;
@@ -35,10 +31,8 @@ import javafx.beans.binding.Bindings;
 import javafx.beans.binding.StringExpression;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.collections.ListChangeListener;
-import javafx.collections.MapChangeListener;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
-import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.Tab;
@@ -58,8 +52,6 @@ public class MatchPresenter extends AnimationTimer implements Initializable, IsS
 	 * Speichert den Logger.
 	 */
 	private final static Logger LOGGER = LoggerFactory.getLogger("MatchPresenter");
-	@FXML
-	private Button buttonProgress;
 	private CanvasZoneBattlefield canvasBattlefield;
 	private CanvasZoneDefault canvasComputerGraveyard;
 	private CanvasZoneDefault canvasComputerHand;
@@ -67,7 +59,6 @@ public class MatchPresenter extends AnimationTimer implements Initializable, IsS
 	private CanvasZoneDefault canvasHumanGraveyard;
 	private CanvasZoneDefault canvasHumanHand;
 	private CanvasZoneStack canvasStack;
-	private final EventBus eventBus = new EventBus();
 	@FXML
 	private Label fpsLabel;
 	private Consumer<Integer> fpsReporter;
@@ -75,23 +66,6 @@ public class MatchPresenter extends AnimationTimer implements Initializable, IsS
 	@FXML
 	private GridPane gridPaneCenter;
 	private ImageView imageViewCardZoom;
-	private InputHuman inputHuman;
-	@FXML
-	private Label labelComputerAvatar;
-	@FXML
-	private Label labelComputerBlackMana;
-	@FXML
-	private Label labelComputerBlueMana;
-	@FXML
-	private Label labelComputerColorlessMana;
-	@FXML
-	private Label labelComputerGreenMana;
-	@FXML
-	private Label labelComputerLife;
-	@FXML
-	private Label labelComputerRedMana;
-	@FXML
-	private Label labelComputerWhiteMana;
 	@FXML
 	private Label labelCurrentPhase;
 	@FXML
@@ -99,54 +73,9 @@ public class MatchPresenter extends AnimationTimer implements Initializable, IsS
 	@FXML
 	private Label labelHint;
 	@FXML
-	private Label labelHumanAvatar;
-	@FXML
-	private Label labelHumanBlackMana;
-	@FXML
-	private Label labelHumanBlueMana;
-	@FXML
-	private Label labelHumanColorlessMana;
-	@FXML
-	private Label labelHumanGreenMana;
-	@FXML
-	private Label labelHumanLife;
-	@FXML
-	private Label labelHumanRedMana;
-	@FXML
-	private Label labelHumanWhiteMana;
-	@FXML
-	private Label labelIconComputerBlackMana;
-	@FXML
-	private Label labelIconComputerBlueMana;
-	@FXML
-	private Label labelIconComputerColorlessMana;
-	@FXML
-	private Label labelIconComputerGreenMana;
-	@FXML
-	private Label labelIconComputerLife;
-	@FXML
-	private Label labelIconComputerRedMana;
-	@FXML
-	private Label labelIconComputerWhiteMana;
-	@FXML
-	private Label labelIconHumanBlackMana;
-	@FXML
-	private Label labelIconHumanBlueMana;
-	@FXML
-	private Label labelIconHumanColorlessMana;
-	@FXML
-	private Label labelIconHumanGreenMana;
-	@FXML
-	private Label labelIconHumanLife;
-	@FXML
-	private Label labelIconHumanRedMana;
-	@FXML
-	private Label labelIconHumanWhiteMana;
-	@FXML
 	private Label labelPlayerActive;
 	@FXML
 	private Label labelTurnNumber;
-	private ImageView loadingIcon;
 	private Match matchActive;
 	private Runnable matchUpdater;
 	@FXML
@@ -168,9 +97,16 @@ public class MatchPresenter extends AnimationTimer implements Initializable, IsS
 	@FXML
 	private AnchorPane paneLeft;
 	@FXML
+	private AnchorPane panePlayerStatusOne;
+	@FXML
+	private AnchorPane panePlayerStatusTwo;
+	@FXML
 	private AnchorPane paneRight;
 	@FXML
 	private AnchorPane paneStack;
+	private PlayerStatusComputerPresenter playerStatusComputerOne;
+	private PlayerStatusComputerPresenter playerStatusComputerTwo;
+	private PlayerStatusHumanPresenter playerStatusHuman;
 	private long previousTime = 0;
 	private Runnable rendererBattlefield;
 	private Runnable rendererComputerGraveyard;
@@ -208,7 +144,6 @@ public class MatchPresenter extends AnimationTimer implements Initializable, IsS
 
 	public MatchPresenter() {
 		// TODO LOW Threading?
-		getEventBus().register(this);
 
 		spriteListBattlefield = new ArrayList<>();
 		spriteListComputerGraveyard = new ArrayList<>();
@@ -222,24 +157,6 @@ public class MatchPresenter extends AnimationTimer implements Initializable, IsS
 	@FXML
 	public void concede() {
 		stopMatch();
-	}
-
-	@Subscribe
-	public void examineButtonChange(GameStatusChange progressNameChange) {
-		if (progressNameChange.getProgressButtonText().equals("concede")) {
-			stopMatch();
-			return;
-		}
-
-		if (progressNameChange.getDisableProgressButton()) {
-			buttonProgress.setText("");
-			buttonProgress.setGraphic(loadingIcon);
-			buttonProgress.setDisable(true);
-		} else {
-			buttonProgress.setText(progressNameChange.getProgressButtonText());
-			buttonProgress.setGraphic(null);
-			buttonProgress.setDisable(false);
-		}
 	}
 
 	public Match getMatchActive() {
@@ -265,7 +182,7 @@ public class MatchPresenter extends AnimationTimer implements Initializable, IsS
 		previousTime = currentTime;
 
 		// Update das Match jede Sekunde
-		if (secondsElapsedSinceUpdate >= 0.25f) {
+		if (secondsElapsedSinceUpdate >= 0.1f) {
 			matchUpdater.run();
 			secondsElapsedSinceUpdate = 0;
 		}
@@ -305,15 +222,24 @@ public class MatchPresenter extends AnimationTimer implements Initializable, IsS
 		paneCardZoom.getChildren().add(imageViewCardZoom);
 		tabCardZoom.setContent(paneCardZoom);
 
-		loadingIcon = new AdaptableImageView(ResourceManager.getIcon("busy.gif"), new SimpleDoubleProperty(32.0),
-				new SimpleDoubleProperty(32.0));
+		PlayerStatusHumanView playerStatusHumanView = new PlayerStatusHumanView();
+		playerStatusHuman = (PlayerStatusHumanPresenter) playerStatusHumanView.getPresenter();
 
-		buttonProgress.setText("");
-		buttonProgress.setGraphic(loadingIcon);
-		buttonProgress.setDisable(true);
-		buttonProgress.setOnAction(actionEvent -> {
-			inputHuman.progress();
-		});
+		if (Constants.AI_ONLY) {
+			PlayerStatusComputerView playerStatusComputerViewOne = new PlayerStatusComputerView();
+			playerStatusComputerOne = (PlayerStatusComputerPresenter) playerStatusComputerViewOne.getPresenter();
+			panePlayerStatusOne.getChildren().add(playerStatusComputerViewOne.getView());
+
+			PlayerStatusComputerView playerStatusComputerViewTwo = new PlayerStatusComputerView();
+			playerStatusComputerTwo = (PlayerStatusComputerPresenter) playerStatusComputerViewTwo.getPresenter();
+			panePlayerStatusTwo.getChildren().add(playerStatusComputerViewTwo.getView());
+		} else {
+			PlayerStatusComputerView playerStatusComputerView = new PlayerStatusComputerView();
+			playerStatusComputerOne = (PlayerStatusComputerPresenter) playerStatusComputerView.getPresenter();
+			panePlayerStatusOne.getChildren().add(playerStatusComputerView.getView());
+
+			panePlayerStatusTwo.getChildren().add(playerStatusHumanView.getView());
+		}
 
 		// Center Pane
 		canvasBattlefield = new CanvasZoneBattlefield(paneBattlefield, imageViewCardZoom);
@@ -365,7 +291,8 @@ public class MatchPresenter extends AnimationTimer implements Initializable, IsS
 			stopMatch();
 		}
 
-		RuleEnforcer ruleEnforcer = new RuleEnforcer(getEventBus());
+		RuleEnforcer ruleEnforcer = new RuleEnforcer(playerStatusHuman.getEventBus());
+		InputHuman inputHuman = null;
 
 		String deckComputer = "vanillaartifact.json";
 		String deckHuman = "vanillaartifact.json";
@@ -382,8 +309,12 @@ public class MatchPresenter extends AnimationTimer implements Initializable, IsS
 					MagicParser.parseDeckFromPath(FileManager.getDeckPath(deckHuman)));
 
 			matchActive = new Match(ruleEnforcer, playerOne, playerTwo);
-			new InputComputer(this, matchActive, playerOne);
-			new InputComputer(this, matchActive, playerTwo);
+
+			playerStatusComputerOne.injectPlayerData(playerOne, new InputComputer(this, matchActive, playerOne),
+					avatarComputer);
+
+			playerStatusComputerTwo.injectPlayerData(playerTwo, new InputComputer(this, matchActive, playerTwo),
+					avatarHuman);
 		} else {
 			playerOne = new Player(ruleEnforcer, "Computer",
 					MagicParser.parseDeckFromPath(FileManager.getDeckPath(deckComputer)));
@@ -391,8 +322,12 @@ public class MatchPresenter extends AnimationTimer implements Initializable, IsS
 					MagicParser.parseDeckFromPath(FileManager.getDeckPath(deckHuman)));
 
 			matchActive = new Match(ruleEnforcer, playerOne, playerTwo);
-			new InputComputer(this, matchActive, playerOne);
+
+			playerStatusComputerOne.injectPlayerData(playerOne, new InputComputer(this, matchActive, playerOne),
+					avatarComputer);
+
 			inputHuman = new InputHuman(this, matchActive, playerTwo);
+			playerStatusHuman.injectPlayerData(this, playerTwo, inputHuman, avatarHuman);
 		}
 
 		// Erstelle Game Loop
@@ -434,35 +369,10 @@ public class MatchPresenter extends AnimationTimer implements Initializable, IsS
 		 * Linkes Panel
 		 */
 		// Elemente erstellen
-		initializeIconLabel(avatarComputer, labelComputerAvatar);
-		initializeIconLabel(ResourceManager.getIcon("heart.png"), labelIconComputerLife);
-
-		initializeIconLabel(ResourceManager.getIcon("b.png"), labelIconComputerBlackMana);
-		initializeIconLabel(ResourceManager.getIcon("u.png"), labelIconComputerBlueMana);
-		initializeIconLabel(ResourceManager.getIcon("1.png"), labelIconComputerColorlessMana);
-		initializeIconLabel(ResourceManager.getIcon("g.png"), labelIconComputerGreenMana);
-		initializeIconLabel(ResourceManager.getIcon("r.png"), labelIconComputerRedMana);
-		initializeIconLabel(ResourceManager.getIcon("w.png"), labelIconComputerWhiteMana);
-
-		initializeIconLabel(avatarHuman, labelHumanAvatar);
-		initializeIconLabel(ResourceManager.getIcon("heart.png"), labelIconHumanLife);
-
-		initializeIconLabel(ResourceManager.getIcon("b.png"), labelIconHumanBlackMana);
-		initializeIconLabel(ResourceManager.getIcon("u.png"), labelIconHumanBlueMana);
-		initializeIconLabel(ResourceManager.getIcon("1.png"), labelIconHumanColorlessMana);
-		initializeIconLabel(ResourceManager.getIcon("g.png"), labelIconHumanGreenMana);
-		initializeIconLabel(ResourceManager.getIcon("r.png"), labelIconHumanRedMana);
-		initializeIconLabel(ResourceManager.getIcon("w.png"), labelIconHumanWhiteMana);
 
 		// Elemente binden
-		bindLifeLabel(labelComputerLife, playerOne);
-		bindManaPoolPlayerOne(playerOne);
-
 		bindSizeTab(tabStack, null, ZoneType.STACK);
 		bindZoneStack(matchActive.getZoneStack(), spriteListStack);
-
-		bindLifeLabel(labelHumanLife, playerTwo);
-		bindManaPoolPlayerTwo(playerTwo);
 
 		/**
 		 * Mittleres Panel
@@ -472,7 +382,7 @@ public class MatchPresenter extends AnimationTimer implements Initializable, IsS
 		bindZoneBattlefield(matchActive.getZoneBattlefield(), spriteListBattlefield);
 
 		bindSizeTab(tabComputerGraveyard, playerOne, ZoneType.GRAVEYARD);
-		bindSizeTab(tabComputerHand, playerTwo, ZoneType.HAND);
+		bindSizeTab(tabComputerHand, playerOne, ZoneType.HAND);
 		bindZoneDefault(playerOne.getZoneGraveyard(), spriteListComputerGraveyard);
 		bindZoneDefault(playerOne.getZoneHand(), spriteListComputerHand);
 
@@ -531,62 +441,6 @@ public class MatchPresenter extends AnimationTimer implements Initializable, IsS
 	@Override
 	public String toString() {
 		return "MatchPresenter";
-	}
-
-	private void bindLifeLabel(Label statusLabel, IsPlayer player) {
-		statusLabel.textProperty().bind(player.propertyLife().asString());
-	}
-
-	private void bindManaPoolPlayerOne(IsPlayer playerOne) {
-		playerOne.getManaPool().propertyMapMana().addListener(new MapChangeListener<ColorType, Integer>() {
-
-			@Override
-			public void onChanged(
-					javafx.collections.MapChangeListener.Change<? extends ColorType, ? extends Integer> change) {
-				ColorType colorType = change.getKey();
-				String stringValue = change.getValueAdded() == null ? "0" : change.getValueAdded().toString();
-
-				if (colorType.equals(ColorType.BLACK)) {
-					labelComputerBlackMana.setText(stringValue);
-				} else if (change.getKey().equals(ColorType.BLUE)) {
-					labelComputerBlueMana.setText(stringValue);
-				} else if (change.getKey().equals(ColorType.GREEN)) {
-					labelComputerGreenMana.setText(stringValue);
-				} else if (change.getKey().equals(ColorType.NONE)) {
-					labelComputerColorlessMana.setText(stringValue);
-				} else if (change.getKey().equals(ColorType.RED)) {
-					labelComputerRedMana.setText(stringValue);
-				} else if (change.getKey().equals(ColorType.WHITE)) {
-					labelComputerWhiteMana.setText(stringValue);
-				}
-			}
-		});
-	}
-
-	private void bindManaPoolPlayerTwo(IsPlayer playerTwo) {
-		playerTwo.getManaPool().propertyMapMana().addListener(new MapChangeListener<ColorType, Integer>() {
-
-			@Override
-			public void onChanged(
-					javafx.collections.MapChangeListener.Change<? extends ColorType, ? extends Integer> change) {
-				ColorType colorType = change.getKey();
-				String stringValue = change.getValueAdded() == null ? "0" : change.getValueAdded().toString();
-
-				if (colorType.equals(ColorType.BLACK)) {
-					labelHumanBlackMana.setText(stringValue);
-				} else if (change.getKey().equals(ColorType.BLUE)) {
-					labelHumanBlueMana.setText(stringValue);
-				} else if (change.getKey().equals(ColorType.GREEN)) {
-					labelHumanGreenMana.setText(stringValue);
-				} else if (change.getKey().equals(ColorType.NONE)) {
-					labelHumanColorlessMana.setText(stringValue);
-				} else if (change.getKey().equals(ColorType.RED)) {
-					labelHumanRedMana.setText(stringValue);
-				} else if (change.getKey().equals(ColorType.WHITE)) {
-					labelHumanWhiteMana.setText(stringValue);
-				}
-			}
-		});
 	}
 
 	private void bindSizeTab(Tab sizeTab, IsPlayer isPlayer, ZoneType zoneType) {
@@ -678,11 +532,4 @@ public class MatchPresenter extends AnimationTimer implements Initializable, IsS
 		}
 	}
 
-	private EventBus getEventBus() {
-		return eventBus;
-	}
-
-	private void initializeIconLabel(Image icon, Label label) {
-		label.setGraphic(new AdaptableImageView(icon, label.heightProperty(), label.widthProperty()));
-	}
 }
