@@ -2,12 +2,6 @@ package de.mca.model;
 
 import de.mca.model.interfaces.IsCombatant;
 import de.mca.model.interfaces.IsPlayer;
-import javafx.beans.property.BooleanProperty;
-import javafx.beans.property.IntegerProperty;
-import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleBooleanProperty;
-import javafx.beans.property.SimpleIntegerProperty;
-import javafx.beans.property.SimpleObjectProperty;
 
 /**
  *
@@ -16,6 +10,9 @@ import javafx.beans.property.SimpleObjectProperty;
  */
 public class MagicPermanent extends MagicCard implements IsCombatant {
 
+	/**
+	 * Speichert die Grundstärke der Kreatur, so wie sie auf der Karte steht.
+	 */
 	private final int basePower;
 	/**
 	 * Speichert die Grundverteidigung der Kreatur, so wie sie auf der Karte steht.
@@ -24,89 +21,74 @@ public class MagicPermanent extends MagicCard implements IsCombatant {
 	/**
 	 * Zeigt an, ob die Kreatur gerade angreift.
 	 */
-	private final BooleanProperty flagAttacking;
+	private boolean flagAttacking;
 	/**
 	 * Zeigt an, ob die Kreatur alleine angreift.
 	 */
-	private final BooleanProperty flagAttackingAlone;
+	private boolean flagAttackingAlone;
 	/**
 	 * Zeigt an, ob eine Kreatur geblockt wird.
 	 */
-	private final BooleanProperty flagBlocked;
+	private boolean flagBlocked;
 	/**
 	 * Zeigt an, ob eine Kreatur gerade verteidigt.
 	 */
-	private final BooleanProperty flagBlocking;
+	private boolean flagBlocking;
 	/**
 	 * Zeigt an, ob die Kreatur alleine blockt.
 	 */
-	private final BooleanProperty flagBlockingAlone;
-	/**
-	 * Zeigt an, ob das Permanent gerade verdeckt liegt.
-	 */
-	private final BooleanProperty flagFaceDown;
-	/**
-	 * Zeigt an, ob das Permanent gerade geflippt ist.
-	 */
-	private final BooleanProperty flagFlipped;
-	/**
-	 * Zeigt an, ob das Permanent gerade phased out ist.
-	 */
-	private final BooleanProperty flagPhasedOut;
+	private boolean flagBlockingAlone;
 	/**
 	 * Zeigt an, ob das Permanent noch mit Einsatzverzögerung behaftet ist.
 	 */
-	private final BooleanProperty flagSummoningSickness;
+	private boolean flagSummoningSickness;
 	/**
 	 * Zeigt an, ob das Permanent getappt ist.
 	 */
-	private final BooleanProperty flagTapped;
+	private boolean flagTapped;
 	/**
 	 * Speichert den Spielertyp des kontrollierenden Spielers.
 	 *
 	 * @see http://magiccards.info/rule/109-objects.html#rule-109-4
 	 */
-	private final ObjectProperty<IsPlayer> playerControlling;
+	private transient IsPlayer playerControlling;
 	/**
 	 * Speichert den Schaden der der Kreatur zugefügt wurden.
 	 */
-	private final IntegerProperty propertyDamage;
+	private int damage;
 
 	private MagicPermanent(int id, int basePower, int baseToughness) {
 		super(id);
 		this.basePower = basePower;
 		this.baseToughness = baseToughness;
-		this.playerControlling = new SimpleObjectProperty<>();
-		propertyDamage = new SimpleIntegerProperty(0);
-		flagAttacking = new SimpleBooleanProperty(false);
-		flagAttackingAlone = new SimpleBooleanProperty(false);
-		flagBlocked = new SimpleBooleanProperty(false);
-		flagBlocking = new SimpleBooleanProperty(false);
-		flagBlockingAlone = new SimpleBooleanProperty(false);
-		flagFaceDown = new SimpleBooleanProperty(false);
-		flagFlipped = new SimpleBooleanProperty(false);
-		flagPhasedOut = new SimpleBooleanProperty(false);
-		flagSummoningSickness = new SimpleBooleanProperty(true);
-		flagTapped = new SimpleBooleanProperty(false);
+		this.playerControlling = null;
+		damage = 0;
+		flagAttacking = false;
+		flagAttackingAlone = false;
+		flagBlocked = false;
+		flagBlocking = false;
+		flagBlockingAlone = false;
+		flagSummoningSickness = false;
+		flagTapped = false;
 	}
 
 	MagicPermanent(MagicCard magicCard) {
 		this(magicCard.getId(), magicCard.getPower(), magicCard.getToughness());
 		setDisplayName(magicCard.getDisplayName());
 		setFileName(magicCard.getFileName());
-		setListActivatedAbilities(magicCard.propertyListAbilities());
-		setListCostMaps(magicCard.propertyListCostMaps());
-		setListEffects(magicCard.propertyListEffects());
-		setListZonesVisited(magicCard.propertyListZonesVisited());
+		setListActivatedAbilities(magicCard.getListActivatedAbilities());
+		setListCostMaps(magicCard.getListCostMaps());
+		setListEffects(magicCard.getListEffects());
+		setListZonesVisited(magicCard.getListZonesVisited());
 		setLoyalty(magicCard.getLoyalty());
 		setPlayerControlling(magicCard.getPlayerOwning());
 		setPlayerOwning(magicCard.getPlayerOwning());
 		setPower(magicCard.getPower());
 		setRarity(magicCard.getRarity());
-		setSetColorTypes(magicCard.propertySetColorTypes());
-		setSetObjectTypes(magicCard.propertySetObjectTypes());
-		setSetSubTypes(magicCard.propertySetSubTypes());
-		setSetSuperTypes(magicCard.propertySetSuperTypes());
+		setSetColorTypes(magicCard.getSetColorType());
+		setSetObjectTypes(magicCard.getSetObjectTypes());
+		setSetSubTypes(magicCard.getSetSubTypes());
+		setSetSuperTypes(magicCard.getSetSuperTypes());
 		setToughness(magicCard.getToughness());
 	}
 
@@ -121,7 +103,7 @@ public class MagicPermanent extends MagicCard implements IsCombatant {
 	}
 
 	public boolean checkCanActivate() {
-		return !getListAbilities().isEmpty() && !getFlagTapped();
+		return !getListActivatedAbilities().isEmpty() && !getFlagTapped();
 	}
 
 	/**
@@ -167,57 +149,40 @@ public class MagicPermanent extends MagicCard implements IsCombatant {
 
 	@Override
 	public int getDamage() {
-		return propertyDamage().get();
+		return damage;
 	}
 
 	public boolean getFlagAttacking() {
-		return flagAttacking.get();
+		return flagAttacking;
 	}
 
 	public boolean getFlagAttackingAlone() {
-		return flagAttackingAlone.get();
+		return flagAttackingAlone;
 	}
 
 	@Override
 	public boolean getFlagBlocked() {
-		return flagBlocked.get();
+		return flagBlocked;
 	}
 
 	public boolean getFlagBlocking() {
-		return flagBlocking.get();
+		return flagBlocking;
 	}
 
 	public boolean getFlagBlockingAlone() {
-		return flagBlockingAlone.get();
-	}
-
-	public boolean getFlagFaceDown() {
-		return flagFaceDown.get();
-	}
-
-	public boolean getFlagFlipped() {
-		return flagFlipped.get();
+		return flagBlockingAlone;
 	}
 
 	public boolean getFlagHasSummoningSickness() {
-		return flagSummoningSickness.get();
-	}
-
-	public boolean getFlagPhasedOut() {
-		return flagPhasedOut.get();
+		return flagSummoningSickness;
 	}
 
 	public boolean getFlagTapped() {
-		return flagTapped.get();
+		return flagTapped;
 	}
 
 	public IsPlayer getPlayerControlling() {
-		return playerControlling.get();
-	}
-
-	@Override
-	public IntegerProperty propertyDamage() {
-		return propertyDamage;
+		return playerControlling;
 	}
 
 	@Override
@@ -228,57 +193,72 @@ public class MagicPermanent extends MagicCard implements IsCombatant {
 	@Override
 	public void setDamage(int damage) {
 		LOGGER.trace("{} setDamage({})", this, damage);
-		propertyDamage().set(damage > 0 ? damage : 0);
+		this.damage = (damage > 0 ? damage : 0);
 	}
 
 	@Override
 	public void setFlagAttacking(boolean flagAttacking) {
-		this.flagAttacking.set(flagAttacking);
+		LOGGER.trace("{} setFlagAttacking({})", this, flagAttacking);
+		this.flagAttacking = flagAttacking;
 	}
 
 	public void setFlagAttackingAlone(boolean flagAttackingAlone) {
-		this.flagAttackingAlone.set(flagAttackingAlone);
+		LOGGER.trace("{} setFlagAttackingAlone({})", this, flagAttackingAlone);
+		this.flagAttackingAlone = flagAttackingAlone;
 	}
 
 	@Override
 	public void setFlagBlocked(boolean flagBlocked) {
-		this.flagBlocked.set(flagBlocked);
+		LOGGER.trace("{} setFlagBlocked({})", this, flagBlocked);
+		this.flagBlocked = flagBlocked;
 	}
 
 	@Override
 	public void setFlagBlocking(boolean flagBlocking) {
-		this.flagBlocking.set(flagBlocking);
+		LOGGER.trace("{} setFlagBlocking({})", this, flagBlocking);
+		this.flagBlocking = flagBlocking;
 	}
 
 	public void setFlagBlockingAlone(boolean flagBlockingAlone) {
-		this.flagBlockingAlone.set(flagBlockingAlone);
-	}
-
-	public void setFlagFaceDown(boolean flagFaceDown) {
-		this.flagFaceDown.set(flagFaceDown);
-		;
-	}
-
-	public void setFlagFlipped(boolean flagFlipped) {
-		this.flagFlipped.set(flagFlipped);
-	}
-
-	public void setFlagPhasedOut(boolean flagPhasedOut) {
-		this.flagPhasedOut.set(flagPhasedOut);
+		LOGGER.trace("{} setFlagBlockingAlone({})", this, flagBlockingAlone);
+		this.flagBlockingAlone = flagBlockingAlone;
 	}
 
 	public void setFlagSummoningSickness(boolean flagHasSummoningSickness) {
-		this.flagSummoningSickness.set(flagHasSummoningSickness);
+		LOGGER.trace("{} setFlagSummoningSickness({})", this, flagHasSummoningSickness);
+		this.flagSummoningSickness = flagHasSummoningSickness;
 	}
 
 	@Override
 	public void setFlagTapped(boolean flagTapped) {
-		this.flagTapped.set(flagTapped);
+		LOGGER.trace("{} setFlagTapped({})", this, flagTapped);
+		this.flagTapped = flagTapped;
 	}
 
 	public void setPlayerControlling(IsPlayer playerControlling) {
 		LOGGER.trace("{} setPlayerControlling({})", this, playerControlling);
-		this.playerControlling.set(playerControlling);
+		this.playerControlling = playerControlling;
 	}
+
+//	public CardState getPermanentState() {
+//		final List<ActivatedAbility> listAbilities = getListActivatedAbilities();
+//		final List<IsManaMap> listCostMaps = getListCostMaps();
+//		final List<Effect> listEffects = new ArrayList<>(propertyListEffects().get());
+//		final List<ZoneType> listZonesVisited = new ArrayList<>(propertyListZonesVisited().get());
+//
+//		final String playerControlling = getPlayerControlling().getDisplayName();
+//		final String playerOwning = getPlayerOwning().getDisplayName();
+//
+//		final Set<ColorType> setColorType = new HashSet<>(propertySetColorType().get());
+//		final Set<ObjectType> setObjectTypes = new HashSet<>(getSetObjectTypes().get());
+//		final Set<SubType> setSubTypes = new HashSet<>(getSetSubTypes().get());
+//		final Set<SuperType> setSuperTypes = new HashSet<>(getSetSuperTypes().get());
+//
+//		return new CardState(getDamage(), getDisplayName(), getFileName(), getFlagAttacking(), getFlagAttackingAlone(),
+//				getFlagBlocked(), getFlagBlocking(), getFlagBlockingAlone(), getFlagFaceDown(), getFlagFlipped(),
+//				getFlagIsInteractable(), getFlagPhasedOut(), getFlagHasSummoningSickness(), getFlagTapped(), getId(),
+//				listAbilities, listCostMaps, listEffects, listZonesVisited, getLoyalty(), playerControlling,
+//				playerOwning, getPower(), setColorType, setObjectTypes, setSubTypes, setSuperTypes, getToughness());
+//	}
 
 }

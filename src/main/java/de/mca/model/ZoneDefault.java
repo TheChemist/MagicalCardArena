@@ -80,7 +80,7 @@ public final class ZoneDefault<E extends MagicCard> implements IsZone<E> {
 	public List<E> getAll(AbilityType abilityType) {
 		final List<E> result = new ArrayList<>();
 		for (final E card : propertyCardList) {
-			final List<ActivatedAbility> listAbilities = card.getListAbilities();
+			final List<ActivatedAbility> listAbilities = card.getListActivatedAbilities();
 			for (final ActivatedAbility ability : listAbilities) {
 				if (ability.getAbilityType().equals(abilityType)) {
 					result.add(card);
@@ -105,7 +105,7 @@ public final class ZoneDefault<E extends MagicCard> implements IsZone<E> {
 	public List<E> getAll(EffectType effectType) {
 		final List<E> result = new ArrayList<>();
 		for (final E card : propertyCardList) {
-			final List<ActivatedAbility> listAbilities = card.getListAbilities();
+			final List<ActivatedAbility> listAbilities = card.getListActivatedAbilities();
 			for (final ActivatedAbility ability : listAbilities) {
 				final List<Effect> listEffects = ability.getListEffects();
 				for (final Effect effect : listEffects) {

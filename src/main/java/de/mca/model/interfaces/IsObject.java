@@ -1,12 +1,13 @@
 package de.mca.model.interfaces;
 
+import java.util.List;
+import java.util.Set;
+
 import de.mca.model.ActivatedAbility;
 import de.mca.model.enums.ColorType;
 import de.mca.model.enums.ObjectType;
 import de.mca.model.enums.SubType;
 import de.mca.model.enums.SuperType;
-import javafx.collections.ObservableList;
-import javafx.collections.ObservableSet;
 
 /**
  * Das Interface dient der Abbildung eines Objekts im Sinne der Regel 109. im
@@ -35,14 +36,14 @@ public interface IsObject {
 
 	int getToughness();
 
-	ObservableList<ActivatedAbility> propertyListAbilities();
+	List<ActivatedAbility> getListActivatedAbilities();
 
-	ObservableSet<ColorType> propertySetColorTypes();
+	Set<ColorType> getSetColorTypes();
 
-	ObservableSet<ObjectType> propertySetObjectTypes();
+	Set<ObjectType> getSetObjectTypes();
 
-	ObservableSet<SubType> propertySetSubTypes();
+	Set<SubType> getSetSubTypes();
 
-	ObservableSet<SuperType> propertySetSuperTypes();
+	Set<SuperType> getSetSuperTypes();
 
 }

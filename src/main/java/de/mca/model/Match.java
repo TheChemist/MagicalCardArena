@@ -1,5 +1,6 @@
 package de.mca.model;
 
+import java.io.Serializable;
 import java.util.List;
 import java.util.Random;
 
@@ -15,6 +16,7 @@ import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.ListProperty;
 import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SetProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleListProperty;
@@ -42,6 +44,12 @@ public final class Match {
 	 * Speichert den Logger.
 	 */
 	private final static Logger LOGGER = LoggerFactory.getLogger("Match");
+	/**
+	 * Speichert die Anzahl der Aktionen innerhalb eines Schrittes, um jede einzelne
+	 * Aktion die zu einer Änderung des BoardStates führt identifiziertbar zu
+	 * machen.-
+	 */
+	private int actionCount;
 	/**
 	 * Speichert den geteilten Stack.
 	 */
@@ -115,6 +123,7 @@ public final class Match {
 		this.playerOne = playerOne;
 		this.playerTwo = playerTwo;
 
+		actionCount = 0;
 		magicStack = new MagicStack();
 		propertyBattlefieldSize = new SimpleIntegerProperty(0);
 		propertyCurrentTurn = new SimpleObjectProperty<>(new Turn(ruleEnforcer));
@@ -128,6 +137,63 @@ public final class Match {
 		propertyStackSize = new SimpleIntegerProperty(0);
 		zoneBattlefield = new ZoneDefault<>(ZoneType.BATTLEFIELD);
 		zoneExile = new ZoneDefault<>(ZoneType.EXILE);
+	}
+
+	/**
+	 * Evaluierungsfunktion für den BoardState. Die Idee der Evaluierungsfunktion
+	 * ist, einen hohen Score zurück zu geben, wenn der Maximizer (aktiver Spieler)
+	 * und einen niedrigen Score zurück zu geben wenn der Minimizer (nichtaktiver
+	 * Spieler) dran ist.
+	 * 
+	 * @return
+	 */
+	public double evaluate() {
+		double result = 0.0;
+
+		/**
+		 * Einfache Evaluation, siehe: @link
+		 * http://mtgrares.blogspot.com/2009/11/min-max-evaluation-function-for-magic.html
+		 */
+		// Spieler 1
+		final double resultOne = playerOne.getLife() + getZoneBattlefield().getAll(playerOne).size();
+
+		// Spieler 2
+		final double resultTwo = playerTwo.getLife() + getZoneBattlefield().getAll(playerTwo).size();
+
+		result = resultOne / resultTwo;
+
+		LOGGER.debug("{} evauluate() -> {}", this, result);
+		return result;
+	}
+
+	public int getActionCount() {
+		return actionCount;
+	}
+
+	/**
+	 * Liefert die aktuelle Runde.
+	 *
+	 * @return die aktuelle Runde.
+	 */
+	public Turn getCurrentTurn() {
+		return propertyCurrentTurn().get();
+	}
+
+	/**
+	 * Prüft, ob das Match zuende ist.
+	 *
+	 * @return true, wenn das Match zuende ist.
+	 */
+	public boolean getFlagMatchRunning() {
+		return propertyMatchRunning.get();
+	}
+
+	public List<Attack> getListAttacks() {
+		return propertyListAttacks.get();
+	}
+
+	public List<IsAttackTarget> getListAttackTargets() {
+		return propertyListAttackTargets.get();
 	}
 
 	public IsPlayer getPlayerOne() {
@@ -152,6 +218,11 @@ public final class Match {
 
 	public MagicStack getZoneStack() {
 		return magicStack;
+	}
+
+	public void incrementActionCount() {
+		int result = actionCount++;
+		LOGGER.trace("{} incrementActionCount() -> {}", this, result);
 	}
 
 	public IntegerProperty propertyBattlefieldSize() {
@@ -190,11 +261,16 @@ public final class Match {
 		return getCurrentTurn().propertyTurnNumber();
 	}
 
+	public void resetActionCount() {
+		actionCount = 0;
+		LOGGER.trace("{} resetActionCount() -> {}", this, 0);
+	}
+
 	@Override
 	public String toString() {
-		return new StringBuilder("[").append("r=[").append(getTurnNumber()).append("] p=[").append(getCurrentPhase())
-				.append("] s=[").append(getCurrentStep()).append("] ap=").append(getPlayerActive()).append("]")
-				.toString();
+		return new StringBuilder("[").append(getTurnNumber()).append(".").append(getActionCount()).append(" ")
+				.append(getCurrentPhase()).append(" ").append(getCurrentStep()).append(" ").append(getPlayerActive())
+				.append("]").toString();
 	}
 
 	public void update() {
@@ -373,7 +449,7 @@ public final class Match {
 	 * @return true, wenn die Phase übersprungen wird.
 	 */
 	private boolean checkSkipPhase() {
-		return getCurrentPhase().getFlagSkipped();
+		return getCurrentPhase().getFlagPhaseSkipped();
 	}
 
 	/**
@@ -398,7 +474,7 @@ public final class Match {
 	 * Bestimmt den aktiven Spieler.
 	 */
 	private IsPlayer determinePlayerActive() {
-		IsPlayer playerActive = (isPlayerActive(getPlayerOne())) ? getPlayerTwo() : getPlayerOne();
+		final IsPlayer playerActive = (isPlayerActive(getPlayerOne())) ? getPlayerTwo() : getPlayerOne();
 		LOGGER.trace("{} determinePlayerActive() -> {}", this, playerActive);
 		return playerActive;
 	}
@@ -407,7 +483,7 @@ public final class Match {
 	 * Bestimmt, welcher Spieler das Spiel beginnt.
 	 */
 	private IsPlayer determinePlayerStarting() {
-		IsPlayer playerStarting = (new Random().nextInt(2) == 0) ? getPlayerOne() : getPlayerTwo();
+		final IsPlayer playerStarting = (new Random().nextInt(2) == 0) ? getPlayerOne() : getPlayerTwo();
 		LOGGER.trace("{} determinePlayerStarting() -> {}", this, playerStarting);
 		return playerStarting;
 	}
@@ -419,24 +495,6 @@ public final class Match {
 	 */
 	private Step getCurrentStep() {
 		return propertyCurrentStep().get();
-	}
-
-	/**
-	 * Liefert die aktuelle Runde.
-	 *
-	 * @return die aktuelle Runde.
-	 */
-	private Turn getCurrentTurn() {
-		return propertyCurrentTurn().get();
-	}
-
-	/**
-	 * Prüft, ob das Match zuende ist.
-	 *
-	 * @return true, wenn das Match zuende ist.
-	 */
-	private boolean getFlagMatchRunning() {
-		return propertyMatchRunning.get();
 	}
 
 	/**
@@ -479,8 +537,7 @@ public final class Match {
 	/**
 	 * Startet ein neues Match, falls flagMatchRunning = false.
 	 * 
-	 * @param flagMatchRunning
-	 *            flag, die anzeigt, ob das Match bereits läuft.
+	 * @param flagMatchRunning flag, die anzeigt, ob das Match bereits läuft.
 	 */
 	private void matchBegin(boolean flagMatchRunning) {
 		if (!flagMatchRunning) {
@@ -496,8 +553,7 @@ public final class Match {
 	/**
 	 * Beendet ein Match, wenn flagMatchRunning = false.
 	 * 
-	 * @param flagMatchRunning
-	 *            flag, die anzeigt, ob ein Match läuft.
+	 * @param flagMatchRunning flag, die anzeigt, ob ein Match läuft.
 	 */
 	private void matchEnd(boolean flagMatchRunning) {
 		if (!flagMatchRunning) {
@@ -510,8 +566,7 @@ public final class Match {
 	 * Beginnt eine neue Phase, wenn es eine nächste Phase gibt und keine Phase
 	 * läuft (flagPhaseRunning = false).
 	 * 
-	 * @param flagPhaseRunning
-	 *            Zeigt an, ob eine Phase bereits läuft.
+	 * @param flagPhaseRunning Zeigt an, ob eine Phase bereits läuft.
 	 */
 	private void phaseBegin(boolean flagPhaseRunning) {
 		if (!flagPhaseRunning) {
@@ -565,8 +620,7 @@ public final class Match {
 	/**
 	 * Setzt die neue aktuelle Runde.
 	 * 
-	 * @param turn
-	 *            die neue Runde.
+	 * @param turn die neue Runde.
 	 */
 	private void setCurrentTurn(Turn turn) {
 		propertyCurrentTurn().set(turn);
@@ -577,8 +631,7 @@ public final class Match {
 	/**
 	 * Setzt den neuen aktiven Spieler.
 	 * 
-	 * @param playerActive
-	 *            der neue aktive Spieler.
+	 * @param playerActive der neue aktive Spieler.
 	 */
 	private void setPlayerActive(IsPlayer playerActive) {
 		LOGGER.trace("{} setPlayerActive({})", this, playerActive);
@@ -590,8 +643,7 @@ public final class Match {
 	/**
 	 * Setzt den neuen priorisierten Spieler.
 	 * 
-	 * @param playerPrioritized
-	 *            der neue priorisierte Spieler.
+	 * @param playerPrioritized der neue priorisierte Spieler.
 	 */
 	private void setPlayerPrioritized(IsPlayer playerPrioritized) {
 		LOGGER.trace("{} setPlayerPrioritized({})", this, playerPrioritized);
@@ -623,8 +675,7 @@ public final class Match {
 	 * TurnBasedActions gefeuert, die für den Beginn dieses Schrittes vorgesehen
 	 * sind.
 	 * 
-	 * @param flagStepRunning
-	 *            Flag, die anzeigt, ob ein Schritt gerade läuft.
+	 * @param flagStepRunning Flag, die anzeigt, ob ein Schritt gerade läuft.
 	 */
 	private void stepBegin(boolean flagStepRunning) {
 		if (!flagStepRunning) {
@@ -639,8 +690,8 @@ public final class Match {
 	 * kann beendet werden, wenn kein Spielerinput mehr benötigt wird. Das wird vor
 	 * allem im letzten Schritt (Aufräumen) relevant.
 	 * 
-	 * @param flagNeedPlayerInput
-	 *            Flag, die anzeigt, ob auf Spielerinput gewartet wird.
+	 * @param flagNeedPlayerInput Flag, die anzeigt, ob auf Spielerinput gewartet
+	 *                            wird.
 	 */
 	private void stepEnd(boolean flagNeedPlayerInput) {
 		if (!flagNeedPlayerInput) {
@@ -650,6 +701,7 @@ public final class Match {
 			getPlayerTwo().setFlagPassedPriority(false);
 
 			getCurrentTurn().stepEnd();
+			resetActionCount();
 		}
 	}
 
@@ -658,8 +710,7 @@ public final class Match {
 	 * wird der Spieler, der das Spiel startet bestimmt und der Ziehschritt
 	 * übersprungen. In den folgenden Runden wird der aktive Spieler bestimmt.
 	 * 
-	 * @param flagTurnRunning
-	 *            Flag, die anzeigt, ob eine Runde läuft.
+	 * @param flagTurnRunning Flag, die anzeigt, ob eine Runde läuft.
 	 */
 	private void turnBegin(boolean flagTurnRunning) {
 		if (!flagTurnRunning) {
@@ -681,13 +732,10 @@ public final class Match {
 	 * Eine Runde kann beendet werden, wenn keine weiteren Phasen (und in der
 	 * letzten Phase keine weiteren Schritte) mehr gespielt werden können.
 	 * 
-	 * @param hasNextPhase
-	 *            Zeigt an, ob die Runde weitere Phasen hat.
-	 * @param hasNextStep
-	 *            Zeigt an, ob die Phase weitere Schritte hat.
-	 * @param playerDiscard
-	 *            Zeigt an, ob der Spieler noch Karten abwerfen muss. TODO: Muss das
-	 *            wirklich hier hin?
+	 * @param hasNextPhase  Zeigt an, ob die Runde weitere Phasen hat.
+	 * @param hasNextStep   Zeigt an, ob die Phase weitere Schritte hat.
+	 * @param playerDiscard Zeigt an, ob der Spieler noch Karten abwerfen muss.
+	 *                      TODO: Muss das wirklich hier hin?
 	 */
 	private void turnEnd(boolean hasNextPhase, boolean hasNextStep, boolean playerDiscard) {
 		if (!hasNextPhase && !hasNextStep && !playerDiscard) {
@@ -716,9 +764,8 @@ public final class Match {
 	 * Fügt dem Match einen neuen Angriff hinzu, der zu gegebener Zeit durchgeführt
 	 * wird.
 	 *
-	 * @param attack
-	 *            ein Hilfsobjekt, das alle relevanten Informationen zu einen
-	 *            Angriff kapselt.
+	 * @param attack ein Hilfsobjekt, das alle relevanten Informationen zu einen
+	 *               Angriff kapselt.
 	 */
 	void addAttack(Attack attack) {
 		LOGGER.debug("{} addAttack({})", this, attack);
@@ -782,14 +829,6 @@ public final class Match {
 
 	Phase getCurrentPhase() {
 		return propertyCurrentPhase().get();
-	}
-
-	List<Attack> getListAttacks() {
-		return propertyListAttacks.get();
-	}
-
-	List<IsAttackTarget> getListAttackTargets() {
-		return propertyListAttackTargets.get();
 	}
 
 	/**
@@ -867,8 +906,7 @@ public final class Match {
 	 * einer Fähigkeit, dem Ausführen einer Spezialhandlung oder dem Abgeben der
 	 * Priorität zurück auf den ursprünglichen "aktiv"/"nichtaktiv"-Status.
 	 *
-	 * @param player
-	 *            Der Spieler, dessen Status zurückgesetzt werden soll.
+	 * @param player Der Spieler, dessen Status zurückgesetzt werden soll.
 	 */
 	void resetPlayerState(IsPlayer player) {
 		final boolean isCombatPhase = getCurrentPhase().isCombatPhase();

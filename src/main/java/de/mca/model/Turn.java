@@ -108,6 +108,26 @@ public class Turn {
 		iteratorPhases = listPhases.listIterator();
 	}
 
+	public Phase getCurrentPhase() {
+		return propertyCurrentPhase().get();
+	}
+
+	public boolean getFlagTurnRunning() {
+		return propertyFlagTurnRunning().get();
+	}
+
+	public boolean getFlagTurnSkipped() {
+		return propertyFlagTurnSkipped().get();
+	}
+
+	public List<Phase> getListPhases() {
+		return listPhases;
+	}
+
+	public int getTurnNumber() {
+		return propertyTurnNumber().get();
+	}
+
 	public void skipStepDraw() {
 		for (final Phase phase : getListPhases()) {
 			if (phase.equals(PhaseType.BEGINNING_PHASE)) {
@@ -116,28 +136,8 @@ public class Turn {
 		}
 	}
 
-	private List<Phase> getListPhases() {
-		return listPhases;
-	}
-
-	private int getTurnNumber() {
-		return propertyTurnNumber().get();
-	}
-
 	private void setFlagTurnRunning(boolean flagRunning) {
 		propertyFlagTurnRunning.set(flagRunning);
-	}
-
-	Phase getCurrentPhase() {
-		return propertyCurrentPhase().get();
-	}
-
-	boolean getFlagTurnRunning() {
-		return propertyFlagTurnRunning().get();
-	}
-
-	boolean getFlagTurnSkipped() {
-		return propertyFlagTurnSkipped().get();
 	}
 
 	boolean hasNextPhase() {
@@ -207,6 +207,6 @@ public class Turn {
 
 	void turnEnd() {
 		setFlagTurnRunning(false);
-	}
+	}	
 
 }

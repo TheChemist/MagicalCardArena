@@ -26,7 +26,7 @@ public class Step {
 	/**
 	 * Zeigt an, ob der Schritt gerade läuft.
 	 */
-	private BooleanProperty propertyFlagStepRunning;
+	private final BooleanProperty propertyFlagStepRunning;
 	/**
 	 * Zeigt an, ob der Spielschritt übersprungen wird.
 	 */
@@ -34,7 +34,7 @@ public class Step {
 	/**
 	 * Speichert den RuleEnforcer.
 	 */
-	private RuleEnforcer ruleEnforcer;
+	private final RuleEnforcer ruleEnforcer;
 	/**
 	 * Speichert die rundenbasiertes Aktionen, die zu Beginn des Spielschrittes
 	 * gefeuert werden.
@@ -74,6 +74,22 @@ public class Step {
 				new TurnBasedAction(this, TurnBasedActionType.DECLARE_DAMAGE_ASSIGNMENT_ORDER_BLOCKER));
 	}
 
+	public boolean getFlagStepRepeated() {
+		return propertyFlagStepRepeated.get();
+	}
+
+	public boolean getFlagStepRunning() {
+		return propertyFlagStepRunning.get();
+	}
+
+	public boolean getFlagStepSkipped() {
+		return propertyFlagStepSkipped.get();
+	}
+
+	public StepType getStepType() {
+		return stepType;
+	}
+
 	@Override
 	public String toString() {
 		return stepType.toString();
@@ -109,18 +125,6 @@ public class Step {
 		return stepType.playersGetPriority();
 	}
 
-	boolean getFlagStepRepeated() {
-		return propertyFlagStepRepeated.get();
-	}
-
-	boolean getFlagStepRunning() {
-		return propertyFlagStepRunning.get();
-	}
-
-	boolean getFlagStepSkipped() {
-		return propertyFlagStepSkipped.get();
-	}
-
 	void setFlagRepeated(boolean flagRepeated) {
 		this.propertyFlagStepRepeated.set(flagRepeated);
 	}
@@ -128,4 +132,5 @@ public class Step {
 	void setFlagSkipped(boolean flagSkipped) {
 		this.propertyFlagStepSkipped.set(flagSkipped);
 	}
+
 }

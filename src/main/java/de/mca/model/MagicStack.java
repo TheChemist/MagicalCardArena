@@ -60,4 +60,5 @@ public class MagicStack {
 	public String toString() {
 		return new StringBuilder(zoneType.toString()).append(" ").append(Arrays.toString(stack.toArray())).toString();
 	}
+
 }

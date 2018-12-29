@@ -20,7 +20,7 @@ public abstract class Effect extends EventObject {
 	/**
 	 * Speichert den Spieler, der den Effekt ausgelöst hat.
 	 */
-	private IsPlayer player;
+	private transient IsPlayer player;
 
 	protected Effect(ActivatedAbility source, EffectType magicEffectType) {
 		super(source);

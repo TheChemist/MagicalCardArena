@@ -12,12 +12,6 @@ import de.mca.model.interfaces.IsManaMap;
 import de.mca.model.interfaces.IsObject;
 import de.mca.model.interfaces.IsPlayer;
 import de.mca.model.interfaces.IsStackable;
-import javafx.beans.property.ListProperty;
-import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleListProperty;
-import javafx.beans.property.SimpleObjectProperty;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 
 /**
  * Bildet eine Ability im Sinne von Regel 112.1a im offiziellen Regebuch ab.
@@ -40,28 +34,28 @@ public class ActivatedAbility implements IsStackable {
 	/**
 	 * Speichert die verschiedenen Darstellungen der Kosten.
 	 */
-	private final ListProperty<IsManaMap> propertyListCostMaps;
+	private final List<IsManaMap> listCostMaps;
 	/**
 	 * Speichert die Liste der Effekte, die die Fähigkeit hervorruft.
 	 */
-	private final ListProperty<Effect> propertyListEffects;
+	private final List<Effect> listEffects;
 	/**
 	 * Speichert den Spielertyp des kontrollierenden Spielers.
 	 */
-	private final ObjectProperty<IsPlayer> propertyPlayerControlling;
+	private IsPlayer playerControlling;
 	/**
 	 * Speichert das Objekt, das durch die Fähigkeit charakterisiert wird.
 	 */
-	private final ObjectProperty<IsObject> propertySource;
+	private IsObject source;
 
 	public ActivatedAbility(IsObject source, AbilityType abilityType, AdditionalCostType additionalCostType,
-			JsonArray effectObject, ObservableList<IsManaMap> listCostMaps) {
+			JsonArray effectObject, List<IsManaMap> listCostMaps) {
 		this.abilityType = abilityType;
 		this.additionalCostType = additionalCostType;
-		this.propertySource = new SimpleObjectProperty<>(source);
-		this.propertyListCostMaps = new SimpleListProperty<>(listCostMaps);
-		propertyListEffects = new SimpleListProperty<>(FXCollections.observableArrayList(new ArrayList<>()));
-		propertyPlayerControlling = new SimpleObjectProperty<>();
+		this.source = source;
+		this.listCostMaps = listCostMaps;
+		listEffects = new ArrayList<>();
+		playerControlling = null;
 
 		for (int i = 0; i < effectObject.size(); i++) {
 			add(MagicParser.parseEffect(this, effectObject.get(i).getAsJsonObject()));
@@ -70,7 +64,7 @@ public class ActivatedAbility implements IsStackable {
 
 	public void add(Effect magicEffect) {
 		magicEffect.setPlayer(getPlayerControlling());
-		propertyListEffects().add(magicEffect);
+		getListEffects().add(magicEffect);
 	}
 
 	public AbilityType getAbilityType() {
@@ -93,16 +87,16 @@ public class ActivatedAbility implements IsStackable {
 	}
 
 	public List<Effect> getListEffects() {
-		return propertyListEffects().get();
+		return listEffects;
 	}
 
 	@Override
 	public IsPlayer getPlayerControlling() {
-		return propertyPlayerControlling().get();
+		return playerControlling;
 	}
 
 	public IsObject getSource() {
-		return propertySource().get();
+		return source;
 	}
 
 	public boolean isManaAbility() {
@@ -115,35 +109,22 @@ public class ActivatedAbility implements IsStackable {
 	}
 
 	@Override
-	public ObservableList<IsManaMap> propertyListCostMaps() {
-		return propertyListCostMaps;
-	}
-
-	@Override
-	public ListProperty<Effect> propertyListEffects() {
-		return propertyListEffects;
-	}
-
-	public ObjectProperty<IsPlayer> propertyPlayerControlling() {
-		return propertyPlayerControlling;
-	}
-
-	public ObjectProperty<IsObject> propertySource() {
-		return propertySource;
+	public List<IsManaMap> getListCostMaps() {
+		return listCostMaps;
 	}
 
 	public void remove(Effect magicEffect) {
-		propertyListEffects().remove(magicEffect);
+		getListEffects().remove(magicEffect);
 	}
 
 	@Override
 	public void setPlayerControlling(IsPlayer playerControlling) {
-		propertyListEffects().forEach(effect -> effect.setPlayer(playerControlling));
-		propertyPlayerControlling().set(playerControlling);
+		getListEffects().forEach(effect -> effect.setPlayer(playerControlling));
+		this.playerControlling = playerControlling;
 	}
 
-	public void setSource(IsObject magicCard) {
-		propertySource().set(magicCard);
+	public void setSource(IsObject source) {
+		this.source = source;
 	}
 
 	@Override

@@ -64,9 +64,31 @@ public class Phase {
 		iteratorSteps = listSteps.listIterator();
 	}
 
+	public Step getCurrentStep() {
+		return propertyCurrentStep().get();
+	}
+
+	public boolean getFlagPhaseRepeated() {
+		return propertyFlagPhaseRepeated.get();
+	}
+
+	public boolean getFlagPhaseRunning() {
+		return propertyFlagPhaseRunning.get();
+	}
+
+	public boolean getFlagPhaseSkipped() {
+		return propertyFlagPhaseSkipped.get();
+	}
+
+	public PhaseType getPhaseType() {
+		return phaseType;
+	}
+
 	public boolean isMain() {
 		return phaseType.isMain();
 	}
+	
+	
 
 	@Override
 	public String toString() {
@@ -79,22 +101,6 @@ public class Phase {
 
 	boolean equals(PhaseType phaseType) {
 		return phaseType.equals(phaseType);
-	}
-
-	Step getCurrentStep() {
-		return propertyCurrentStep().get();
-	}
-
-	boolean getFlagPhaseRunning() {
-		return propertyFlagPhaseRunning.get();
-	}
-
-	boolean getFlagRepeated() {
-		return propertyFlagPhaseRepeated.get();
-	}
-
-	boolean getFlagSkipped() {
-		return propertyFlagPhaseSkipped.get();
 	}
 
 	boolean hasNextStep() {

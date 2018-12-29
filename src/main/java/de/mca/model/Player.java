@@ -551,7 +551,7 @@ public final class Player implements IsPlayer {
 
 	@Override
 	public String toString() {
-		return new StringBuilder("[").append(getDisplayName()).append("] ps=[").append(getPlayerState()).append("]]")
+		return new StringBuilder("[").append(getDisplayName()).append(" ").append(getPlayerState()).append("]")
 				.toString();
 	}
 

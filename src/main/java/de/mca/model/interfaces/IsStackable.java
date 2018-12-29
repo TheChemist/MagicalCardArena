@@ -1,7 +1,8 @@
 package de.mca.model.interfaces;
 
+import java.util.List;
+
 import de.mca.model.Effect;
-import javafx.collections.ObservableList;
 
 /**
  * Taggerinterface zur Markierung von Objekten, die auf dem Stack verarbeitet
@@ -45,9 +46,9 @@ public interface IsStackable {
 	 *
 	 * @return die CostMap.
 	 */
-	public ObservableList<IsManaMap> propertyListCostMaps();
+	public List<IsManaMap> getListCostMaps();
 
-	public ObservableList<Effect> propertyListEffects();
+	public List<Effect> getListEffects();
 
 	/**
 	 * Setzt den Spieler, der das Stackable kontrolliert.

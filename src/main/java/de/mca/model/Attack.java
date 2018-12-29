@@ -1,15 +1,10 @@
 package de.mca.model;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import de.mca.model.interfaces.IsAttackTarget;
 import de.mca.model.interfaces.IsCombatant;
-import javafx.beans.property.ListProperty;
-import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleListProperty;
-import javafx.beans.property.SimpleObjectProperty;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 
 /**
  * Hilfsklasse, die alle benötigten Informationen eines Angriffs kapselt.
@@ -22,20 +17,20 @@ public class Attack {
 	/**
 	 * Speichert die Kreatur von der der Angriff ausgeht.
 	 */
-	private final ObjectProperty<IsCombatant> attacker;
+	private final IsCombatant attacker;
 	/**
 	 * Speichert das Angriffziel.
 	 */
-	private final ObjectProperty<IsAttackTarget> attackTarget;
+	private final IsAttackTarget attackTarget;
 	/**
 	 * Speichert die unsortierten Verteidiger.
 	 */
-	private final ListProperty<IsCombatant> listBlockers;
+	private final List<IsCombatant> listBlockers;
 
 	public Attack(MagicPermanent source, IsAttackTarget target) {
-		this.attacker = new SimpleObjectProperty<>(source);
-		this.attackTarget = new SimpleObjectProperty<>(target);
-		listBlockers = new SimpleListProperty<>(FXCollections.observableArrayList());
+		this.attacker = source;
+		this.attackTarget = target;
+		listBlockers = new ArrayList<>();
 
 		getAttacker().setFlagTapped(true);
 		getAttacker().setFlagAttacking(true);
@@ -44,15 +39,19 @@ public class Attack {
 	public void addBlocker(IsCombatant combatant) {
 		combatant.setFlagBlocking(true);
 		getAttacker().setFlagBlocked(true);
-		propertyListBlockers().add(combatant);
+		getListBlockers().add(combatant);
 	}
 
 	public IsCombatant getAttacker() {
-		return propertyAttacker().get();
+		return attacker;
 	}
 
 	public IsAttackTarget getAttackTarget() {
-		return attackTarget.get();
+		return attackTarget;
+	}
+
+	public List<IsCombatant> getListBlockers() {
+		return listBlockers;
 	}
 
 	/**
@@ -60,33 +59,21 @@ public class Attack {
 	 *
 	 * @return Eine Liste, die Angreifer und ihm zugeteilte Blocker enthält.
 	 */
-	public ObservableList<IsCombatant> getCombatants() {
-		final ObservableList<IsCombatant> result = FXCollections.observableArrayList();
+	public List<IsCombatant> getCombatants() {
+		final List<IsCombatant> result = new ArrayList<>();
 		result.add(getAttacker());
-		result.addAll(propertyListBlockers());
+		result.addAll(getListBlockers());
 		return result;
 	}
 
-	public ObjectProperty<IsCombatant> propertyAttacker() {
-		return attacker;
-	}
-
-	public ObjectProperty<IsAttackTarget> propertyAttackTarget() {
-		return attackTarget;
-	}
-
-	public ObservableList<IsCombatant> propertyListBlockers() {
-		return listBlockers;
-	}
-
-	public void setBlockers(List<IsCombatant> listBlocker) {
-		propertyListBlockers().addAll(listBlocker);
+	public void setBlockers(List<IsCombatant> listBlockers) {
+		this.listBlockers.addAll(listBlockers);
 	}
 
 	@Override
 	public String toString() {
-		return new StringBuilder("[Attack a=[").append(attacker.get().toString()).append("] at=[")
-				.append(attackTarget.get().toString()).append("]]").toString();
+		return new StringBuilder("[Attack a=[").append(getAttacker().toString()).append("] at=[")
+				.append(getAttackTarget().toString()).append("]]").toString();
 	}
 
 }

@@ -1,9 +1,13 @@
 package de.mca.model;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import de.mca.Constants;
+import de.mca.io.JsonManager;
 import de.mca.model.enums.ObjectType;
 import de.mca.model.interfaces.IsInput;
 import de.mca.model.interfaces.IsPlayer;
@@ -47,6 +51,8 @@ public class InputComputer implements IsInput {
 				LOGGER.trace("{} changed({}, {})", player, oldValue, newValue);
 
 				if (newValue) {
+					JsonManager.writeBoardState(getMatch());
+
 					getRuleEnforcer().i_deriveInteractionStatus(getPlayer(), "InputComputer");
 
 					switch (getPlayer().getPlayerState()) {
@@ -113,32 +119,45 @@ public class InputComputer implements IsInput {
 							break;
 						}
 
-						// Spiele zufälliges Land
-						for (final MagicCard magicCard : player.getZoneHand().getAll(ObjectType.LAND)) {
-							if (magicCard.getFlagIsInteractable() && getMatch().getCurrentPhase().isMain()) {
-								inputPlayLand(magicCard);
-								return;
+						for (MagicCard mc : getPlayer().getZoneHand().getAll()) {
+							if (mc.getFlagIsInteractable()) {
+
 							}
 						}
 
-						// Aktiviere erstes aktivierbares Permanent
-						for (final MagicPermanent magicPermanent : getMatch().getZoneBattlefield()
-								.getAll(ObjectType.LAND)) {
-							if (magicPermanent.getFlagIsInteractable() && getMatch().getCurrentPhase().isMain()) {
-								inputActivatePermanent(magicPermanent);
-								return;
-							}
-						}
+						final List<Double> listBoardStates = new ArrayList<>();
 
-						// Beschwöre ersten beschwörbaren Zauberspruch.
-						for (final MagicCard magicCard : player.getZoneHand().getAll(ObjectType.CREATURE)) {
-							if (magicCard.getFlagIsInteractable() && getMatch().getCurrentPhase().isMain()) {
-								inputCastSpell(magicCard);
-								return;
-							}
-						}
+						for (int i = 0; i < getPlayer().getInteractionCount(); i++) {
 
-						inputPassPriority();
+						}
+						getMatch().evaluate();
+
+//						// Spiele zufälliges Land
+//						for (final MagicCard magicCard : player.getZoneHand().getAll(ObjectType.LAND)) {
+//							if (magicCard.getFlagIsInteractable() && getMatch().getCurrentPhase().isMain()) {
+//								inputPlayLand(magicCard);
+//								return;
+//							}
+//						}
+//
+//						// Aktiviere erstes aktivierbares Permanent
+//						for (final MagicPermanent magicPermanent : getMatch().getZoneBattlefield()
+//								.getAll(ObjectType.LAND)) {
+//							if (magicPermanent.getFlagIsInteractable() && getMatch().getCurrentPhase().isMain()) {
+//								inputActivatePermanent(magicPermanent);
+//								return;
+//							}
+//						}
+//
+//						// Beschwöre ersten beschwörbaren Zauberspruch.
+//						for (final MagicCard magicCard : player.getZoneHand().getAll(ObjectType.CREATURE)) {
+//							if (magicCard.getFlagIsInteractable() && getMatch().getCurrentPhase().isMain()) {
+//								inputCastSpell(magicCard);
+//								return;
+//							}
+//						}
+//
+//						inputPassPriority();
 						break;
 					default:
 						break;
@@ -176,4 +195,5 @@ public class InputComputer implements IsInput {
 		}
 		return getPlayer().toString();
 	}
+
 }

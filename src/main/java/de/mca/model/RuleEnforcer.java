@@ -77,8 +77,7 @@ public class RuleEnforcer {
 	/**
 	 * Wertet eine TurnBasedAction aus und leitet die entsprechende Reaktion ein.
 	 * 
-	 * @param turnBasedAction
-	 *            die auszuwertende TurnBasedAction.
+	 * @param turnBasedAction die auszuwertende TurnBasedAction.
 	 */
 	public void examineTurnBasedAction(TurnBasedAction turnBasedAction) {
 		LOGGER.trace("{} examineTurnBasedAction({})", this, turnBasedAction);
@@ -137,6 +136,14 @@ public class RuleEnforcer {
 		}
 	}
 
+	public SetProperty<StateBasedAction> getpropertyStateBasedActions() {
+		return propertySetStateBasedActions;
+	}
+
+	public MagicPermanent getTemporaryBlocker() {
+		return temporaryBlocker;
+	}
+
 	public void gui_disableProgressButton() {
 		getEventBus().post(new GameStatusChange(this, "", true));
 	}
@@ -150,15 +157,13 @@ public class RuleEnforcer {
 	 * Voraussetzungen erfüllt, wird die zu aktivierende Fähigkeit bestimmt und für
 	 * die Aktivierung übergeben.
 	 *
-	 * @param player
-	 *            der priorisierte Spieler.
-	 * @param magicPermanent
-	 *            das aktivierte Permanent.
+	 * @param player         der priorisierte Spieler.
+	 * @param magicPermanent das aktivierte Permanent.
 	 */
 	public void i_activatePermanentStart(IsPlayer player, MagicPermanent magicPermanent) {
 		LOGGER.debug("{} i_activatePermanentStart({}, {})", this, player, magicPermanent);
 
-		List<ActivatedAbility> listActivatedAbities = magicPermanent.propertyListAbilities();
+		List<ActivatedAbility> listActivatedAbities = magicPermanent.getListActivatedAbilities();
 
 		if (listActivatedAbities.size() <= 0) {
 			// Keine Fähigkeiten vorhanden
@@ -178,10 +183,8 @@ public class RuleEnforcer {
 	 *
 	 * @see http://magiccards.info/rule/601-casting-spells.html
 	 *
-	 * @param player
-	 *            Der Spieler, der den Zauberspruch spielt.
-	 * @param magicCard
-	 *            Die Karte, die als Zauberspruch auf den Stack gespielt wird.
+	 * @param player    Der Spieler, der den Zauberspruch spielt.
+	 * @param magicCard Die Karte, die als Zauberspruch auf den Stack gespielt wird.
 	 */
 	public void i_castSpellStart(IsPlayer player, MagicCard magicCard) {
 		LOGGER.debug("{} i_castSpellStart({}, {})", this, player, magicCard);
@@ -197,22 +200,6 @@ public class RuleEnforcer {
 
 		TotalCostInformation totalCostInformation = new TotalCostInformation();
 
-		if (spell.isModal()) {
-			// TODO LOW Entscheidung: Modus wählen.
-		}
-
-		if (spell.canSplice()) {
-			// TODO LOW Entscheidung: Splicen.
-		}
-
-		if (spell.hasBuyback() || spell.hasKicker()) {
-			// TODO LOW Entscheidung: Kicker.
-		}
-
-		if (spell.hasVariableCost()) {
-			// TODO LOW Entscheidung: Wähle Wert für X aus.
-		}
-
 		if (spell.hasHybridCost()) {
 			/**
 			 * TODO HIGH Methode unterbrechen und Ergebnis der Abfrage zwischenspeichern.
@@ -224,22 +211,7 @@ public class RuleEnforcer {
 		} else {
 			// Wähle erste und einzige CostMap aus.
 
-			totalCostInformation.setInitalCost(spell.propertyListCostMaps().get(0));
-		}
-
-		if (spell.hasPhyrexianCost()) {
-			// TODO LOW Entscheidung: Wähle Zahlweise aus.
-		}
-
-		if (spell.requiresTarget()) {
-			// TODO MID Entscheidung: Wähle Ziele aus.
-			/**
-			 * Hier stehen noch einige weitere Entscheidungen aus.
-			 */
-		}
-
-		if (spell.hasAdditionalCost()) {
-			// TODO LOW Zusätzliche Kosten dem Objekt hinzufügen.
+			totalCostInformation.setInitalCost(spell.getListCostMaps().get(0));
 		}
 
 		// Kosten bezahlen.
@@ -249,12 +221,12 @@ public class RuleEnforcer {
 	/**
 	 * Wird aufgerufen, wenn ein Spieler das Match aufgibt.
 	 *
-	 * @param player
-	 *            der Spieler.
+	 * @param player der Spieler.
 	 */
 	public void i_concede(IsPlayer player) {
 		LOGGER.debug("{} i_concede({})", this, player);
 		match.setFlagIsMatchRunning(false);
+		match.incrementActionCount();
 		getEventBus().post(new GameStatusChange(this, "concede", true));
 	}
 
@@ -263,10 +235,8 @@ public class RuleEnforcer {
 	 * gültiges Angriffsziel ermittelt und der Angriff zur späteren Durchführung
 	 * hinterlegt.
 	 *
-	 * @param player
-	 *            Der aktive Spieler.
-	 * @param magicPermanent
-	 *            Die angreifende Kreatur.
+	 * @param player         Der aktive Spieler.
+	 * @param magicPermanent Die angreifende Kreatur.
 	 */
 	public void i_declareAttacker(IsPlayer player, MagicPermanent magicPermanent) {
 		LOGGER.debug("{} i_declareAttacker({}, {})", this, player, magicPermanent);
@@ -284,6 +254,7 @@ public class RuleEnforcer {
 			// Wähle einzig gültiges Ziel automatisch.
 
 			match.addAttack(new Attack(magicPermanent, validAttackTargets.get(0)));
+			match.incrementActionCount();
 		} else {
 			// TODO MID Entscheidung: Ziel auswählen
 
@@ -296,8 +267,7 @@ public class RuleEnforcer {
 	 * Setzt die flagDeclareAttackers auf false. Danach wird die Priorität neu
 	 * bestimmt und eine Eingabe vom priorisierten Spieler erwartet.
 	 *
-	 * @param player
-	 *            der aktive Spieler.
+	 * @param player der aktive Spieler.
 	 */
 	public void i_declareAttackersStop(IsPlayer player) {
 		LOGGER.debug("{} i_declareAttackersStop({})", this, player);
@@ -310,6 +280,7 @@ public class RuleEnforcer {
 
 		// Setze flag zurück
 		player.setFlagDeclareAttackers(false);
+		match.incrementActionCount();
 
 		// Bestimme Priorität.
 		match.determinePlayerPrioritised("i_declareAttackersStop()");
@@ -319,10 +290,8 @@ public class RuleEnforcer {
 	 * Wird aufgerufen, wenn der Spieler einen Blocker auswählt. Zunächst wird das
 	 * Blockziel ausgewählt, dann wird der ausgewählte Blocker registriert.
 	 *
-	 * @param player
-	 *            der nichtaktive Spieler.
-	 * @param blocker
-	 *            der Blocker.
+	 * @param player  der nichtaktive Spieler.
+	 * @param blocker der Blocker.
 	 */
 	public void i_declareBlocker(IsPlayer player, MagicPermanent blocker) {
 		LOGGER.debug("{} i_declareBlocker({}, {})", this, player, blocker);
@@ -351,8 +320,7 @@ public class RuleEnforcer {
 	 * Setzt die flagDeclareBlockers auf false. Danach wird die Priorität neu
 	 * bestimmt und eine Eingabe vom priorisierten Spieler erwartet.
 	 *
-	 * @param player
-	 *            der nichtaktive Spieler.
+	 * @param player der nichtaktive Spieler.
 	 */
 	public void i_declareBlockersStop(IsPlayer player) {
 		LOGGER.debug("{} i_declareBlockersStop({})", this, player);
@@ -405,10 +373,8 @@ public class RuleEnforcer {
 	/**
 	 * Wird aufgerufen, wenn der Spieler eine Karte abwirft.
 	 *
-	 * @param player
-	 *            der Spieler.
-	 * @param magicCard
-	 *            die Karte.
+	 * @param player    der Spieler.
+	 * @param magicCard die Karte.
 	 */
 	public void i_discard(IsPlayer player, MagicCard magicCard) {
 		LOGGER.debug("{} i_discard({}, {})", this, player, magicCard);
@@ -429,10 +395,8 @@ public class RuleEnforcer {
 	 * geprüft, ob genügend Karten abgeworfen werden können. Können nicht, werden
 	 * alle Karten abgeworfen.
 	 *
-	 * @param player
-	 *            der Spieler.
-	 * @param howMany
-	 *            die Anzahl zufällig abgeworfener Karten.
+	 * @param player  der Spieler.
+	 * @param howMany die Anzahl zufällig abgeworfener Karten.
 	 */
 	public void i_discardRandom(IsPlayer player, int howMany) {
 		LOGGER.debug("{} actionDiscardRandom({}, {})", this, player, howMany);
@@ -448,8 +412,7 @@ public class RuleEnforcer {
 	/**
 	 * Wird aufgerufen, wenn ein Spieler die Priorität abgibt.
 	 *
-	 * @param player
-	 *            der Spieler.
+	 * @param player der Spieler.
 	 */
 	public void i_passPriority(IsPlayer player) {
 		LOGGER.debug("{} i_passPriority({})", this, player);
@@ -460,10 +423,8 @@ public class RuleEnforcer {
 	/**
 	 * Wird aufgerufen, wenn ein Spieler ein Land spielt.
 	 *
-	 * @param player
-	 *            der aktive Spieler
-	 * @param magicCard
-	 *            das Land.
+	 * @param player    der aktive Spieler
+	 * @param magicCard das Land.
 	 */
 	public void i_playLand(IsPlayer player, MagicCard magicCard) {
 		LOGGER.debug("{} i_playLand({}, {})", this, player, magicCard);
@@ -488,10 +449,8 @@ public class RuleEnforcer {
 	 * Wird aufgerufen, wenn ein Spieler eine Fähigkeit aktiviert. Es wird
 	 * überprüft, ob die Fähigkeit aktiviert werden kann.
 	 *
-	 * @param player
-	 *            der Spieler.
-	 * @param activatedAbility
-	 *            die Fähigkeit.
+	 * @param player           der Spieler.
+	 * @param activatedAbility die Fähigkeit.
 	 */
 	private void actionActivateAbility(IsPlayer player, ActivatedAbility activatedAbility) {
 		LOGGER.debug("{} actionActivateAbility({}, {})", this, player, activatedAbility);
@@ -504,7 +463,7 @@ public class RuleEnforcer {
 			 * Umweg über den Stack.
 			 **/
 
-			activatedAbility.propertyListEffects().forEach(effect -> {
+			activatedAbility.getListEffects().forEach(effect -> {
 				examineEffectProduceMana((EffectProduceMana) effect);
 			});
 
@@ -531,6 +490,7 @@ public class RuleEnforcer {
 		}
 
 		// Setze Status und flag.
+		match.incrementActionCount();
 		if (playerState.equals(PlayerState.PAYING)) {
 			player.setPlayerState(PlayerState.PAYING);
 		} else {
@@ -542,79 +502,77 @@ public class RuleEnforcer {
 	/**
 	 * Wird aufgerufen, wenn ein Spieler eine bleibende Karte begräbt.
 	 *
-	 * @param player
-	 *            der Spieler.
-	 * @param magicPermanent
-	 *            die bleibende Karte.
+	 * @param player         der Spieler.
+	 * @param magicPermanent die bleibende Karte.
 	 */
 	private void actionBury(IsPlayer player, MagicPermanent magicPermanent) {
 		LOGGER.debug("{} actionBury({}, {})", this, player, magicPermanent);
 		match.removeCard(magicPermanent, ZoneType.BATTLEFIELD);
 		player.addCard(new MagicCard(magicPermanent), ZoneType.GRAVEYARD);
+		match.incrementActionCount();
 	}
 
 	/**
 	 * Wird aufgerufen, wenn der Spieler alle verbleibenden Karten abwirft.
 	 *
-	 * @param player
-	 *            der Spieler.
+	 * @param player der Spieler.
 	 */
 	private void actionDiscardAll(IsPlayer player) {
 		LOGGER.debug("{} actionDiscardAll({})", this, player);
 		final List<MagicCard> cardList = player.getZoneHand().getAll();
 		player.removeAllCards(ZoneType.HAND);
 		player.addAllCards(cardList, ZoneType.GRAVEYARD);
+		match.incrementActionCount();
 	}
 
 	/**
 	 * Wird aufgerufen, wenn ein Spieler zufällig eine Karte ablegt.
 	 *
-	 * @param player
-	 *            der Spieler.
+	 * @param player der Spieler.
 	 */
 	private void actionDiscardRandom(IsPlayer player) {
 		LOGGER.debug("{} actionDiscardRandom({})", this, player);
 		final List<MagicCard> zoneHand = player.getZoneHand().getAll();
 		i_discard(player, zoneHand.get(new Random().nextInt(zoneHand.size())));
+		match.incrementActionCount();
 	}
 
 	/**
 	 * Wird aufgerufen, wenn ein Spieler alle verbleibenden Karten zieht.
 	 *
-	 * @param player
-	 *            der Spieler.
+	 * @param player der Spieler.
 	 */
 	private void actionDrawAll(IsPlayer player) {
 		LOGGER.debug("{} actionDrawAll({})", this, player);
 		final List<MagicCard> cardList = player.getZoneLibrary().getAll();
 		player.removeAllCards(ZoneType.LIBRARY);
 		player.addAllCards(cardList, ZoneType.HAND);
+		match.incrementActionCount();
 	}
 
 	/**
 	 * Wird aufgerufen, wenn ein Spieler eine Karte verbannt.
 	 *
-	 * @param player
-	 *            der Spieler.
-	 * @param magicCard
-	 *            die Karte.
+	 * @param player    der Spieler.
+	 * @param magicCard die Karte.
 	 */
 	private void actionExile(IsPlayer player, MagicCard magicCard) {
 		LOGGER.debug("{} actionExile({}, {})", this, player, magicCard);
 		player.removeCard(magicCard, ZoneType.HAND);
 		match.addCard(magicCard, ZoneType.EXILE);
+		match.incrementActionCount();
 	}
 
 	/**
 	 * Wird aufgerufen, wenn eine bleibende Karte verbannt wird.
 	 *
-	 * @param magicPermanent
-	 *            die bleibende Karte.
+	 * @param magicPermanent die bleibende Karte.
 	 */
 	private void actionExile(MagicPermanent magicPermanent) {
 		LOGGER.debug("{} actionExile({})", this, magicPermanent);
 		match.removeCard(magicPermanent, ZoneType.BATTLEFIELD);
 		match.addCard(new MagicCard(magicPermanent), ZoneType.EXILE);
+		match.incrementActionCount();
 	}
 
 	/**
@@ -623,11 +581,9 @@ public class RuleEnforcer {
 	 * gespeichert sind. Zuletzt wird dem bezahlenden Spieler eine Reaktion
 	 * abverlangt.
 	 *
-	 * @param player
-	 *            der bezahlende Spieler.
-	 * @param totalCostInformation
-	 *            Hilfsobjekt zur Kapselung aller Informationen zu einem
-	 *            Bezahlvorgang.
+	 * @param player               der bezahlende Spieler.
+	 * @param totalCostInformation Hilfsobjekt zur Kapselung aller Informationen zu
+	 *                             einem Bezahlvorgang.
 	 */
 	private void actionPaymentStart(IsPlayer player, TotalCostInformation totalCostInformation) {
 		LOGGER.debug("{} actionPaymentStart({})", this, player);
@@ -646,14 +602,15 @@ public class RuleEnforcer {
 		} else {
 			player.setFlagNeedInput(true, "actionPaymentStart()");
 		}
+
+		match.incrementActionCount();
 	}
 
 	/**
 	 * Setzt den Spielerstatus zurück auf CASTING_SPELL. Setzt die Werte zum
 	 * Bezahlvorgang im Spieler zurück. Schließt zuletzt die Spielerhandlung ab.
 	 *
-	 * @param player
-	 *            der bezahlende Spieler.
+	 * @param player der bezahlende Spieler.
 	 */
 	private void actionPaymentStop(IsPlayer player) {
 		LOGGER.debug("{} actionPaymentStop()", this);
@@ -666,6 +623,7 @@ public class RuleEnforcer {
 		getEventBus().post(new GameStatusChange(this, "Pass", false));
 
 		// Setze Status und flag.
+		match.incrementActionCount();
 		player.setPlayerState(PlayerState.PRIORITIZED);
 		player.setFlagNeedInput(true, "actionPaymentStop()");
 	}
@@ -676,10 +634,8 @@ public class RuleEnforcer {
 	 * beliebigen Fähigkeit des Permanents).
 	 *
 	 * @see http://magiccards.info/rule/602-activating-activated-abilities.html
-	 * @param player
-	 *            der Spieler.
-	 * @param magicPermanent
-	 *            die bleibende Karte.
+	 * @param player         der Spieler.
+	 * @param magicPermanent die bleibende Karte.
 	 * @return true, wenn die grundlegenden Voraussetzungen erfüllt sind.
 	 */
 	private boolean checkCanActivatePermanent(IsPlayer player, MagicPermanent magicPermanent) {
@@ -703,10 +659,8 @@ public class RuleEnforcer {
 	 * Prüft, ob die grundlegenden Voraussetzungen für einen Angriff erfüllt sind.
 	 *
 	 * @see http://magiccards.info/rule/508-declare-attackers-step.html
-	 * @param player
-	 *            der aktive Spieler.
-	 * @param magicPermanent
-	 *            der Angreifer.
+	 * @param player         der aktive Spieler.
+	 * @param magicPermanent der Angreifer.
 	 * @return true, wenn der designierte Angreifer grundsätzlich angreifen kann.
 	 */
 	private boolean checkCanAttack(IsPlayer player, MagicPermanent magicPermanent) {
@@ -722,14 +676,11 @@ public class RuleEnforcer {
 	 * Prüft, ob die grundlegenden Voraussetzungen für das geblockt werden erfüllt
 	 * sind.
 	 *
-	 * @param player
-	 *            der nichtaktive Spieler.
-	 * @param magicPermanent
-	 *            das Blockziel.
+	 * @param player         der nichtaktive Spieler.
+	 * @param magicPermanent das Blockziel.
 	 * @return true, wenn das Blockziel grundsätzlich geblockt werden kann.
 	 */
 	private boolean checkCanBeBlocked(IsPlayer player, MagicPermanent magicPermanent) {
-		IsPlayer playerActive = match.getPlayerOpponent(player);
 		final boolean isChoosingBlockTargets = player.isChoosingBlockTarget();
 		final boolean opponentControlled = magicPermanent.getPlayerControlling().equals(match.getPlayerActive());
 
@@ -743,10 +694,8 @@ public class RuleEnforcer {
 	 * Prüft, ob die grundlegenden Voraussetzungen für einen Block erfüllt sind.
 	 *
 	 * @see http://magiccards.info/rule/509-declare-blockers-step.html
-	 * @param player
-	 *            der nichtaktive Spieler.
-	 * @param magicPermanent
-	 *            der Blocker.
+	 * @param player         der nichtaktive Spieler.
+	 * @param magicPermanent der Blocker.
 	 * @return true, wenn der designierte Blocker grundsätzlich Blocken kann.
 	 */
 	private boolean checkCanBlock(IsPlayer player, MagicPermanent magicPermanent) {
@@ -765,10 +714,8 @@ public class RuleEnforcer {
 	 * Zauberspruchs erfüllt sind.
 	 *
 	 * @see http://magiccards.info/rule/601-casting-spells.html
-	 * @param player
-	 *            der Spieler.
-	 * @param magicCard
-	 *            der Zauberspruch.
+	 * @param player    der Spieler.
+	 * @param magicCard der Zauberspruch.
 	 * @return true, wenn alle Voraussetzungen erfüllt sind.
 	 */
 	private boolean checkCanCast(IsPlayer player, MagicCard magicCard) {
@@ -785,7 +732,7 @@ public class RuleEnforcer {
 		IsManaMap potential = new ManaMapDefault();
 		for (final MagicPermanent magicPermanent : match.getZoneBattlefield().getAll(match.getPlayerActive())) {
 			if (magicPermanent.isManaSource() && magicPermanent.checkCanActivate()) {
-				for (Effect effect : magicPermanent.getManaAbility().propertyListEffects()) {
+				for (Effect effect : magicPermanent.getManaAbility().getListEffects()) {
 					if (effect.getEffectType().equals(EffectType.PRODUCE_MANA)) {
 						potential.addAll(((EffectProduceMana) effect).getProduceMap());
 					}
@@ -820,10 +767,8 @@ public class RuleEnforcer {
 	/**
 	 * Prüft, ob ein Spieler eine gewisse Anzahl Handkarten abwerfen kann.
 	 *
-	 * @param player
-	 *            Der Spieler.
-	 * @param howMany
-	 *            Anzahl Karten.
+	 * @param player  Der Spieler.
+	 * @param howMany Anzahl Karten.
 	 * @return true, wenn eine Anzahl Karten in Höhe howMany abgelegt werden kann.
 	 */
 	private boolean checkCanDiscard(IsPlayer player, int howMany) {
@@ -835,8 +780,7 @@ public class RuleEnforcer {
 	/**
 	 * Prüft, ob noch mindestens eine Karte in der Bibliothek ist.
 	 *
-	 * @param player
-	 *            Der Spieler.
+	 * @param player Der Spieler.
 	 * @return true, wenn gezogen werden kann.
 	 */
 	private boolean checkCanDraw(IsPlayer player) {
@@ -850,8 +794,7 @@ public class RuleEnforcer {
 	 * erfüllt sind.
 	 *
 	 * @see http://magiccards.info/rule/305-lands.html
-	 * @param player
-	 *            ein Spieler.
+	 * @param player ein Spieler.
 	 * @return true, wenn die grundlegenden Voraussetzungen erfüllt sind.
 	 */
 	private boolean checkCanPlayLand(IsPlayer player, MagicCard magicCard) {
@@ -875,8 +818,7 @@ public class RuleEnforcer {
 	 * Prüft, ob ein Spieler seine aktuellen Bezahlziele vollständig erreicht hat.
 	 * Eventuell vorhandenes Mana im Manapool wird dabei verbracht.
 	 *
-	 * @param player
-	 *            ein Spieler.
+	 * @param player ein Spieler.
 	 * @return true, wenn der Spieler seine Bezahlziele erreicht hat.
 	 */
 	private boolean checkIsPaid(IsPlayer player) {
@@ -952,10 +894,6 @@ public class RuleEnforcer {
 		return eventBus;
 	}
 
-	private MagicPermanent getTemporaryBlocker() {
-		return temporaryBlocker;
-	}
-
 	private void setTemporaryBlocker(MagicPermanent temporaryBlocker) {
 		this.temporaryBlocker = temporaryBlocker;
 	}
@@ -979,10 +917,8 @@ public class RuleEnforcer {
 	/**
 	 * Wird durch eine TurnBasedAction aufgerufen: Leert die Manapools.
 	 * 
-	 * @param playerActive
-	 *            der aktive Spieler.
-	 * @param playerNonactive
-	 *            der nichtaktive Spieler.
+	 * @param playerActive    der aktive Spieler.
+	 * @param playerNonactive der nichtaktive Spieler.
 	 */
 	private void tb_clearManaPools(final IsPlayer playerActive, final IsPlayer playerNonactive) {
 		LOGGER.trace("{} tb_clearManaPools({}, {})", this, playerActive, playerNonactive);
@@ -1018,7 +954,7 @@ public class RuleEnforcer {
 			if (attacker.getFlagBlocked()) {
 				// Angreifer ist geblockt.
 
-				attack.propertyListBlockers().forEach(blocker -> {
+				attack.getListBlockers().forEach(blocker -> {
 					attacker.setDamage(blocker.getPower());
 					blocker.setDamage(attackerPower);
 				});
@@ -1061,18 +997,17 @@ public class RuleEnforcer {
 	 * eine Schadensreihenfolge festgelegt.
 	 *
 	 * @see http://magiccards.info/rule/510-combat-damage-step.html
-	 * @param player
-	 *            Der aktive Spieler.
+	 * @param player Der aktive Spieler.
 	 */
 	private void tb_damageAssignmentAttackerStart(IsPlayer player) {
 		LOGGER.trace("{} tb_damageAssignmentAttackerStart({})", this, player);
 		player.setPlayerState(PlayerState.ASSINGING_DAMAGE_ORDER_ATTACKER);
 
 		for (final Attack attack : match.getListAttacks()) {
-			final List<IsCombatant> blockers = attack.propertyListBlockers();
+			final List<IsCombatant> blockers = attack.getListBlockers();
 			if (attack.getAttacker().getFlagBlocked() && blockers.size() > 1) {
 				// TODO MID Entscheidung: Schadensreihenfolge
-				attack.setBlockers(attack.propertyListBlockers());
+				attack.setBlockers(blockers);
 			}
 		}
 	}
@@ -1081,10 +1016,8 @@ public class RuleEnforcer {
 	 * Setzt den Spielerstatus des aktiven Spielers zurück auf ATTACKING. Feuert
 	 * danach die nächste TurnBasedAction ab, um den Schritt voran zu treiben.
 	 *
-	 * @param player
-	 *            der aktive Spieler.
-	 * @param currentStep
-	 *            der aktuelle Schritt.
+	 * @param player      der aktive Spieler.
+	 * @param currentStep der aktuelle Schritt.
 	 */
 	private void tb_damageAssignmentAttackerStop(IsPlayer player, Step currentStep) {
 		LOGGER.trace("{} tb_damageAssignmentAttackerStop({})", this, player);
@@ -1100,8 +1033,7 @@ public class RuleEnforcer {
 	 * eine Schadenreihenfolge festgelegt.
 	 *
 	 * @see http://magiccards.info/rule/510-combat-damage-step.html
-	 * @param player
-	 *            Der nichtaktive Spieler.
+	 * @param player Der nichtaktive Spieler.
 	 */
 	private void tb_damageAssignmentBlockerStart(IsPlayer player) {
 		// TODO LOW Wird erst bei mehreren Blockzielen relevant.
@@ -1114,10 +1046,8 @@ public class RuleEnforcer {
 	 * Feuert danach die nächste TurnBasedAction ab, um den Schritt voran zu
 	 * treiben.
 	 *
-	 * @param playerNonactive
-	 *            der nichtaktive Spieler.
-	 * @param currentStep
-	 *            der aktuelle Schritt.
+	 * @param playerNonactive der nichtaktive Spieler.
+	 * @param currentStep     der aktuelle Schritt.
 	 */
 	private void tb_damageAssignmentBlockerStop(IsPlayer playerNonactive, Step currentStep) {
 		LOGGER.trace("{} tb_damageAssignmentBlockerStop({})", this, playerNonactive);
@@ -1131,8 +1061,7 @@ public class RuleEnforcer {
 	 * Setzt die flagDeclareAttackers auf true und verlangt vom Spieler eine
 	 * Reaktion (flagNeedPlayerInput = true).
 	 *
-	 * @param playerActive
-	 *            der aktive Spieler.
+	 * @param playerActive der aktive Spieler.
 	 */
 	private void tb_declareAttackersStart(IsPlayer playerActive) {
 		LOGGER.trace("{} tb_declareAttackersStart({})", this, playerActive);
@@ -1146,8 +1075,7 @@ public class RuleEnforcer {
 	 * Setzt die flagDeclareBlockers auf true und verlangt vom Spieler eine Reaktion
 	 * (flagNeedPlayerInput = true).
 	 *
-	 * @param playerNonactive
-	 *            der nichtaktive Spieler.
+	 * @param playerNonactive der nichtaktive Spieler.
 	 */
 	private void tb_declareBlockersStart(IsPlayer playerNonactive) {
 		LOGGER.trace("{} tb_declareBlockersStart({})", this, playerNonactive);
@@ -1170,8 +1098,7 @@ public class RuleEnforcer {
 	/**
 	 * Wird aufgerufen, wenn ein Spieler eine Karte zieht.
 	 *
-	 * @param playerActive
-	 *            der aktive Spieler.
+	 * @param playerActive der aktive Spieler.
 	 */
 	private void tb_draw(IsPlayer playerActive) {
 		LOGGER.trace("{} tb_draw({})", this, playerActive);
@@ -1195,10 +1122,8 @@ public class RuleEnforcer {
 	/**
 	 * Wird aufgerufen, wenn ein Spieler mehrere Karten zieht.
 	 *
-	 * @param player
-	 *            der Spieler.
-	 * @param howMany
-	 *            Anzahl Karten.
+	 * @param player  der Spieler.
+	 * @param howMany Anzahl Karten.
 	 */
 	void actionDraw(IsPlayer player, int howMany) {
 		LOGGER.debug("{} actionDraw({}, {})", this, player, howMany);
@@ -1219,7 +1144,7 @@ public class RuleEnforcer {
 			if (stackable.isPermanentSpell()) {
 				match.addCard(new MagicPermanent((MagicSpell) stackable), ZoneType.BATTLEFIELD);
 			} else {
-				stackable.propertyListEffects().forEach(effect -> examineEffectProduceMana((EffectProduceMana) effect));
+				stackable.getListEffects().forEach(effect -> examineEffectProduceMana((EffectProduceMana) effect));
 			}
 
 			match.popSpell();

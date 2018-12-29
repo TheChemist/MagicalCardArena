@@ -26,8 +26,7 @@ public interface IsInput {
 	 * Informiert das Spiel über eine Spielerhandlung: Der Spieler hat ein Permanent
 	 * aktiviert.
 	 *
-	 * @param magicPermanent
-	 *            das aktivierte Permanent.
+	 * @param magicPermanent das aktivierte Permanent.
 	 */
 	public default void inputActivatePermanent(MagicPermanent magicPermanent) {
 		if (magicPermanent.getFlagIsInteractable()) {
@@ -50,8 +49,7 @@ public interface IsInput {
 	 * Informiert das Spiel über eine Spielerhandlung: Der Spieler beschwört einen
 	 * Zauberspruch.
 	 *
-	 * @param magicCard
-	 *            der Zauberspruch.
+	 * @param magicCard der Zauberspruch.
 	 */
 	public default void inputCastSpell(MagicCard magicCard) {
 		if (magicCard.getFlagIsInteractable()) {
@@ -83,8 +81,7 @@ public interface IsInput {
 	 * Informiert das Spiel über eine Spielerhandlung: Der Spieler deklariert einen
 	 * Angreifer.
 	 *
-	 * @param attacker
-	 *            der Angreifer.
+	 * @param attacker der Angreifer.
 	 */
 	public default void inputDeclareAttacker(MagicPermanent magicPermanent) {
 		if (magicPermanent.getFlagIsInteractable()) {
@@ -107,10 +104,8 @@ public interface IsInput {
 	 * Informiert das Spiel über eine Spielerhandlung: Der Spieler deklariert einen
 	 * Blocker.
 	 *
-	 * @param attackerIndex
-	 *            der Index des Angreifer, der geblockt werden soll.
-	 * @param magicPermanent
-	 *            der Blocker.
+	 * @param attackerIndex  der Index des Angreifer, der geblockt werden soll.
+	 * @param magicPermanent der Blocker.
 	 */
 	public default void inputDeclareBlocker(MagicPermanent magicPermanent) {
 		if (magicPermanent.getFlagIsInteractable()) {
@@ -133,8 +128,7 @@ public interface IsInput {
 	 * Informiert das Spiel über eine Spielerhandlung: Der Spieler möchte ein
 	 * Blockziel deklarieren.
 	 *
-	 * @param blockTarget
-	 *            das Blockziel.
+	 * @param blockTarget das Blockziel.
 	 */
 	public default void inputDeclareBlockTarget(MagicPermanent blockTarget) {
 		if (blockTarget.getFlagIsInteractable()) {
@@ -157,8 +151,7 @@ public interface IsInput {
 	 * Informiert das Spiel über eine Spielerhandlung: Der Spieler wirft eine
 	 * bestimmte Karte ab.
 	 *
-	 * @param magicCard
-	 *            Die abzuwerfende Karte.
+	 * @param magicCard Die abzuwerfende Karte.
 	 */
 	public default void inputDiscard(MagicCard magicCard) {
 		getPlayer().setFlagNeedInput(false, "inputDiscard()");
@@ -170,8 +163,7 @@ public interface IsInput {
 	 * Informiert das Spiel über eine Spielerhandlung: Der Spieler wirft N zufällige
 	 * Karten ab.
 	 *
-	 * @param howMany
-	 *            Anzahl abzuwerfender Karten.
+	 * @param howMany Anzahl abzuwerfender Karten.
 	 */
 	public default void inputDiscardRandom(int howMany) {
 		getPlayer().setFlagNeedInput(false, "inputDiscardRandom()");
@@ -213,8 +205,7 @@ public interface IsInput {
 	 * Informiert das Spiel über eine Spielerhandlung: Der Spieler möchte ein Land
 	 * spielen.
 	 *
-	 * @param magicCard
-	 *            das Land.
+	 * @param magicCard das Land.
 	 */
 	public default void inputPlayLand(MagicCard magicCard) {
 		if (magicCard.getFlagIsInteractable()) {
